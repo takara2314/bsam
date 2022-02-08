@@ -9,7 +9,7 @@ final routerProvider = Provider((ref) => GoRouter(
     GoRoute(
       path: '/',
       pageBuilder: (context, state) => const MaterialPage(
-        child: Home(title: 'Sailing Assist Mie')
+        child: Home()
       )
     ),
     GoRoute(

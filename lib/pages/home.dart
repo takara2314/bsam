@@ -5,43 +5,89 @@ import 'package:sailing_assist_mie/providers/count.dart';
 import 'package:go_router/go_router.dart';
 
 class Home extends HookConsumerWidget {
-  const Home({Key? key, required this.title}) : super(key: key);
-  final String title;
+  const Home({Key? key}) : super(key: key);
+
+  final TextStyle _titleTextStyle = const TextStyle(
+    fontWeight: FontWeight.bold,
+    color: Color.fromRGBO(0, 42, 149, 1),
+    fontSize: 72
+  );
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final count = useState<int>(0);
-    final StateController<int> globalCount = ref.watch(countProvider.notifier);
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+          children: [
+            Container(
+              child: Column(
+                children: [
+                  Text('Sailing', style: _titleTextStyle),
+                  Text('Assist', style: _titleTextStyle),
+                  Text('Mie', style: _titleTextStyle)
+                ],
+                crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              margin: const EdgeInsets.only(top: 80, bottom: 150)
             ),
-            Text(
-              '${count.value}',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          count.value += 1;
-          globalCount.state += 2;
-          if (globalCount.state >= 6) {
-            context.go('/next');
-          }
-        },
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+            SizedBox(
+              child: Column(
+                children: [
+                  ElevatedButton(
+                    child: const Text(
+                      'レースする',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w500
+                      )
+                    ),
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      primary: const Color.fromRGBO(0, 98, 104, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)
+                      ),
+                      minimumSize: const Size(300, 60)
+                    )
+                  ),
+                  ElevatedButton(
+                    child: const Text(
+                      'シミュレーションする',
+                      style: TextStyle(
+                        color: Color.fromRGBO(50, 50, 50, 1),
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500
+                      ),
+                    ),
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      primary: const Color.fromRGBO(232, 232, 232, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)
+                      ),
+                      padding: const EdgeInsets.all(8),
+                      minimumSize: const Size(300, 60)
+                    )
+                  ),
+                  TextButton(
+                    child: const Text(
+                      '設定する',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w500
+                      )
+                    ),
+                    onPressed: () {}
+                  )
+                ],
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+              height: 200
+            )
+          ]
+        )
+      )
     );
   }
 }
