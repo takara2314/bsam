@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
-import 'home.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:sailing_assist_mie/router.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: App()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class App extends ConsumerWidget {
+  const App({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sailing Assist Mie',
-      theme: ThemeData(
-        primarySwatch: Colors.lightBlue,
-      ),
-      home: const MyHomePage(title: 'Sailing Assist Mie'),
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+
+    return MaterialApp.router(
+      routeInformationParser: router.routeInformationParser,
+      routerDelegate: router.routerDelegate,
     );
   }
 }
