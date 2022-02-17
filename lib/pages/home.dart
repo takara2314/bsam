@@ -7,12 +7,6 @@ import 'package:go_router/go_router.dart';
 class Home extends HookConsumerWidget {
   const Home({Key? key}) : super(key: key);
 
-  final TextStyle _titleTextStyle = const TextStyle(
-    fontWeight: FontWeight.bold,
-    color: Color.fromRGBO(0, 42, 149, 1),
-    fontSize: 72
-  );
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
@@ -21,10 +15,31 @@ class Home extends HookConsumerWidget {
           children: [
             Container(
               child: Column(
-                children: [
-                  Text('Sailing', style: _titleTextStyle),
-                  Text('Assist', style: _titleTextStyle),
-                  Text('Mie', style: _titleTextStyle)
+                children: const [
+                  Text(
+                    'Sailing',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(0, 42, 149, 1),
+                      fontSize: 72
+                    )
+                  ),
+                  Text(
+                    'Assist',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(0, 42, 149, 1),
+                      fontSize: 72
+                    )
+                  ),
+                  Text(
+                    'Mie',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(0, 42, 149, 1),
+                      fontSize: 72
+                    )
+                  )
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
@@ -42,7 +57,7 @@ class Home extends HookConsumerWidget {
                         fontWeight: FontWeight.w500
                       )
                     ),
-                    onPressed: () {},
+                    onPressed: () => context.go('/select-race'),
                     style: ElevatedButton.styleFrom(
                       primary: const Color.fromRGBO(0, 98, 104, 1),
                       shape: RoundedRectangleBorder(
