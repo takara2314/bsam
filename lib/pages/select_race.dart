@@ -25,7 +25,7 @@ class SelectRace extends HookConsumerWidget {
         title: const Text(
           'コース選択',
           style: TextStyle(
-            color: Color.fromRGBO(100, 100, 100, 1)
+            color: Colors.black
           )
         ),
         elevation: 0,
@@ -264,7 +264,8 @@ class SelectRace extends HookConsumerWidget {
           margin: const EdgeInsets.only(top: 10, bottom: 10),
           padding: const EdgeInsets.all(25)
         )
-      )
+      ),
+      backgroundColor: const Color.fromRGBO(229, 229, 229, 1)
     );
   }
 }

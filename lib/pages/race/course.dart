@@ -26,20 +26,52 @@ class RaceCourse extends HookConsumerWidget {
         title: const Text(
           '伊勢湾レースA',
           style: TextStyle(
-            color: Color.fromRGBO(100, 100, 100, 1)
+            color: Colors.black
           )
         ),
         elevation: 0,
         backgroundColor: Colors.transparent
       ),
-      body: const GoogleMap(
-        myLocationButtonEnabled: false,
-        zoomControlsEnabled: false,
-        initialCameraPosition: CameraPosition(
-          target: LatLng(37.773972, -122.431297),
-          zoom: 11.7
-        )
-      )
+      body: Stack(
+        children: [
+          const GoogleMap(
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            initialCameraPosition: CameraPosition(
+              target: LatLng(37.773972, -122.431297),
+              zoom: 11.7
+            )
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: SizedBox(
+              width: _width,
+              height: 128,
+              child: Container(
+                color: const Color.fromRGBO(0, 0, 0, 0.25),
+                child: Column(
+                  children: [
+                    const Text(
+                      'レース開始までお待ちください',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white
+                      )
+                    ),
+                    ElevatedButton(
+                      child: const Text('スタート（仮）'),
+                      onPressed: () => context.go('/race/navi')
+                    )
+                  ],
+                  mainAxisAlignment: MainAxisAlignment.center,
+                )
+              )
+            )
+          )
+        ]
+      ),
+      backgroundColor: const Color.fromRGBO(229, 229, 229, 1)
     );
   }
 }

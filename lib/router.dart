@@ -5,6 +5,7 @@ import 'package:sailing_assist_mie/pages/home.dart';
 import 'package:sailing_assist_mie/pages/next.dart';
 import 'package:sailing_assist_mie/pages/select_race.dart';
 import 'package:sailing_assist_mie/pages/race/course.dart';
+import 'package:sailing_assist_mie/pages/race/navi.dart';
 
 final routerProvider = Provider((ref) => GoRouter(
   routes: [
@@ -24,6 +25,12 @@ final routerProvider = Provider((ref) => GoRouter(
       path: '/race/course',
       pageBuilder: (context, state) => const MaterialPage(
         child: RaceCourse()
+      )
+    ),
+    GoRoute(
+      path: '/race/navi',
+      pageBuilder: (context, state) => const MaterialPage(
+        child: RaceNavi()
       )
     ),
     GoRoute(

@@ -102,7 +102,8 @@ class Home extends HookConsumerWidget {
             )
           ]
         )
-      )
+      ),
+      backgroundColor: const Color.fromRGBO(229, 229, 229, 1)
     );
   }
 }
