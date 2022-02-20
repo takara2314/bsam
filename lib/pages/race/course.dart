@@ -20,7 +20,7 @@ class RaceCourse extends HookConsumerWidget {
             Icons.arrow_back_ios,
             color: Color.fromRGBO(100, 100, 100, 1)
           ),
-          onPressed: () => context.go('/select-race')
+          onPressed: () => context.go('/races')
         ),
         centerTitle: false,
         title: const Text(

@@ -3,9 +3,10 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sailing_assist_mie/pages/home.dart';
 import 'package:sailing_assist_mie/pages/next.dart';
-import 'package:sailing_assist_mie/pages/select_race.dart';
+import 'package:sailing_assist_mie/pages/races.dart';
 import 'package:sailing_assist_mie/pages/race/course.dart';
 import 'package:sailing_assist_mie/pages/race/navi.dart';
+import 'package:sailing_assist_mie/pages/settings.dart';
 
 final routerProvider = Provider((ref) => GoRouter(
   routes: [
@@ -16,9 +17,9 @@ final routerProvider = Provider((ref) => GoRouter(
       )
     ),
     GoRoute(
-      path: '/select-race',
+      path: '/races',
       pageBuilder: (context, state) => const MaterialPage(
-        child: SelectRace()
+        child: Races()
       )
     ),
     GoRoute(
@@ -31,6 +32,12 @@ final routerProvider = Provider((ref) => GoRouter(
       path: '/race/navi',
       pageBuilder: (context, state) => const MaterialPage(
         child: RaceNavi()
+      )
+    ),
+    GoRoute(
+      path: '/settings',
+      pageBuilder: (context, state) => const MaterialPage(
+        child: Settings()
       )
     ),
     GoRoute(

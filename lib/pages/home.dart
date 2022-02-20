@@ -1,14 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:sailing_assist_mie/providers/count.dart';
+import 'package:sailing_assist_mie/providers/androidId.dart';
+import 'package:sailing_assist_mie/providers/deviceName.dart';
 import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/services.dart';
 
 class Home extends HookConsumerWidget {
   const Home({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isLocationAllowed = useState<bool>(false);
+    final androidId = ref.watch(androidIdProvider.notifier);
+    final deviceName = ref.watch(deviceNameProvider.notifier);
+
+    useEffect(() {
+      () async {
+        var status = await Permission.location.status;
+
+        if (status == PermissionStatus.denied) {
+          status = await Permission.location.request();
+        }
+
+        isLocationAllowed.value = status.isGranted;
+
+        DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        androidId.state = androidInfo.androidId.toString();
+        deviceName.state = androidInfo.brand.toString();
+      }();
+    }, const []);
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -57,7 +82,7 @@ class Home extends HookConsumerWidget {
                         fontWeight: FontWeight.w500
                       )
                     ),
-                    onPressed: () => context.go('/select-race'),
+                    onPressed: () => context.go('/races'),
                     style: ElevatedButton.styleFrom(
                       primary: const Color.fromRGBO(0, 98, 104, 1),
                       shape: RoundedRectangleBorder(
@@ -93,7 +118,17 @@ class Home extends HookConsumerWidget {
                         fontWeight: FontWeight.w500
                       )
                     ),
-                    onPressed: () {}
+                    onPressed: () => context.go('/settings')
+                  ),
+                  Visibility(
+                    visible: !isLocationAllowed.value,
+                    child: const Text(
+                      '位置情報が有効になっていません！',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold
+                      )
+                    )
                   )
                 ],
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

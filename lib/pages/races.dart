@@ -5,8 +5,8 @@ import 'package:sailing_assist_mie/providers/count.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-class SelectRace extends HookConsumerWidget {
-  const SelectRace({Key? key}) : super(key: key);
+class Races extends HookConsumerWidget {
+  const Races({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
