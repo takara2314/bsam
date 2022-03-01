@@ -5,6 +5,8 @@ import 'package:sailing_assist_mie/providers/count.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class RaceCourse extends HookConsumerWidget {
   const RaceCourse({Key? key}) : super(key: key);
@@ -12,6 +14,21 @@ class RaceCourse extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     double _width = MediaQuery.of(context).size.width;
+
+    final races = useState<Map<String, dynamic>>({});
+
+    useEffect(() {
+      http.get(
+        Uri.parse('http://10.0.2.2:8080/races')
+      )
+        .then((res) {
+          if (res.statusCode != 200) {
+            throw Exception('Something occurred.');
+          }
+          final body = json.decode(res.body);
+          races.value = body['races'];
+        });
+    }, const []);
 
     return Scaffold(
       appBar: AppBar(
