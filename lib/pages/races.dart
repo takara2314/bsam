@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:sailing_assist_mie/providers/count.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'dart:convert';
@@ -56,13 +55,13 @@ class Races extends HookConsumerWidget {
         child: Container(
           child: Column(
             children: [
-              Container(
-                margin: const EdgeInsets.only(bottom: 7.5),
-                child: const Text(
-                  '今日',
-                  style: TextStyle(fontSize: 28)
-                )
-              ),
+              // Container(
+              //   margin: const EdgeInsets.only(bottom: 7.5),
+              //   child: const Text(
+              //     '今日',
+              //     style: TextStyle(fontSize: 28)
+              //   )
+              // ),
               for (var race in races.value) Container(
                 margin: const EdgeInsets.only(bottom: 15),
                 child: SizedBox(
@@ -116,7 +115,7 @@ class Races extends HookConsumerWidget {
                                   fontWeight: FontWeight.w500
                                 )
                               ),
-                              onPressed: () => context.go('/race/course'),
+                              onPressed: () => context.go('/race/course/${race["id"]}'),
                               style: ElevatedButton.styleFrom(
                                 primary: const Color.fromRGBO(4, 111, 171, 1),
                                 shape: RoundedRectangleBorder(

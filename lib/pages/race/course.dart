@@ -9,13 +9,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class RaceCourse extends HookConsumerWidget {
-  const RaceCourse({Key? key}) : super(key: key);
+  const RaceCourse({Key? key, required String this.raceId}) : super(key: key);
+  final String raceId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     double _width = MediaQuery.of(context).size.width;
 
-    final races = useState<Map<String, dynamic>>({});
+    final races = useState<List<dynamic>>([]);
 
     useEffect(() {
       http.get(
@@ -78,7 +79,7 @@ class RaceCourse extends HookConsumerWidget {
                     ),
                     ElevatedButton(
                       child: const Text('スタート（仮）'),
-                      onPressed: () => context.go('/race/navi')
+                      onPressed: () => context.go('/race/navi/${raceId}')
                     )
                   ],
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -23,15 +23,15 @@ final routerProvider = Provider((ref) => GoRouter(
       )
     ),
     GoRoute(
-      path: '/race/course',
-      pageBuilder: (context, state) => const MaterialPage(
-        child: RaceCourse()
+      path: '/race/course/:raceId',
+      pageBuilder: (context, state) => MaterialPage(
+        child: RaceCourse(raceId: state.params['raceId'] ?? '')
       )
     ),
     GoRoute(
-      path: '/race/navi',
-      pageBuilder: (context, state) => const MaterialPage(
-        child: RaceNavi()
+      path: '/race/navi/:raceId',
+      pageBuilder: (context, state) => MaterialPage(
+        child: RaceNavi(raceId: state.params['raceId'] ?? '')
       )
     ),
     GoRoute(
