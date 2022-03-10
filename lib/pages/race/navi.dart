@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sailing_assist_mie/providers/androidId.dart';
+import 'package:sailing_assist_mie/providers/userId.dart';
 import 'package:sailing_assist_mie/providers/deviceName.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:math';
@@ -11,6 +12,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 
 class RaceNavi extends HookConsumerWidget {
@@ -21,12 +23,13 @@ class RaceNavi extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     double _width = MediaQuery.of(context).size.width;
     final androidId = ref.watch(androidIdProvider.notifier);
+    final userId = ref.watch(userIdProvider.notifier);
     final deviceName = ref.watch(deviceNameProvider.notifier);
 
     final raceName = useState<String>('');
     final latitude = useState<double>(20.0);
     final longitude = useState<double>(20.0);
-    final nextMarks = useState<int>(-1);
+    final nextPointNo = useState<int>(-1);
     final nextPointLat = useState<double>(-1);
     final nextPointLng = useState<double>(-1);
     final distance = useState<double>(-1);
@@ -58,33 +61,36 @@ class RaceNavi extends HookConsumerWidget {
     }, const []);
 
     useEffect(() {
-      WebSocket.connect('ws://10.0.2.2:8080/racing/${raceId}?device=${androidId.state}').then((ws) {
-        var channel = IOWebSocketChannel(ws);
+      WebSocketChannel channel = IOWebSocketChannel.connect('ws://10.0.2.2:8080/racing/${raceId}?user=${userId.state}');
 
-        Timer.periodic(const Duration(seconds: 5), (Timer? timer) async {
-          Position position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high
-          );
-          latitude.value = position.latitude;
-          longitude.value = position.longitude;
+      final timer = Timer.periodic(const Duration(seconds: 5), (Timer? timer) async {
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high
+        );
+        latitude.value = position.latitude;
+        longitude.value = position.longitude;
 
-          channel.sink.add(json.encode({
-            "latitude": position.latitude,
-            "longitude": position.longitude
-          }));
-        });
-
-        channel.stream.listen((message) {
-          final body = json.decode(message);
-          nextMarks.value = body['now']['point'];
-          nextPointLat.value = body['now']['latitude'];
-          nextPointLng.value = body['now']['longitude'];
-        });
-
-        FlutterCompass.events?.listen((value) {
-          deviceDirection.value = value.accuracy ?? 0;
-        });
+        channel.sink.add(json.encode({
+          "latitude": position.latitude,
+          "longitude": position.longitude
+        }));
       });
+
+      channel.stream.listen((message) {
+        final body = json.decode(message);
+        nextPointNo.value = body['next']['point'];
+        nextPointLat.value = body['next']['latitude'];
+        nextPointLng.value = body['next']['longitude'];
+      });
+
+      FlutterCompass.events?.listen((value) {
+        deviceDirection.value = value.accuracy ?? 0;
+      });
+
+      return () {
+        timer.cancel();
+        channel.sink.close();
+      };
     }, const []);
 
     useEffect(() {
@@ -150,7 +156,7 @@ class RaceNavi extends HookConsumerWidget {
           Column(
             children: [
               Text(
-                marks[nextMarks.value] ?? '',
+                marks[nextPointNo.value] ?? '',
                 style: const TextStyle(
                   fontSize: 32
                 )
