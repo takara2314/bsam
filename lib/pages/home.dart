@@ -100,7 +100,7 @@ class Home extends HookConsumerWidget {
                         fontWeight: FontWeight.w500
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () => context.go('/simulate'),
                     style: ElevatedButton.styleFrom(
                       primary: const Color.fromRGBO(232, 232, 232, 1),
                       shape: RoundedRectangleBorder(
