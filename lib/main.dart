@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:sailing_assist_mie/router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() {
-  runApp(const ProviderScope(child: App()));
+  runApp(
+    ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: () => const ProviderScope(child: App())
+    )
+  );
 }
 
 class App extends ConsumerWidget {
@@ -16,6 +24,7 @@ class App extends ConsumerWidget {
     return MaterialApp.router(
       routeInformationParser: router.routeInformationParser,
       routerDelegate: router.routerDelegate,
+      debugShowCheckedModeBanner: false
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class Home extends HookConsumerWidget {
   const Home({Key? key}) : super(key: key);
@@ -40,45 +41,45 @@ class Home extends HookConsumerWidget {
           children: [
             Container(
               child: Column(
-                children: const [
+                children: [
                   Text(
                     'Sailing',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(0, 42, 149, 1),
-                      fontSize: 72
+                      color: const Color.fromRGBO(0, 42, 149, 1),
+                      fontSize: 60.h
                     )
                   ),
                   Text(
                     'Assist',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(0, 42, 149, 1),
-                      fontSize: 72
+                      color: const Color.fromRGBO(0, 42, 149, 1),
+                      fontSize: 60.h
                     )
                   ),
                   Text(
                     'Mie',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(0, 42, 149, 1),
-                      fontSize: 72
+                      color: const Color.fromRGBO(0, 42, 149, 1),
+                      fontSize: 60.h
                     )
                   )
                 ],
                 crossAxisAlignment: CrossAxisAlignment.start,
               ),
-              margin: const EdgeInsets.only(top: 80, bottom: 150)
+              margin: EdgeInsets.only(top: 70.h, bottom: 70.h)
             ),
             SizedBox(
               child: Column(
                 children: [
                   ElevatedButton(
-                    child: const Text(
+                    child: Text(
                       'レースする',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 32,
+                        fontSize: 28.sp,
                         fontWeight: FontWeight.w500
                       )
                     ),
@@ -88,15 +89,15 @@ class Home extends HookConsumerWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)
                       ),
-                      minimumSize: const Size(300, 60)
+                      minimumSize: Size(280.w, 60.h)
                     )
                   ),
                   ElevatedButton(
-                    child: const Text(
+                    child: Text(
                       'シミュレーションする',
                       style: TextStyle(
-                        color: Color.fromRGBO(50, 50, 50, 1),
-                        fontSize: 22,
+                        color: const Color.fromRGBO(50, 50, 50, 1),
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w500
                       ),
                     ),
@@ -107,14 +108,14 @@ class Home extends HookConsumerWidget {
                         borderRadius: BorderRadius.circular(12)
                       ),
                       padding: const EdgeInsets.all(8),
-                      minimumSize: const Size(300, 60)
+                      minimumSize: Size(280.w, 60.h)
                     )
                   ),
                   TextButton(
-                    child: const Text(
+                    child: Text(
                       '設定する',
                       style: TextStyle(
-                        fontSize: 22,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w500
                       )
                     ),

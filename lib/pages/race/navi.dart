@@ -14,6 +14,8 @@ import 'package:http/http.dart' as http;
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:wakelock/wakelock.dart';
 
 class RaceNavi extends HookConsumerWidget {
   const RaceNavi({Key? key, required String this.raceId}) : super(key: key);
@@ -30,8 +32,8 @@ class RaceNavi extends HookConsumerWidget {
     final latitude = useState<double>(20.0);
     final longitude = useState<double>(20.0);
     final nextPointNo = useState<int>(-1);
-    final nextPointLat = useState<double>(-1);
-    final nextPointLng = useState<double>(-1);
+    final nextPointLat = useState<double>(34.298093);
+    final nextPointLng = useState<double>(136.751886);
     final distance = useState<double>(-1);
     final mapDirection = useState<double>(0);
     final deviceDirection = useState<double>(0);
@@ -48,7 +50,7 @@ class RaceNavi extends HookConsumerWidget {
     useEffect(() {
       try {
         http.get(
-          Uri.parse('http://10.0.2.2:8080/race/${raceId}')
+          Uri.parse('https://sailing-assist-mie-api.herokuapp.com/race/${raceId}')
         )
           .then((res) {
             if (res.statusCode != 200) {
@@ -61,7 +63,8 @@ class RaceNavi extends HookConsumerWidget {
     }, const []);
 
     useEffect(() {
-      WebSocketChannel channel = IOWebSocketChannel.connect('ws://10.0.2.2:8080/racing/${raceId}?user=${userId.state}');
+      Wakelock.enable();
+      WebSocketChannel channel = IOWebSocketChannel.connect('ws://sailing-assist-mie-api.herokuapp.com/racing/${raceId}?user=${userId.state}');
 
       final timer = Timer.periodic(const Duration(seconds: 5), (Timer? timer) async {
         Position position = await Geolocator.getCurrentPosition(
@@ -79,17 +82,23 @@ class RaceNavi extends HookConsumerWidget {
       channel.stream.listen((message) {
         final body = json.decode(message);
         nextPointNo.value = body['next']['point'];
-        nextPointLat.value = body['next']['latitude'];
-        nextPointLng.value = body['next']['longitude'];
+        // nextPointLat.value = body['next']['latitude'];
+        // nextPointLng.value = body['next']['longitude'];
       });
 
       FlutterCompass.events?.listen((value) {
-        deviceDirection.value = value.accuracy ?? 0;
-      });
+        deviceDirection.value = value.heading ?? 0;
+      },
+        onError: (error) {
+          debugPrint('エラーです！');
+          debugPrint(error);
+        }
+      );
 
       return () {
         timer.cancel();
         channel.sink.close();
+        Wakelock.disable();
       };
     }, const []);
 
@@ -99,7 +108,16 @@ class RaceNavi extends HookConsumerWidget {
     }, [latitude.value, longitude.value, nextPointLat.value, nextPointLng.value]);
 
     useEffect(() {
-      double direction = deviceDirection.value - mapDirection.value + 270;
+      // compass direction
+      double direction = mapDirection.value - deviceDirection.value;
+
+      // Convert to a unit circle angle.
+      if (direction >= -180 && direction <= 90) {
+        direction = 90 - direction;
+      } else {
+        direction = 450 - direction;
+      }
+
       compassDirection.value = direction;
 
       debugPrint(direction.toString());
@@ -144,10 +162,10 @@ class RaceNavi extends HookConsumerWidget {
       body: Column(
         children: [
           Container(
-            margin: const EdgeInsets.only(top: 30, bottom: 30),
+            margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
             child: SizedBox(
-              width: 300,
-              height: 300,
+              width: 250.h,
+              height: 250.h,
               child: CustomPaint(
                 painter: _Compass(direction: compassDirection.value)
               )
@@ -157,12 +175,12 @@ class RaceNavi extends HookConsumerWidget {
             children: [
               Text(
                 marks[nextPointNo.value] ?? '',
-                style: const TextStyle(
-                  fontSize: 32
+                style: TextStyle(
+                  fontSize: 28.sp
                 )
               ),
               Container(
-                margin: const EdgeInsets.only(top: 25, bottom: 25),
+                margin: EdgeInsets.only(top: 10.h, bottom: 10.h),
                 child: Text(
                   compassDirectionName.value ,
                   style: const TextStyle(
@@ -174,28 +192,28 @@ class RaceNavi extends HookConsumerWidget {
               ),
               Row(
                 children: [
-                  const Text(
+                  Text(
                     '残り 約',
                     style: TextStyle(
-                      color: Color.fromRGBO(79, 79, 79, 1),
-                      fontSize: 32
+                      color: const Color.fromRGBO(79, 79, 79, 1),
+                      fontSize: 28.sp
                     )
                   ),
                   Container(
                     margin: const EdgeInsets.only(left: 10, right: 10),
                     child: Text(
                       '${distance.value.toInt()}',
-                      style: const TextStyle(
-                        color: Color.fromRGBO(79, 79, 79, 1),
-                        fontSize: 48
+                      style: TextStyle(
+                        color: const Color.fromRGBO(79, 79, 79, 1),
+                        fontSize: 36.sp
                       )
                     )
                   ),
-                  const Text(
+                  Text(
                     'm',
                     style: TextStyle(
-                      color: Color.fromRGBO(79, 79, 79, 1),
-                      fontSize: 32
+                      color: const Color.fromRGBO(79, 79, 79, 1),
+                      fontSize: 28.sp
                     )
                   )
                 ],
@@ -203,10 +221,13 @@ class RaceNavi extends HookConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
               ),
               Text(
-                '緯度 ${latitude.value}',
+                '緯度 ${latitude.value} / 経度 ${longitude.value}',
               ),
               Text(
-                '緯度 ${longitude.value}',
+                'マ角度 ${mapDirection.value}',
+              ),
+              Text(
+                'デ角度 ${deviceDirection.value}',
               )
             ]
           )

@@ -20,7 +20,7 @@ class Races extends HookConsumerWidget {
     useEffect(() {
       try {
         http.get(
-          Uri.parse('http://10.0.2.2:8080/races')
+          Uri.parse('https://sailing-assist-mie-api.herokuapp.com/races')
         )
           .then((res) {
             if (res.statusCode != 200) {
