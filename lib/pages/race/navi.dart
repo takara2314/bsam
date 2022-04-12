@@ -64,9 +64,11 @@ class RaceNavi extends HookConsumerWidget {
 
     useEffect(() {
       Wakelock.enable();
-      WebSocketChannel channel = IOWebSocketChannel.connect('ws://sailing-assist-mie-api.herokuapp.com/racing/${raceId}?user=${userId.state}');
+      WebSocketChannel channel = IOWebSocketChannel.connect(
+        Uri.parse('wss://sailing-assist-mie-api.herokuapp.com/racing/${raceId}?user=${userId.state}')
+      );
 
-      final timer = Timer.periodic(const Duration(seconds: 5), (Timer? timer) async {
+      getPos(Timer? timer) async {
         Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high
         );
@@ -77,7 +79,15 @@ class RaceNavi extends HookConsumerWidget {
           "latitude": position.latitude,
           "longitude": position.longitude
         }));
-      });
+
+        debugPrint(json.encode({
+          "latitude": position.latitude,
+          "longitude": position.longitude
+        }));
+      }
+
+      getPos(null);
+      final timer = Timer.periodic(const Duration(seconds: 5), getPos);
 
       channel.stream.listen((message) {
         final body = json.decode(message);
@@ -86,7 +96,7 @@ class RaceNavi extends HookConsumerWidget {
         // nextPointLng.value = body['next']['longitude'];
       });
 
-      FlutterCompass.events?.listen((value) {
+      final stream = FlutterCompass.events?.listen((value) {
         deviceDirection.value = value.heading ?? 0;
       },
         onError: (error) {
@@ -96,8 +106,10 @@ class RaceNavi extends HookConsumerWidget {
       );
 
       return () {
+        debugPrint('廃車や！');
         timer.cancel();
         channel.sink.close();
+        stream!.cancel();
         Wakelock.disable();
       };
     }, const []);
