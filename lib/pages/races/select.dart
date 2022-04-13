@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:sailing_assist_mie/pages/races/navi.dart';
 
 class Select extends StatefulWidget {
   const Select({Key? key}) : super(key: key);
@@ -57,7 +58,7 @@ class _Select extends State<Select> {
             children: [
               for (var race in races) Container(
                 margin: const EdgeInsets.only(bottom: 15),
-                child: RaceCard(
+                child: _RaceCard(
                   id: race['id'],
                   name: race['name'],
                   startAt: DateTime.parse(race['start_at']),
@@ -71,14 +72,13 @@ class _Select extends State<Select> {
           margin: const EdgeInsets.only(top: 10, bottom: 10),
           padding: const EdgeInsets.all(25)
         )
-      ),
-      backgroundColor: const Color.fromRGBO(229, 229, 229, 1)
+      )
     );
   }
 }
 
-class RaceCard extends StatelessWidget {
-  RaceCard({
+class _RaceCard extends StatelessWidget {
+  _RaceCard({
     Key? key,
     required this.id,
     required this.name,
@@ -87,7 +87,7 @@ class RaceCard extends StatelessWidget {
     this.memo
   }) : super(key: key);
 
-  DateFormat timeFormat = DateFormat('H時m分');
+  final DateFormat timeFormat = DateFormat('H時m分');
 
   final String id;
   final String name;
@@ -161,7 +161,13 @@ class RaceCard extends StatelessWidget {
                           fontWeight: FontWeight.w500
                         )
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => Navi(raceId: id, raceName: name),
+                          )
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         primary: const Color.fromRGBO(4, 111, 171, 1),
                         shape: RoundedRectangleBorder(

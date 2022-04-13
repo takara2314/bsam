@@ -40,7 +40,7 @@ class _Home extends State<Home> {
         child: Column(
           children: [
             Container(
-              child: const Logo(),
+              child: const _Logo(),
               margin: const EdgeInsets.only(top: 70, bottom: 70)
             ),
             SizedBox(
@@ -129,13 +129,12 @@ class _Home extends State<Home> {
           ]
         )
       ),
-      backgroundColor: const Color.fromRGBO(229, 229, 229, 1)
     );
   }
 }
 
-class Logo extends StatelessWidget {
-  const Logo({Key? key}) : super(key: key);
+class _Logo extends StatelessWidget {
+  const _Logo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -29,7 +29,8 @@ class App extends StatelessWidget {
         ),
         textTheme: const TextTheme(
           bodyMedium: TextStyle(fontSize: 18),
-        )
+        ),
+        backgroundColor: const Color.fromRGBO(229, 229, 229, 1)
       ),
       home: const Home()
     );
