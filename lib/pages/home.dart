@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sailing_assist_mie/pages/races/select.dart' as races;
+import 'package:sailing_assist_mie/pages/race/select.dart' as race;
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -58,7 +58,7 @@ class _Home extends State<Home> {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => const races.Select(),
+                          builder: (context) => const race.Select(),
                         )
                       );
                     },

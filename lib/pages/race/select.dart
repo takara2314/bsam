@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:sailing_assist_mie/pages/races/navi.dart';
+import 'package:sailing_assist_mie/pages/race/navi.dart';
 
 class Select extends StatefulWidget {
   const Select({Key? key}) : super(key: key);
