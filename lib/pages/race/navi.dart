@@ -35,11 +35,13 @@ class _Navi extends ConsumerState<Navi> {
   late Timer _timer;
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
+  late Timer _compassEasingTimer;
 
   double _latitude = 0.0;
   double _longitude = 0.0;
   double _compassDeg = 0.0;
   double _routeDeg = 0.0;
+  double _compassPinDeg = 0.0;
 
   int _nextPointNo = -1;
   double _routeDistance = 0.0;
@@ -60,12 +62,18 @@ class _Navi extends ConsumerState<Navi> {
 
     _compass = FlutterCompass.events?.listen(_getCompassDeg);
 
+    _compassEasingTimer = Timer.periodic(
+      const Duration(milliseconds: 1),
+      _compassEasing
+    );
+
     _connectWs();
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _compassEasingTimer.cancel();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
     Wakelock.disable();
@@ -94,6 +102,10 @@ class _Navi extends ConsumerState<Navi> {
     setState(() {
       _compassDeg = evt.heading ?? 0.0;
     });
+  }
+
+  _compassEasing(Timer? timer) {
+    _compassPinDeg += (_routeDeg - _compassPinDeg) * 0.005;
   }
 
   _connectWs() {
@@ -176,7 +188,7 @@ class _Navi extends ConsumerState<Navi> {
                 width: 250,
                 height: 250,
                 child: CustomPaint(
-                  painter: _Compass(direction: _routeDeg)
+                  painter: _Compass(direction: _compassPinDeg)
                 )
               )
             ),
