@@ -121,7 +121,6 @@ class _Navi extends ConsumerState<Navi> {
 
     _channel.stream.listen(_readWsMsg,
       onDone: () {
-        debugPrint('これは再接続ですね…！');
         _connectWs();
       }
     );
@@ -133,8 +132,6 @@ class _Navi extends ConsumerState<Navi> {
     if (!body.containsKey('next')) {
       return;
     }
-
-    debugPrint(body.toString());
 
     setState(() {
       _nextPointNo = body['next']['point'];
@@ -241,12 +238,12 @@ class _Navi extends ConsumerState<Navi> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                 ),
-                Text(
-                  '緯度: $_latitude / 経度: $_longitude'
-                ),
-                Text(
-                  'コンパス角度: $_routeDeg'
-                )
+                // Text(
+                //   '緯度: $_latitude / 経度: $_longitude'
+                // ),
+                // Text(
+                //   'コンパス角度: $_routeDeg'
+                // )
               ]
             )
           ]
