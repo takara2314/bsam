@@ -5,11 +5,14 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_compass/flutter_compass.dart';
+import 'package:sailing_assist_mie/utils/get_deg_name.dart';
+import 'package:sailing_assist_mie/utils/normalize_deg.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:wakelock/wakelock.dart';
 import 'package:sailing_assist_mie/providers.dart';
+import 'package:sailing_assist_mie/utils/get_position.dart';
 
 class Navi extends ConsumerStatefulWidget {
   const Navi({Key? key, required this.raceId, required this.raceName}) : super(key: key);
@@ -36,6 +39,7 @@ class _Navi extends ConsumerState<Navi> {
   double _latitude = 0.0;
   double _longitude = 0.0;
   double _compassDeg = 0.0;
+  double _routeDeg = 0.0;
 
   int _nextPointNo = -1;
   double _routeDistance = 0.0;
@@ -48,10 +52,10 @@ class _Navi extends ConsumerState<Navi> {
     // Screen lock
     Wakelock.enable();
 
-    _getPosition(null);
+    _sendPosition(null);
     _timer = Timer.periodic(
       const Duration(seconds: 5),
-      _getPosition
+      _sendPosition
     );
 
     _compass = FlutterCompass.events?.listen(_getCompassDeg);
@@ -68,23 +72,21 @@ class _Navi extends ConsumerState<Navi> {
     super.dispose();
   }
 
-  _getPosition(Timer? timer) async {
-    Position pos = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best
-    );
+  _sendPosition(Timer? timer) async {
+    final pos = await getPosition();
 
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _latitude = pos.latitude;
-      _longitude = pos.longitude;
+      _latitude = pos[0];
+      _longitude = pos[1];
     });
 
     _channel.sink.add(json.encode({
-      'latitude': pos.latitude,
-      'longitude': pos.longitude
+      'latitude': pos[0],
+      'longitude': pos[1]
     }));
   }
 
@@ -114,8 +116,14 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _readWsMsg(dynamic message) {
-    // debugPrint(message);
     final body = json.decode(message);
+
+    if (!body.containsKey('next')) {
+      return;
+    }
+
+    debugPrint(body.toString());
+
     setState(() {
       _nextPointNo = body['next']['point'];
     });
@@ -138,46 +146,11 @@ class _Navi extends ConsumerState<Navi> {
     final mapDeg = Geolocator.bearingBetween(_latitude, _longitude, nextLat, nextLng);
 
     // Compass direction
-    double routeDeg = mapDeg - _compassDeg;
-
-    // Convert to a unit circle angle.
-    if (routeDeg >= -180 && routeDeg <= 90) {
-      routeDeg = 90 - routeDeg;
-    } else {
-      routeDeg = 450 - routeDeg;
-    }
+    _routeDeg = normalizeRouteDeg(normalizeDeg(mapDeg) - normalizeCompassDeg(_compassDeg));
 
     setState(() {
-      _routeDirection = _convDirectionToName(routeDeg);
+      _routeDirection = getDegName(_routeDeg);
     });
-  }
-
-  _convDirectionToName(double deg) {
-    if (deg >= 337.5 || deg < 22.5) {
-      return '右';
-    }
-    if (deg >= 22.5 && deg < 67.5) {
-      return '右前方';
-    }
-    if (deg >= 67.5 && deg < 112.5) {
-      return '上';
-    }
-    if (deg >= 112.5 && deg < 157.5) {
-      return '左前方';
-    }
-    if (deg >= 157.5 && deg < 202.5) {
-      return '左';
-    }
-    if (deg >= 202.5 && deg < 247.5) {
-      return '左後方';
-    }
-    if (deg >= 247.5 && deg < 292.5) {
-      return '下';
-    }
-    if (deg >= 292.5 && deg < 337.5) {
-      return '右後方';
-    }
-    return '不明';
   }
 
   @override
@@ -203,7 +176,7 @@ class _Navi extends ConsumerState<Navi> {
                 width: 250,
                 height: 250,
                 child: CustomPaint(
-                  painter: _Compass(direction: _compassDeg)
+                  painter: _Compass(direction: _routeDeg)
                 )
               )
             ),
@@ -260,7 +233,7 @@ class _Navi extends ConsumerState<Navi> {
                   '緯度: $_latitude / 経度: $_longitude'
                 ),
                 Text(
-                  'コンパス角度: $_compassDeg'
+                  'コンパス角度: $_routeDeg'
                 )
               ]
             )
