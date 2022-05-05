@@ -77,13 +77,13 @@ class _Home extends ConsumerState<Home> {
     });
   }
 
-  _updateDeviceId() async {
+  _updateDeviceId(String userId) async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
 
     try {
       http.put(
-        Uri.parse('https://sailing-assist-mie-api.herokuapp.com/auth/token'),
+        Uri.parse('https://sailing-assist-mie-api.herokuapp.com/user/$userId'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'device_id': androidInfo.androidId.toString()
@@ -152,7 +152,7 @@ class _Home extends ConsumerState<Home> {
               }();
               final userId = ref.read(userIdProvider.notifier);
               userId.state = payload['user_id'];
-              _updateDeviceId();
+              _updateDeviceId(payload['user_id']);
               break;
 
             case 403:
