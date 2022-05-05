@@ -25,6 +25,10 @@ class _Select extends State<Select> {
   }
 
   _getRaces() {
+    setState(() {
+      _ready = false;
+    });
+
     try {
       http.get(
         Uri.parse('https://sailing-assist-mie-api.herokuapp.com/races')
@@ -74,6 +78,7 @@ class _Select extends State<Select> {
                       startAt: DateTime.parse(race['start_at']),
                       endAt: DateTime.parse(race['end_at']),
                       memo: race['memo'],
+                      getRaces: _getRaces
                     )
                   )
                 ],
@@ -109,6 +114,7 @@ class _RaceCard extends StatelessWidget {
     required this.name,
     required this.startAt,
     required this.endAt,
+    required this.getRaces,
     this.memo
   }) : super(key: key);
 
@@ -119,6 +125,8 @@ class _RaceCard extends StatelessWidget {
   final DateTime startAt;
   final DateTime endAt;
   final String? memo;
+
+  Function getRaces;
 
   @override
   Widget build(BuildContext context) {
@@ -186,12 +194,13 @@ class _RaceCard extends StatelessWidget {
                           fontWeight: FontWeight.w500
                         )
                       ),
-                      onPressed: () {
-                        Navigator.of(context).push(
+                      onPressed: () async {
+                        await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => Navi(raceId: id, raceName: name),
                           )
                         );
+                        getRaces();
                       },
                       style: ElevatedButton.styleFrom(
                         primary: const Color.fromRGBO(4, 111, 171, 1),
