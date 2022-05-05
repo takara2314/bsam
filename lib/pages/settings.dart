@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:permission_handler/permission_handler.dart';
-import 'package:sailing_assist_mie/pages/race/select.dart' as race;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decode/jwt_decode.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sailing_assist_mie/providers.dart';
