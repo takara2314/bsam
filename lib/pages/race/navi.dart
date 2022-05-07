@@ -11,6 +11,7 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:wakelock/wakelock.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:sailing_assist_mie/providers.dart';
 import 'package:sailing_assist_mie/utils/get_position.dart';
 
@@ -26,16 +27,19 @@ class Navi extends ConsumerStatefulWidget {
 
 class _Navi extends ConsumerState<Navi> {
   static const marks = {
-    -1: '現在取得中…',
-    1: '① 上マーク',
-    2: '② サイドマーク',
-    3: '③ 下マーク'
+    -1: ['○', '現在取得中…'],
+    1: ['①', '上マーク'],
+    2: ['②', 'サイドマーク'],
+    3: ['③', '下マーク']
   };
+
+  final FlutterTts tts = FlutterTts();
 
   late Timer _timer;
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
   late Timer _compassEasingTimer;
+  late Timer _alertTimer;
 
   double _latitude = 0.0;
   double _longitude = 0.0;
@@ -46,6 +50,8 @@ class _Navi extends ConsumerState<Navi> {
   int _nextPointNo = -1;
   double _routeDistance = 0.0;
   String _routeDirection = '';
+
+  bool _enableAlert = false;
 
   @override
   void initState() {
@@ -67,6 +73,12 @@ class _Navi extends ConsumerState<Navi> {
       _compassEasing
     );
 
+    tts.speak('ナビゲーションを開始します。この音量でアラートを行います。');
+    _alertTimer = Timer.periodic(
+      const Duration(seconds: 7),
+      _alert
+    );
+
     _connectWs();
   }
 
@@ -74,6 +86,7 @@ class _Navi extends ConsumerState<Navi> {
   void dispose() {
     _timer.cancel();
     _compassEasingTimer.cancel();
+    _alertTimer.cancel();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
     Wakelock.disable();
@@ -108,6 +121,13 @@ class _Navi extends ConsumerState<Navi> {
     _compassPinDeg += (_routeDeg - _compassPinDeg) * 0.005;
   }
 
+  _alert(Timer? timer) {
+    if (!_enableAlert) {
+      return;
+    }
+    tts.speak('${marks[_nextPointNo]![1]}${_routeDirection}方向距離約${_routeDistance.toInt()}メートル');
+  }
+
   _connectWs() {
     if (!mounted) {
       return;
@@ -133,6 +153,7 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
+    _checkMarkPassed(_nextPointNo, body['next']['point']);
     setState(() {
       _nextPointNo = body['next']['point'];
     });
@@ -160,6 +181,21 @@ class _Navi extends ConsumerState<Navi> {
     setState(() {
       _routeDirection = getDegName(_routeDeg);
     });
+  }
+
+  _checkMarkPassed(int current, int next) async {
+    if (current == next || current == -1) {
+      return;
+    }
+
+    _enableAlert = false;
+
+    for (int i = 0; i < 5; i++) {
+      tts.speak('$current${marks[current]![1]}に到達');
+      await Future.delayed(const Duration(seconds: 3));
+    }
+
+    _enableAlert = true;
   }
 
   @override
@@ -192,7 +228,7 @@ class _Navi extends ConsumerState<Navi> {
             Column(
               children: [
                 Text(
-                  marks[_nextPointNo] ?? '',
+                  '${marks[_nextPointNo]![0]} ${marks[_nextPointNo]![1]}',
                   style: const TextStyle(
                     fontSize: 28
                   )
