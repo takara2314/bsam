@@ -15,6 +15,10 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:sailing_assist_mie/providers.dart';
 import 'package:sailing_assist_mie/utils/get_position.dart';
 
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+
 class Navi extends ConsumerStatefulWidget {
   const Navi({Key? key, required this.raceId, required this.raceName}) : super(key: key);
 
@@ -27,10 +31,10 @@ class Navi extends ConsumerStatefulWidget {
 
 class _Navi extends ConsumerState<Navi> {
   static const marks = {
-    -1: ['○', '現在取得中…'],
-    1: ['①', '上マーク'],
-    2: ['②', 'サイドマーク'],
-    3: ['③', '下マーク']
+    -1: ['○', '現在取得中…', 'げんざいしゅとくちゅう'],
+    1: ['①', '上マーク', 'かみまーく'],
+    2: ['②', 'サイドマーク', 'さいどまーく'],
+    3: ['③', '下マーク', 'しもまーく']
   };
 
   final FlutterTts tts = FlutterTts();
@@ -40,6 +44,8 @@ class _Navi extends ConsumerState<Navi> {
   late WebSocketChannel _channel;
   late Timer _compassEasingTimer;
   late Timer _alertTimer;
+  late Timer _calcRouteTimer;
+  late Timer _readyWaitTimer;
 
   double _latitude = 0.0;
   double _longitude = 0.0;
@@ -48,10 +54,13 @@ class _Navi extends ConsumerState<Navi> {
   double _compassPinDeg = 0.0;
 
   int _nextPointNo = -1;
+  double _nextPointLat = 0.0;
+  double _nextPointLng = 0.0;
   double _routeDistance = 0.0;
   String _routeDirection = '';
 
-  bool _enableAlert = false;
+  bool _enableAlert = true;
+  bool _ready = false;
 
   @override
   void initState() {
@@ -60,9 +69,12 @@ class _Navi extends ConsumerState<Navi> {
     // Screen lock
     Wakelock.enable();
 
+    // Change tts speed
+    tts.setSpeechRate(0.8);
+
     _sendPosition(null);
     _timer = Timer.periodic(
-      const Duration(seconds: 5),
+      const Duration(seconds: 1),
       _sendPosition
     );
 
@@ -73,13 +85,23 @@ class _Navi extends ConsumerState<Navi> {
       _compassEasing
     );
 
-    tts.speak('ナビゲーションを開始します。この音量でアラートを行います。');
+    _calcRouteTimer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      _calcRoute
+    );
+
     _alertTimer = Timer.periodic(
       const Duration(seconds: 7),
       _alert
     );
 
     _connectWs();
+
+    _readyWait(null);
+    _readyWaitTimer = Timer.periodic(
+      const Duration(seconds: 8),
+      _readyWait
+    );
   }
 
   @override
@@ -87,6 +109,8 @@ class _Navi extends ConsumerState<Navi> {
     _timer.cancel();
     _compassEasingTimer.cancel();
     _alertTimer.cancel();
+    _calcRouteTimer.cancel();
+    _readyWaitTimer.cancel();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
     Wakelock.disable();
@@ -95,6 +119,7 @@ class _Navi extends ConsumerState<Navi> {
 
   _sendPosition(Timer? timer) async {
     final pos = await getPosition();
+    debugPrint(pos.toString());
 
     if (!mounted) {
       return;
@@ -112,6 +137,7 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _getCompassDeg(CompassEvent evt) {
+    debugPrint(evt.heading.toString());
     setState(() {
       _compassDeg = evt.heading ?? 0.0;
     });
@@ -122,10 +148,24 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _alert(Timer? timer) {
-    if (!_enableAlert) {
+    if (!_enableAlert || !_ready) {
       return;
     }
-    tts.speak('${marks[_nextPointNo]![1]}${_routeDirection}方向距離約${_routeDistance.toInt()}メートル');
+    tts.speak('${marks[_nextPointNo]![2]}${_routeDirection}方向距離約${_routeDistance.toInt()}メートル');
+  }
+
+  _checkReady() async {
+    try {
+      final res = await http.get(
+        Uri.parse('https://sailing-assist-mie-api.herokuapp.com/race/${widget.raceId}')
+      );
+      if (res.statusCode != 200) {
+        throw Exception('Something occurred.');
+      }
+      final body = json.decode(res.body);
+
+      return body['race']['is_holding'];
+    } catch (_) {}
   }
 
   _connectWs() {
@@ -162,18 +202,18 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
-    _calcRoute(
-      body['next']['latitude'],
-      body['next']['longitude']
-    );
+    setState(() {
+      _nextPointLat = body['next']['latitude'];
+      _nextPointLng = body['next']['longitude'];
+    });
   }
 
-  _calcRoute(double nextLat, double nextLng) {
+  _calcRoute(Timer? timer) {
     setState(() {
-      _routeDistance = Geolocator.distanceBetween(_latitude, _longitude, nextLat, nextLng);
+      _routeDistance = Geolocator.distanceBetween(_latitude, _longitude, _nextPointLat, _nextPointLng);
     });
 
-    final mapDeg = Geolocator.bearingBetween(_latitude, _longitude, nextLat, nextLng);
+    final mapDeg = Geolocator.bearingBetween(_latitude, _longitude, _nextPointLat, _nextPointLng);
 
     // Compass direction
     _routeDeg = normalizeRouteDeg(normalizeDeg(mapDeg) - normalizeCompassDeg(_compassDeg));
@@ -196,6 +236,25 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     _enableAlert = true;
+  }
+
+  _readyWait(Timer? timer) async {
+    tts.speak('現在準備中です。');
+
+    final result = await _checkReady();
+
+    if (!result) {
+      return;
+    }
+
+    setState(() {
+      _ready = true;
+    });
+
+    tts.speak('ナビゲーションを開始します。この音量でアラートを行います。');
+
+    _readyWaitTimer.cancel();
+    _connectWs();
   }
 
   @override
@@ -225,62 +284,80 @@ class _Navi extends ConsumerState<Navi> {
                 )
               )
             ),
-            Column(
-              children: [
-                Text(
-                  '${marks[_nextPointNo]![0]} ${marks[_nextPointNo]![1]}',
-                  style: const TextStyle(
-                    fontSize: 28
-                  )
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 10, bottom: 10),
-                  child: Text(
-                    _routeDirection,
+            (_ready
+              ? Column(
+                children: [
+                  Text(
+                    '${marks[_nextPointNo]![0]} ${marks[_nextPointNo]![1]}',
                     style: const TextStyle(
-                      color: Color.fromRGBO(0, 94, 115, 1),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 52
+                      fontSize: 28
                     )
-                  )
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      '残り 約',
-                      style: TextStyle(
-                        color: Color.fromRGBO(79, 79, 79, 1),
-                        fontSize: 28
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 10, bottom: 10),
+                    child: Text(
+                      _routeDirection,
+                      style: const TextStyle(
+                        color: Color.fromRGBO(0, 94, 115, 1),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 52
                       )
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(left: 10, right: 10),
-                      child: Text(
-                        '${_routeDistance.toInt()}',
-                        style: const TextStyle(
+                    )
+                  ),
+                  Row(
+                    children: [
+                      const Text(
+                        '残り 約',
+                        style: TextStyle(
                           color: Color.fromRGBO(79, 79, 79, 1),
-                          fontSize: 36
+                          fontSize: 28
+                        )
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(left: 10, right: 10),
+                        child: Text(
+                          '${_routeDistance.toInt()}',
+                          style: const TextStyle(
+                            color: Color.fromRGBO(79, 79, 79, 1),
+                            fontSize: 36
+                          )
+                        )
+                      ),
+                      const Text(
+                        'm',
+                        style: TextStyle(
+                          color: Color.fromRGBO(79, 79, 79, 1),
+                          fontSize: 28
                         )
                       )
-                    ),
-                    const Text(
-                      'm',
-                      style: TextStyle(
-                        color: Color.fromRGBO(79, 79, 79, 1),
-                        fontSize: 28
-                      )
+                    ],
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                  ),
+                  // Text(
+                  //   '緯度: $_latitude / 経度: $_longitude'
+                  // ),
+                  // Text(
+                  //   'コンパス角度: $_routeDeg'
+                  // )
+                ]
+              )
+            : Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.only(right: 15, left: 15),
+              child: Column(
+                children: const [
+                  Text(
+                    'まだレースは始まっていません',
+                    style: TextStyle(
+                      fontSize: 28
                     )
-                  ],
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                ),
-                // Text(
-                //   '緯度: $_latitude / 経度: $_longitude'
-                // ),
-                // Text(
-                //   'コンパス角度: $_routeDeg'
-                // )
-              ]
+                  ),
+                  Text(
+                    'スタートボタンが押されるまでお待ちください。'
+                  )
+                ])
+              )
             )
           ]
         )
