@@ -70,7 +70,7 @@ class _Navi extends ConsumerState<Navi> {
     Wakelock.enable();
 
     // Change tts speed
-    tts.setSpeechRate(0.8);
+    tts.setSpeechRate(0.7);
 
     _sendPosition(null);
     _timer = Timer.periodic(
@@ -118,22 +118,46 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _sendPosition(Timer? timer) async {
-    final pos = await getPosition();
-    debugPrint(pos.toString());
+    // final pos = await getPosition();
+    // debugPrint(pos.toString());
+
+    // if (!mounted) {
+    //   return;
+    // }
+
+    // setState(() {
+    //   _latitude = pos[0];
+    //   _longitude = pos[1];
+    // });
+
+    // _channel.sink.add(json.encode({
+    //   'latitude': pos[0],
+    //   'longitude': pos[1]
+    // }));
+    Position pos = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.bestForNavigation
+    );
 
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _latitude = pos[0];
-      _longitude = pos[1];
+      _latitude = pos.latitude;
+      _longitude = pos.longitude;
     });
 
-    _channel.sink.add(json.encode({
-      'latitude': pos[0],
-      'longitude': pos[1]
-    }));
+    // debugPrint(json.encode({
+    //     'latitude': pos.latitude,
+    //     'longitude': pos.longitude
+    //   }));
+
+    try {
+      _channel.sink.add(json.encode({
+        'latitude': pos.latitude,
+        'longitude': pos.longitude
+      }));
+    } catch (_) {}
   }
 
   _getCompassDeg(CompassEvent evt) {
@@ -193,7 +217,10 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
-    _checkMarkPassed(_nextPointNo, body['next']['point']);
+    // マークを通過したなら
+    if (_nextPointNo != body['next']['point']) {
+      _announcePassed(_nextPointNo, body['next']['point']);
+    }
     setState(() {
       _nextPointNo = body['next']['point'];
     });
@@ -215,27 +242,34 @@ class _Navi extends ConsumerState<Navi> {
 
     final mapDeg = Geolocator.bearingBetween(_latitude, _longitude, _nextPointLat, _nextPointLng);
 
-    // Compass direction
-    _routeDeg = normalizeRouteDeg(normalizeDeg(mapDeg) - normalizeCompassDeg(_compassDeg));
-
     setState(() {
+      // Compass direction
+      _routeDeg = normalizeRouteDeg(normalizeDeg(mapDeg) - normalizeCompassDeg(_compassDeg));
       _routeDirection = getDegName(_routeDeg);
     });
   }
 
-  _checkMarkPassed(int current, int next) async {
+  _announcePassed(int current, int next) async {
     if (current == next || current == -1) {
       return;
     }
 
-    _enableAlert = false;
+    if (!_enableAlert) {
+      return;
+    }
+
+    setState(() {
+      _enableAlert = false;
+    });
 
     for (int i = 0; i < 5; i++) {
-      tts.speak('$current${marks[current]![1]}に到達');
+      tts.speak('$current${marks[current]![2]}に到達');
       await Future.delayed(const Duration(seconds: 3));
     }
 
-    _enableAlert = true;
+    setState(() {
+      _enableAlert = true;
+    });
   }
 
   _readyWait(Timer? timer) async {
