@@ -161,7 +161,7 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _getCompassDeg(CompassEvent evt) {
-    debugPrint(evt.heading.toString());
+    // debugPrint(evt.heading.toString());
     setState(() {
       _compassDeg = evt.heading ?? 0.0;
     });
@@ -198,6 +198,7 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     final userId = ref.read(userIdProvider);
+    debugPrint('接続します');
     _channel = IOWebSocketChannel.connect(
       Uri.parse('wss://sailing-assist-mie-api.herokuapp.com/racing/${widget.raceId}?user=$userId'),
       pingInterval: const Duration(seconds: 1)
@@ -205,6 +206,7 @@ class _Navi extends ConsumerState<Navi> {
 
     _channel.stream.listen(_readWsMsg,
       onDone: () {
+        debugPrint('再接続。');
         _connectWs();
       }
     );
@@ -217,13 +219,20 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
+    debugPrint('次のポイント: ' + _nextPointNo.toString());
+    debugPrint('送信された次のポイント: ' + body['next']['point'].toString());
+
     // マークを通過したなら
-    if (_nextPointNo != body['next']['point']) {
+    if (_nextPointNo < body['next']['point'] || ((_nextPointNo == 3) && (body['next']['point'] == 1))) {
       _announcePassed(_nextPointNo, body['next']['point']);
+      setState(() {
+        _nextPointNo = body['next']['point'];
+      });
+    } else if (_nextPointNo > body['next']['point']) {
+      return;
     }
-    setState(() {
-      _nextPointNo = body['next']['point'];
-    });
+
+    // _nextPointNo == body['next']['point'] ならこっち
 
     if (body['next']['latitude'].runtimeType == int || body['next']['longitude'].runtimeType == int) {
       return;
@@ -239,6 +248,8 @@ class _Navi extends ConsumerState<Navi> {
     setState(() {
       _routeDistance = Geolocator.distanceBetween(_latitude, _longitude, _nextPointLat, _nextPointLng);
     });
+
+    // debugPrint('distance: ' + _routeDistance.toString());
 
     final mapDeg = Geolocator.bearingBetween(_latitude, _longitude, _nextPointLat, _nextPointLng);
 
@@ -265,6 +276,10 @@ class _Navi extends ConsumerState<Navi> {
     for (int i = 0; i < 5; i++) {
       tts.speak('$current${marks[current]![2]}に到達');
       await Future.delayed(const Duration(seconds: 3));
+    }
+
+    if (!mounted) {
+      return;
     }
 
     setState(() {
