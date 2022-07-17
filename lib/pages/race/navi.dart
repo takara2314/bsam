@@ -53,11 +53,20 @@ class _Navi extends ConsumerState<Navi> {
   double _routeDeg = 0.0;
   double _compassPinDeg = 0.0;
 
+  double _accuracy = 0.0;
+
   int _nextPointNo = -1;
   double _nextPointLat = 0.0;
   double _nextPointLng = 0.0;
   double _routeDistance = 0.0;
   String _routeDirection = '';
+
+  double _pointALat = 0.0;
+  double _pointALng = 0.0;
+  double _pointBLat = 0.0;
+  double _pointBLng = 0.0;
+  double _pointCLat = 0.0;
+  double _pointCLng = 0.0;
 
   bool _enableAlert = true;
   bool _ready = false;
@@ -95,6 +104,7 @@ class _Navi extends ConsumerState<Navi> {
       _alert
     );
 
+    debugPrint('ws routine 開始');
     _connectWs();
 
     _readyWait(null);
@@ -135,8 +145,13 @@ class _Navi extends ConsumerState<Navi> {
     //   'longitude': pos[1]
     // }));
     Position pos = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.bestForNavigation
+      desiredAccuracy: LocationAccuracy.best,
+      // forceAndroidLocationManager: true
     );
+
+    if (pos.accuracy > 15.0) {
+      return;
+    }
 
     if (!mounted) {
       return;
@@ -145,6 +160,7 @@ class _Navi extends ConsumerState<Navi> {
     setState(() {
       _latitude = pos.latitude;
       _longitude = pos.longitude;
+      _accuracy = pos.accuracy;
     });
 
     // debugPrint(json.encode({
@@ -198,7 +214,6 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     final userId = ref.read(userIdProvider);
-    debugPrint('接続します');
     _channel = IOWebSocketChannel.connect(
       Uri.parse('wss://sailing-assist-mie-api.herokuapp.com/racing/${widget.raceId}?user=$userId'),
       pingInterval: const Duration(seconds: 1)
@@ -206,8 +221,10 @@ class _Navi extends ConsumerState<Navi> {
 
     _channel.stream.listen(_readWsMsg,
       onDone: () {
-        debugPrint('再接続。');
-        _connectWs();
+        if (mounted) {
+          debugPrint('再接続。');
+          _connectWs();
+        }
       }
     );
   }
@@ -216,32 +233,79 @@ class _Navi extends ConsumerState<Navi> {
     final body = json.decode(message);
 
     if (!body.containsKey('next')) {
-      return;
-    }
-
-    debugPrint('次のポイント: ' + _nextPointNo.toString());
-    debugPrint('送信された次のポイント: ' + body['next']['point'].toString());
-
-    // マークを通過したなら
-    if (_nextPointNo < body['next']['point'] || ((_nextPointNo == 3) && (body['next']['point'] == 1))) {
-      _announcePassed(_nextPointNo, body['next']['point']);
+      // debugPrint(body.toString());
       setState(() {
-        _nextPointNo = body['next']['point'];
+        _pointALat = body['point_a']['latitude'];
+        _pointALng = body['point_a']['longitude'];
+        _pointBLat = body['point_b']['latitude'];
+        _pointBLng = body['point_b']['longitude'];
+        _pointCLat = body['point_c']['latitude'];
+        _pointCLng = body['point_c']['longitude'];
       });
-    } else if (_nextPointNo > body['next']['point']) {
+
+      if (_nextPointNo == -1) {
+        setState(() {
+          _nextPointNo = 1;
+          _nextPointLat = _pointALat;
+          _nextPointLng = _pointALng;
+        });
+      }
+
+      final diff = Geolocator.distanceBetween(_latitude, _longitude, _nextPointLat, _nextPointLng);
+      debugPrint(diff.abs().toString());
+
+      if (diff.abs() <= 10) {
+        tts.speak('10メートル以内に到達');
+        if (_nextPointNo == 1) {
+          setState(() {
+            _nextPointNo = 2;
+            _nextPointLat = _pointBLat;
+            _nextPointLng = _pointBLng;
+          });
+          _announcePassed(1, 0);
+        } else if (_nextPointNo == 2) {
+          setState(() {
+            _nextPointNo = 3;
+            _nextPointLat = _pointCLat;
+            _nextPointLng = _pointCLng;
+          });
+          _announcePassed(1, 0);
+        } else if (_nextPointNo == 3) {
+          setState(() {
+            _nextPointNo = 1;
+            _nextPointLat = _pointALat;
+            _nextPointLng = _pointALng;
+          });
+          _announcePassed(1, 0);
+        }
+      }
+
       return;
     }
 
-    // _nextPointNo == body['next']['point'] ならこっち
+    // debugPrint('次のポイント: ' + _nextPointNo.toString());
+    // debugPrint('送信された次のポイント: ' + body['next']['point'].toString());
 
-    if (body['next']['latitude'].runtimeType == int || body['next']['longitude'].runtimeType == int) {
-      return;
-    }
+    // // マークを通過したなら
+    // if (_nextPointNo < body['next']['point'] || ((_nextPointNo == 3) && (body['next']['point'] == 1))) {
+    //   _announcePassed(_nextPointNo, body['next']['point']);
+    //   setState(() {
+    //     _nextPointNo = body['next']['point'];
+    //   });
+    // } else if (_nextPointNo > body['next']['point']) {
+    //   return;
+    // }
 
-    setState(() {
-      _nextPointLat = body['next']['latitude'];
-      _nextPointLng = body['next']['longitude'];
-    });
+    // // _nextPointNo == body['next']['point'] ならこっち
+
+    // if (body['next']['latitude'].runtimeType == int || body['next']['longitude'].runtimeType == int) {
+    //   return;
+    // }
+
+    // setState(() {
+    //   _nextPointLat = body['next']['latitude'];
+    //   _nextPointLng = body['next']['longitude'];
+    // });
   }
 
   _calcRoute(Timer? timer) {
@@ -274,7 +338,7 @@ class _Navi extends ConsumerState<Navi> {
     });
 
     for (int i = 0; i < 5; i++) {
-      tts.speak('$current${marks[current]![2]}に到達');
+      tts.speak('${marks[current]![2]}に到達');
       await Future.delayed(const Duration(seconds: 3));
     }
 
@@ -388,14 +452,24 @@ class _Navi extends ConsumerState<Navi> {
                   // ),
                   // Text(
                   //   'コンパス角度: $_routeDeg'
-                  // )
+                  // ),
+                  Text(
+                    '精度: $_accuracy m'
+                  ),
+                  Row(
+                    children: [
+                      TextButton(onPressed: () {setState(() {_nextPointNo = 1; _nextPointLat = _pointALat; _nextPointLng = _pointALng;});}, child: Text('1の案内')),
+                      TextButton(onPressed: () {setState(() {_nextPointNo = 2; _nextPointLat = _pointBLat; _nextPointLng = _pointBLng;});}, child: Text('2の案内')),
+                      TextButton(onPressed: () {setState(() {_nextPointNo = 3; _nextPointLat = _pointCLat; _nextPointLng = _pointCLng;});}, child: Text('3の案内')),
+                    ],
+                  )
                 ]
               )
             : Container(
               alignment: Alignment.center,
               padding: const EdgeInsets.only(right: 15, left: 15),
               child: Column(
-                children: const [
+                children: [
                   Text(
                     'まだレースは始まっていません',
                     style: TextStyle(
@@ -404,6 +478,9 @@ class _Navi extends ConsumerState<Navi> {
                   ),
                   Text(
                     'スタートボタンが押されるまでお待ちください。'
+                  ),
+                  Text(
+                    '精度: $_accuracy m'
                   )
                 ])
               )
