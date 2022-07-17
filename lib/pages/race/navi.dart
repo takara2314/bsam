@@ -255,7 +255,7 @@ class _Navi extends ConsumerState<Navi> {
       debugPrint(diff.abs().toString());
 
       if (diff.abs() <= 10) {
-        tts.speak('10メートル以内に到達');
+        // tts.speak('10メートル以内に到達');
         if (_nextPointNo == 1) {
           setState(() {
             _nextPointNo = 2;
