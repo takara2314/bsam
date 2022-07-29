@@ -1,6 +1,6 @@
 {
-    "name": "sailing_assist_mie",
-    "short_name": "sailing_assist_mie",
+    "name": "bsam",
+    "short_name": "bsam",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
