@@ -46,7 +46,7 @@ class _Navi extends ConsumerState<Navi> {
   double _compassDeg = 0.0;
 
   int _nextMarkNo = 0;
-  final List<MarkPosition> _markPos = [];
+  List<dynamic> _markPos = [];
   double _routeDistance = 0.0;
 
   @override
@@ -118,13 +118,15 @@ class _Navi extends ConsumerState<Navi> {
 
     switch (body['type']) {
     case 'mark_position':
-      List<MarkPosition> markPos = [];
-
-      body['positions'].forEach((pos) {
-        markPos.add(MarkPosition.fromJson(pos));
+      setState(() {
+        _markPos = body['positions'];
       });
 
-      if (markPos.length == 3) {
+      if (body['mark_num'] == 3) {
+        if (!_started) {
+          _nextMarkNo = 1;
+        }
+
         setState(() {
           _started = true;
         });
@@ -152,7 +154,9 @@ class _Navi extends ConsumerState<Navi> {
 
   _sendPosition(Timer? timer) async {
     await _getPosition();
-    _checkPassed();
+    if (_started) {
+      _checkPassed();
+    }
 
     try {
       _channel.sink.add(json.encode({
@@ -167,8 +171,8 @@ class _Navi extends ConsumerState<Navi> {
     final diff = Geolocator.distanceBetween(
       _lat,
       _lng,
-      _markPos[_nextMarkNo - 1].lat!,
-      _markPos[_nextMarkNo - 1].lng!,
+      _markPos[_nextMarkNo - 1]['latitude'],
+      _markPos[_nextMarkNo - 1]['longitude'],
     );
 
     setState(() {
@@ -202,11 +206,15 @@ class _Navi extends ConsumerState<Navi> {
   _changeCompassDeg(CompassEvent evt) {
     double compassDeg = evt.heading ?? 0.0;
 
+    if (!_started) {
+      return;
+    }
+
     double angle = Geolocator.bearingBetween(
       _lat,
       _lng,
-      _markPos[_nextMarkNo - 1].lat!,
-      _markPos[_nextMarkNo - 1].lng!,
+      _markPos[_nextMarkNo - 1]['latitude'],
+      _markPos[_nextMarkNo - 1]['longitude'],
     );
 
     if (angle > 180) {
@@ -224,7 +232,7 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     if (_started) {
-      tts.speak('約${_routeDistance.toInt()}メートル');
+      tts.speak('${getDegName(_compassDeg)}方向、約${_routeDistance.toInt()}メートル');
     } else {
       tts.speak('レースは始まっていません');
     }
@@ -383,25 +391,6 @@ class _Navi extends ConsumerState<Navi> {
   }
 }
 
-class MarkPosition {
-  double? lat;
-  double? lng;
-
-  MarkPosition({this.lat, this.lng});
-
-  MarkPosition.fromJson(Map<String, dynamic> json) {
-    lat = json['latitude'];
-    lng = json['longitude'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['latitude'] = lat;
-    data['longitude'] = lng;
-    return data;
-  }
-}
-
 class _Compass extends CustomPainter {
   const _Compass({required this.direction});
   final double direction;
@@ -464,4 +453,33 @@ class _Compass extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) {
     return true;
   }
+}
+
+String getDegName(double deg) {
+  if (deg >= -22.5 && deg < 22.5) {
+    return '右';
+  }
+  if (deg >= 22.5 && deg < 67.5) {
+    return 'やや右';
+  }
+  if (deg >= 67.5 && deg < 112.5) {
+    return '前';
+  }
+  if (deg >= 112.5 && deg < 157.5) {
+    return 'やや左';
+  }
+  if (deg >= 157.5 || deg < -157.5) {
+    return '左';
+  }
+  if (deg >= -157.5 && deg < -112.5) {
+    return '左後ろ';
+  }
+  if (deg >= -112.5 && deg < -67.5) {
+    return '後ろ';
+  }
+  if (deg >= -67.5 && deg < -22.5) {
+    return '右後ろ';
+  }
+
+  return '不明';
 }
