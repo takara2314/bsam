@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
 import 'dart:async';
 import 'dart:convert';
 
@@ -13,6 +12,10 @@ import 'package:wakelock/wakelock.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import 'package:bsam/providers.dart';
+import 'package:bsam/models/navi.dart';
+import 'package:bsam/widgets/compass.dart';
+import 'package:bsam/services/navi/compass.dart';
+import 'package:bsam/services/navi/mark.dart';
 
 class Navi extends ConsumerStatefulWidget {
   const Navi({Key? key, required this.raceId}) : super(key: key);
@@ -24,6 +27,8 @@ class Navi extends ConsumerStatefulWidget {
 }
 
 class _Navi extends ConsumerState<Navi> {
+  static const markNum = 3;
+
   static const marks = {
     1: ['上マーク', 'かみまーく'],
     2: ['サイドマーク', 'さいどまーく'],
@@ -46,7 +51,7 @@ class _Navi extends ConsumerState<Navi> {
   double _compassDeg = 0.0;
 
   int _nextMarkNo = 0;
-  List<dynamic> _markPos = [];
+  List<MarkPosition> _markPos = [];
   double _routeDistance = 0.0;
 
   @override
@@ -118,21 +123,35 @@ class _Navi extends ConsumerState<Navi> {
 
     switch (body['type']) {
     case 'mark_position':
+      _receiveMarkPos(MarkPositionMsg.fromJson(body));
+      break;
+    }
+  }
+
+  _receiveMarkPos(MarkPositionMsg msg) {
+    if (!_started) {
       setState(() {
-        _markPos = body['positions'];
+        _markPos = msg.positions!;
       });
 
-      if (body['mark_num'] == 3) {
-        if (!_started) {
-          _nextMarkNo = 1;
-        }
-
+      if (msg.markNum == markNum) {
         setState(() {
+          _nextMarkNo = 1;
           _started = true;
         });
       }
 
-      break;
+      return;
+    }
+
+    if (msg.markNum == markNum) {
+      setState(() {
+        _markPos = msg.positions!;
+      });
+    } else {
+      setState(() {
+        _markPos = updateMarksOnEnable(_markPos, msg.positions!);
+      });
     }
   }
 
@@ -171,8 +190,8 @@ class _Navi extends ConsumerState<Navi> {
     final diff = Geolocator.distanceBetween(
       _lat,
       _lng,
-      _markPos[_nextMarkNo - 1]['latitude'],
-      _markPos[_nextMarkNo - 1]['longitude'],
+      _markPos[_nextMarkNo - 1].lat!,
+      _markPos[_nextMarkNo - 1].lng!,
     );
 
     setState(() {
@@ -213,8 +232,8 @@ class _Navi extends ConsumerState<Navi> {
     double angle = Geolocator.bearingBetween(
       _lat,
       _lng,
-      _markPos[_nextMarkNo - 1]['latitude'],
-      _markPos[_nextMarkNo - 1]['longitude'],
+      _markPos[_nextMarkNo - 1].lat!,
+      _markPos[_nextMarkNo - 1].lng!,
     );
 
     if (angle > 180) {
@@ -286,7 +305,7 @@ class _Navi extends ConsumerState<Navi> {
                       width: 250,
                       height: 250,
                       child: CustomPaint(
-                        painter: _Compass(direction: _compassDeg)
+                        painter: Compass(direction: _compassDeg)
                       )
                     )
                   ),
@@ -389,97 +408,4 @@ class _Navi extends ConsumerState<Navi> {
       )
     );
   }
-}
-
-class _Compass extends CustomPainter {
-  const _Compass({required this.direction});
-  final double direction;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const lineLength = 30;
-    final startRadius = (size.width / 2) - lineLength - 10;
-    final endRadius = (size.width / 2) - 10;
-
-    final paint = Paint();
-    paint.color = Colors.white;
-    paint.strokeWidth = 5;
-
-    canvas.drawCircle(
-      Offset(size.width / 2, size.height / 2),
-      size.width / 2,
-      paint
-    );
-
-    paint.color = const Color.fromRGBO(181, 181, 181, 1);
-
-    for (var theta = 0; theta < 360; theta+=30) {
-      canvas.drawLine(
-        Offset(
-          startRadius * cos(pi * theta / 180) + (size.width / 2),
-          - startRadius * sin(pi * theta / 180) + (size.width / 2)
-        ),
-        Offset(
-          endRadius * cos(pi * theta / 180) + (size.width / 2),
-          - endRadius * sin(pi * theta / 180) + (size.width / 2)
-        ),
-        paint
-      );
-    }
-
-    final path = Path();
-    path.moveTo(
-      startRadius * cos(pi * direction / 180) + (size.width / 2),
-      - startRadius * sin(pi * direction / 180) + (size.width / 2)
-    );
-
-    path.lineTo(
-      startRadius * cos(pi * (direction + 160) / 180) + (size.width / 2),
-      - startRadius * sin(pi * (direction + 160) / 180) + (size.width / 2)
-    );
-
-    path.lineTo(
-      startRadius * cos(pi * (direction + 200) / 180) + (size.width / 2),
-      - startRadius * sin(pi * (direction + 200) / 180) + (size.width / 2)
-    );
-
-    path.close();
-
-    paint.color = const Color.fromRGBO(0, 94, 115, 1);
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
-  }
-}
-
-String getDegName(double deg) {
-  if (deg >= -22.5 && deg < 22.5) {
-    return '右';
-  }
-  if (deg >= 22.5 && deg < 67.5) {
-    return 'やや右';
-  }
-  if (deg >= 67.5 && deg < 112.5) {
-    return '前';
-  }
-  if (deg >= 112.5 && deg < 157.5) {
-    return 'やや左';
-  }
-  if (deg >= 157.5 || deg < -157.5) {
-    return '左';
-  }
-  if (deg >= -157.5 && deg < -112.5) {
-    return '左後ろ';
-  }
-  if (deg >= -112.5 && deg < -67.5) {
-    return '後ろ';
-  }
-  if (deg >= -67.5 && deg < -22.5) {
-    return '右後ろ';
-  }
-
-  return '不明';
 }
