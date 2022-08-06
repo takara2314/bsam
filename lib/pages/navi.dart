@@ -39,7 +39,7 @@ class _Navi extends ConsumerState<Navi> {
 
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
-  late Timer _timerSendPos;
+  late Timer _timerSendLoc;
   late Timer _timerPeriodicTts;
 
   bool _started = false;
@@ -48,6 +48,7 @@ class _Navi extends ConsumerState<Navi> {
   double _lat = 0.0;
   double _lng = 0.0;
   double _accuracy = 0.0;
+  double _heading = 0.0;
   double _compassDeg = 0.0;
 
   int _nextMarkNo = 0;
@@ -64,13 +65,13 @@ class _Navi extends ConsumerState<Navi> {
     // Change tts speed
     tts.setSpeechRate(0.7);
 
-    _sendPosition(null);
-    _timerSendPos = Timer.periodic(
+    _sendLocation(null);
+    _timerSendLoc = Timer.periodic(
       const Duration(seconds: 1),
-      _sendPosition
+      _sendLocation
     );
 
-    _compass = FlutterCompass.events?.listen(_changeCompassDeg);
+    _compass = FlutterCompass.events?.listen(_changeHeading);
 
     _timerPeriodicTts = Timer.periodic(
       const Duration(seconds: 7),
@@ -82,7 +83,7 @@ class _Navi extends ConsumerState<Navi> {
 
   @override
   void dispose() {
-    _timerSendPos.cancel();
+    _timerSendLoc.cancel();
     _timerPeriodicTts.cancel();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
@@ -171,7 +172,7 @@ class _Navi extends ConsumerState<Navi> {
     });
   }
 
-  _sendPosition(Timer? timer) async {
+  _sendLocation(Timer? timer) async {
     await _getPosition();
     if (_started) {
       _checkPassed();
@@ -179,9 +180,11 @@ class _Navi extends ConsumerState<Navi> {
 
     try {
       _channel.sink.add(json.encode({
-        'type': 'position',
+        'type': 'location',
         'latitude': _lat,
-        'longitude': _lng
+        'longitude': _lng,
+        'accuracy': _accuracy,
+        'heading': _heading
       }));
     } catch (_) {}
   }
@@ -222,8 +225,18 @@ class _Navi extends ConsumerState<Navi> {
     } catch (_) {}
   }
 
-  _changeCompassDeg(CompassEvent evt) {
-    double compassDeg = evt.heading ?? 0.0;
+  _changeHeading(CompassEvent evt) {
+    double heading = evt.heading ?? 0.0;
+
+    setState(() {
+      _heading = heading;
+    });
+
+    _changeCompassDeg(heading);
+  }
+
+  _changeCompassDeg(double heading) {
+    final degFix = ref.read(degFixProvider.notifier);
 
     if (!_started) {
       return;
@@ -237,11 +250,11 @@ class _Navi extends ConsumerState<Navi> {
     );
 
     if (angle > 180) {
-      compassDeg = compassDeg - 360;
+      heading = heading - 360;
     }
 
     setState(() {
-      _compassDeg = compassDeg;
+      _compassDeg = heading + degFix.state;
     });
   }
 
@@ -288,7 +301,28 @@ class _Navi extends ConsumerState<Navi> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.of(context).pop()
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (_) {
+                return AlertDialog(
+                  title: const Text("本当に戻りますか？"),
+                  content: const Text("レースの真っ最中です。前の画面に戻るとレースを中断することになります。"),
+                  actions: <Widget>[
+                    // ボタン領域
+                    TextButton(
+                      child: const Text("いいえ"),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    TextButton(
+                      child: const Text("はい"),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
         )
       ),
       body: Center(

@@ -22,6 +22,7 @@ class _Home extends ConsumerState<Home> {
 
   static const raceId = '3ae8c214-eb72-481c-b110-8e8f32ecf02d';
 
+  String? _raceName;
   String? _userName;
 
   @override
@@ -37,16 +38,27 @@ class _Home extends ConsumerState<Home> {
     }();
   }
 
+  _changeRace(String? value) {
+    setState(() {
+      _raceName = value;
+    });
+  }
+
   _changeUser(String? value) {
-      final userId = ref.read(userIdProvider.notifier);
-      final jwt = ref.read(jwtProvider.notifier);
+    final userId = ref.read(userIdProvider.notifier);
+    final jwt = ref.read(jwtProvider.notifier);
 
-      userId.state = value;
-      jwt.state = jwts[value];
+    userId.state = value;
+    jwt.state = jwts[value];
 
-      setState(() {
-        _userName = value;
-      });
+    setState(() {
+      _userName = value;
+    });
+  }
+
+  _changeDegFix(String value) {
+    final degFix = ref.read(degFixProvider.notifier);
+    degFix.state = double.parse(value);
   }
 
   @override
@@ -54,16 +66,33 @@ class _Home extends ConsumerState<Home> {
     final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
-    final userId = ref.watch(userIdProvider);
-    final jwt = ref.watch(jwtProvider);
+    final degFix = ref.watch(degFixProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'ゴーリキテスト',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.primary,
-            fontWeight: FontWeight.bold
+        title: SizedBox(
+          width: width * 0.8,
+          child: DropdownButton(
+            items: const [
+              DropdownMenuItem(
+                value: 'e85c3e4d-21d8-4c42-be9',
+                child: Text('ゴーリキテスト'),
+              ),
+              DropdownMenuItem(
+                value: '925aea83-44e0-4ff3-9ce6',
+                child: Text('ハマグチテスト'),
+              ),
+              DropdownMenuItem(
+                value: '4aaee1',
+                child: Text('鳥羽商船テスト'),
+              ),
+            ],
+            onChanged: _changeRace,
+            value: _raceName,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold
+            )
           )
         ),
         centerTitle: true
@@ -71,20 +100,52 @@ class _Home extends ConsumerState<Home> {
       body: Center(
         child: Column(
           children: <Widget>[
+            // SizedBox(
+            //   width: width * 0.9,
+            //   child: ElevatedButton(
+            //     child: Center(
+            //       child: Text(
+            //         'テストくん',
+            //         style: TextStyle(
+            //           color: Theme.of(context).colorScheme.inverseSurface,
+            //           fontWeight: FontWeight.bold
+            //         )
+            //       ),
+            //     ),
+            //     onPressed: () {},
+            //     style: ButtonStyle(
+            //       gradient: MaterialStateProperty.all(
+            //         LinearGradient(
+            //           colors: [
+            //             Theme.of(context).colorScheme.primary,
+            //             Theme.of(context).colorScheme.secondary
+            //           ]
+            //         )
+            //       )
+            //     )
+            //     // style: ElevatedButton.styleFrom(
+            //     //   primary: Theme.of(context).colorScheme.primaryContainer,
+            //     //   shape: RoundedRectangleBorder(
+            //     //     borderRadius: BorderRadius.circular(10.0)
+            //     //   ),
+            //     //   minimumSize: Size(width * 0.8, height * 0.1)
+            //     // )
+            //   )
+            // ),
             const Text('ユーザー'),
             DropdownButton(
               items: const [
                 DropdownMenuItem(
                   value: 'e85c3e4d-21d8-4c42-be90-b79418419c40',
-                  child: Text('テストくんA'),
+                  child: Text('テストくんA')
                 ),
                 DropdownMenuItem(
                   value: '925aea83-44e0-4ff3-9ce6-84a1c5190532',
-                  child: Text('テストくんB'),
+                  child: Text('テストくんB')
                 ),
                 DropdownMenuItem(
                   value: '4aaee190-e8ef-4fb6-8ee9-510902b68cf4',
-                  child: Text('テストくんC'),
+                  child: Text('テストくんC')
                 ),
               ],
               onChanged: _changeUser,
@@ -102,6 +163,14 @@ class _Home extends ConsumerState<Home> {
                 );
               }
             ),
+            TextFormField(
+              initialValue: degFix.toString(),
+              onChanged: _changeDegFix,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: '補正角度 [deg]',
+              ),
+            )
           ]
         )
       )
