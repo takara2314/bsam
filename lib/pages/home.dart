@@ -58,7 +58,11 @@ class _Home extends ConsumerState<Home> {
 
   _changeDegFix(String value) {
     final degFix = ref.read(degFixProvider.notifier);
-    degFix.state = double.parse(value);
+    try {
+      degFix.state = double.parse(value);
+    } catch (_) {
+      degFix.state = 0.0;
+    }
   }
 
   @override
@@ -83,7 +87,7 @@ class _Home extends ConsumerState<Home> {
                 child: Text('ハマグチテスト'),
               ),
               DropdownMenuItem(
-                value: '4aaee1',
+                value: 'hogemaru',
                 child: Text('鳥羽商船テスト'),
               ),
             ],
@@ -163,13 +167,16 @@ class _Home extends ConsumerState<Home> {
                 );
               }
             ),
-            TextFormField(
-              initialValue: degFix.toString(),
-              onChanged: _changeDegFix,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: '補正角度 [deg]',
-              ),
+            SizedBox(
+              width: width * 0.9,
+              child: TextFormField(
+                initialValue: degFix.toString(),
+                onChanged: _changeDegFix,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: '補正角度 [deg]',
+                ),
+              )
             )
           ]
         )

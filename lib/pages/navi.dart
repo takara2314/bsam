@@ -178,13 +178,17 @@ class _Navi extends ConsumerState<Navi> {
       _checkPassed();
     }
 
+    final degFix = ref.read(degFixProvider.notifier);
+
     try {
       _channel.sink.add(json.encode({
         'type': 'location',
         'latitude': _lat,
         'longitude': _lng,
         'accuracy': _accuracy,
-        'heading': _heading
+        'heading': _heading,
+        'compass_fixing': degFix.state,
+        'compass_degree': _compassDeg
       }));
     } catch (_) {}
   }
@@ -297,6 +301,8 @@ class _Navi extends ConsumerState<Navi> {
 
   @override
   Widget build(BuildContext context) {
+    final degFix = ref.watch(degFixProvider);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -316,7 +322,10 @@ class _Navi extends ConsumerState<Navi> {
                     ),
                     TextButton(
                       child: const Text("はい"),
-                      onPressed: () => Navigator.of(context).pop(),
+                      onPressed: () {
+                        int count = 0;
+                        Navigator.popUntil(context, (_) => count++ >= 2);
+                      }
                     ),
                   ],
                 );
@@ -394,7 +403,7 @@ class _Navi extends ConsumerState<Navi> {
                     '緯度: $_lat / 経度: $_lng'
                   ),
                   Text(
-                    'コンパス角度: $_compassDeg'
+                    'コンパス角度[deg]: $_compassDeg (内補正: $degFix)'
                   ),
                   Text(
                     '精度: $_accuracy m'
