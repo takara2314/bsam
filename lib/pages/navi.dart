@@ -246,19 +246,23 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
-    double angle = Geolocator.bearingBetween(
+    double bearingDeg = Geolocator.bearingBetween(
       _lat,
       _lng,
       _markPos[_nextMarkNo - 1].lat!,
       _markPos[_nextMarkNo - 1].lng!,
     );
 
-    if (angle > 180) {
-      heading = heading - 360;
+    double diff = bearingDeg - heading;
+
+    if (diff > 180) {
+      diff -= 360;
+    } else if (diff < -180) {
+      diff = 360 - diff;
     }
 
     setState(() {
-      _compassDeg = heading + degFix.state;
+      _compassDeg = diff + degFix.state;
     });
   }
 
@@ -348,7 +352,7 @@ class _Navi extends ConsumerState<Navi> {
                       width: 250,
                       height: 250,
                       child: CustomPaint(
-                        painter: Compass(direction: _compassDeg)
+                        painter: Compass(heading: _compassDeg)
                       )
                     )
                   ),
