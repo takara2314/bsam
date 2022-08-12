@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 class Compass extends CustomPainter {
-  const Compass({required this.direction});
-  final double direction;
+  const Compass({required this.heading});
+  final double heading;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -37,20 +37,22 @@ class Compass extends CustomPainter {
       );
     }
 
+    final angle = 90 - heading;
+
     final path = Path();
     path.moveTo(
-      startRadius * cos(pi * direction / 180) + (size.width / 2),
-      - startRadius * sin(pi * direction / 180) + (size.width / 2)
+      startRadius * cos(pi * angle / 180) + (size.width / 2),
+      - startRadius * sin(pi * angle / 180) + (size.width / 2)
     );
 
     path.lineTo(
-      startRadius * cos(pi * (direction + 160) / 180) + (size.width / 2),
-      - startRadius * sin(pi * (direction + 160) / 180) + (size.width / 2)
+      startRadius * cos(pi * (angle + 160) / 180) + (size.width / 2),
+      - startRadius * sin(pi * (angle + 160) / 180) + (size.width / 2)
     );
 
     path.lineTo(
-      startRadius * cos(pi * (direction + 200) / 180) + (size.width / 2),
-      - startRadius * sin(pi * (direction + 200) / 180) + (size.width / 2)
+      startRadius * cos(pi * (angle + 200) / 180) + (size.width / 2),
+      - startRadius * sin(pi * (angle + 200) / 180) + (size.width / 2)
     );
 
     path.close();
