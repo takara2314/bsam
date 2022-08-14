@@ -404,13 +404,32 @@ class _Navi extends ConsumerState<Navi> {
                     ],
                   ),
                   Text(
-                    '緯度: $_lat / 経度: $_lng'
+                    '緯度 / 経度',
+                    style: Theme.of(context).textTheme.headline3
                   ),
                   Text(
-                    'コンパス角度[deg]: $_compassDeg (内補正: $degFix)'
+                    '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
                   ),
                   Text(
-                    '精度: $_accuracy m'
+                    '位置情報の精度',
+                    style: Theme.of(context).textTheme.headline3
+                  ),
+                  Text(
+                    '$_accuracy m'
+                  ),
+                  Text(
+                    '端末の方角',
+                    style: Theme.of(context).textTheme.headline3
+                  ),
+                  Text(
+                    '${_heading.toStringAsFixed(2)}° '
+                  ),
+                  Text(
+                    'コンパスの方角',
+                    style: Theme.of(context).textTheme.headline3
+                  ),
+                  Text(
+                    '${_compassDeg.toStringAsFixed(2)}° （内補正: ${degFix.toStringAsFixed(2)}°）'
                   ),
                   Row(
                     children: [

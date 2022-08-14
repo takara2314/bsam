@@ -67,7 +67,6 @@ class _Home extends ConsumerState<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
     final width = MediaQuery.of(context).size.width;
 
     final degFix = ref.watch(degFixProvider);
