@@ -12,7 +12,7 @@ String getDegName(double deg) {
     return '右後ろ';
   }
   if (deg >= 157.5 || deg < -157.5) {
-    return '下';
+    return '後ろ';
   }
   if (deg >= -157.5 && deg < -112.5) {
     return '左後ろ';
