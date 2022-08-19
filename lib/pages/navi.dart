@@ -63,7 +63,7 @@ class _Navi extends ConsumerState<Navi> {
     Wakelock.enable();
 
     // Change tts speed
-    tts.setSpeechRate(0.7);
+    tts.setSpeechRate(0.75);
 
     _sendLocation(null);
     _timerSendLoc = Timer.periodic(
@@ -73,10 +73,7 @@ class _Navi extends ConsumerState<Navi> {
 
     _compass = FlutterCompass.events?.listen(_changeHeading);
 
-    _timerPeriodicTts = Timer.periodic(
-      const Duration(seconds: 7),
-      _periodicTts
-    );
+    _periodicTts(const Duration(seconds: 1));
 
     _connectWs();
   }
@@ -266,15 +263,23 @@ class _Navi extends ConsumerState<Navi> {
     });
   }
 
-  _periodicTts(Timer? timer) {
-    if (!_enabledPeriodicTts || !mounted) {
-      return;
-    }
+  _periodicTts(Duration duration) async {
+    while (true) {
+      if (!mounted) {
+        return;
+      }
+      if (!_enabledPeriodicTts) {
+        continue;
+      }
 
-    if (_started) {
-      tts.speak('${getDegName(_compassDeg)}方向、約${_routeDistance.toInt()}メートル');
-    } else {
-      tts.speak('レースは始まっていません');
+      if (_started) {
+        await tts.speak('${getDegName(_compassDeg)}方向');
+        await tts.speak('約${_routeDistance.toInt()}メートル');
+      } else {
+        await tts.speak('レースは始まっていません');
+      }
+
+      await Future.delayed(duration);
     }
   }
 
@@ -424,13 +429,6 @@ class _Navi extends ConsumerState<Navi> {
                   Text(
                     '${_heading.toStringAsFixed(2)}° '
                   ),
-                  Text(
-                    'コンパスの方角',
-                    style: Theme.of(context).textTheme.headline3
-                  ),
-                  Text(
-                    '${_compassDeg.toStringAsFixed(2)}° （内補正: ${degFix.toStringAsFixed(2)}°）'
-                  ),
                   Row(
                     children: [
                       TextButton(
@@ -454,17 +452,33 @@ class _Navi extends ConsumerState<Navi> {
               padding: const EdgeInsets.only(right: 15, left: 15),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'レースは始まっていません',
-                    style: TextStyle(
-                      fontSize: 28
-                    )
+                    style: Theme.of(context).textTheme.headline1
                   ),
                   const Text(
                     'スタートボタンが押されるまでお待ちください。'
                   ),
                   Text(
-                    '精度: $_accuracy m'
+                    '緯度 / 経度',
+                    style: Theme.of(context).textTheme.headline3
+                  ),
+                  Text(
+                    '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
+                  ),
+                  Text(
+                    '位置情報の精度',
+                    style: Theme.of(context).textTheme.headline3
+                  ),
+                  Text(
+                    '$_accuracy m'
+                  ),
+                  Text(
+                    '端末の方角',
+                    style: Theme.of(context).textTheme.headline3
+                  ),
+                  Text(
+                    '${_heading.toStringAsFixed(2)}° '
                   )
                 ])
               )
