@@ -28,7 +28,7 @@ class Navi extends ConsumerStatefulWidget {
 
   final String raceId;
   final double ttsSpeed;
-  final int ttsDuration;
+  final double ttsDuration;
   final bool isAnnounceNeighbors;
 
   @override
@@ -67,12 +67,17 @@ class _Navi extends ConsumerState<Navi> {
 
   int _nearSailNum = 0;
 
+  DateTime? _lastPassedTime;
+
   @override
   void initState() {
     super.initState();
 
     // Screen lock
     Wakelock.enable();
+
+    // Change tts volume
+    tts.setVolume(1.0);
 
     // Change tts speed
     tts.setSpeechRate(widget.ttsSpeed);
@@ -85,7 +90,10 @@ class _Navi extends ConsumerState<Navi> {
 
     _compass = FlutterCompass.events?.listen(_changeHeading);
 
-    _periodicTts(Duration(milliseconds: widget.ttsDuration));
+    _timerPeriodicTts = Timer.periodic(
+      Duration(milliseconds: (widget.ttsDuration * 1000).toInt()),
+      _periodicTts
+    );
 
     _connectWs();
   }
@@ -238,6 +246,7 @@ class _Navi extends ConsumerState<Navi> {
     _passedTts(_nextMarkNo);
 
     setState(() {
+      _lastPassedTime = DateTime.now();
       _nextMarkNo = nextMarkNo;
     });
   }
@@ -289,32 +298,32 @@ class _Navi extends ConsumerState<Navi> {
     });
   }
 
-  _periodicTts(Duration duration) async {
-    while (true) {
-      if (!mounted) {
-        return;
-      }
-      if (!_enabledPeriodicTts) {
-        continue;
-      }
+  _periodicTts(Timer? timer) {
+    if (!_enabledPeriodicTts || !mounted) {
+      return;
+    }
 
-      setState(() {
-        _periodicTtsCount += 1;
-      });
+    setState(() {
+      _periodicTtsCount += 1;
+    });
 
-      if (_started) {
-        if (_periodicTtsCount % 2 == 0 && _nearSailNum > 0) {
-          await tts.speak('近くにセイルがいます。気をつけてください。');
+    if (_started) {
+      if (_periodicTtsCount % 2 == 0 && _nearSailNum > 0) {
+        tts.speak('近くにセイルがいます。気をつけてください。');
 
-        } else {
-          await tts.speak('${getDegName(_compassDeg)}方向');
-          await tts.speak('約${_routeDistance.toInt()}メートル');
-        }
       } else {
-        await tts.speak('レースは始まっていません');
-      }
+        String text = '${getDegName(_compassDeg)}方向、${_routeDistance.toInt()}メートル';
 
-      await Future.delayed(duration);
+        if (_lastPassedTime != null) {
+          if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
+            text = '${marks[_nextMarkNo]![1]}、$text';
+          }
+        }
+
+        tts.speak(text);
+      }
+    } else {
+      tts.speak('レースは始まっていません');
     }
   }
 
