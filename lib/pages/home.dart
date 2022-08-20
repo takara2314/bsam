@@ -24,8 +24,8 @@ class _Home extends ConsumerState<Home> {
 
   String? _raceName;
   String? _userName;
-  double _ttsSpeed = 0.75;
-  int _ttsDuration = 1000;
+  double _ttsSpeed = 1.0;
+  double _ttsDuration = 3.0;
   bool _isAnnounceNeighbors = false;
 
   @override
@@ -191,14 +191,18 @@ class _Home extends ConsumerState<Home> {
                 initialValue: _ttsSpeed.toString(),
                 onChanged: (String value) {
                   try {
-                    _ttsSpeed = double.parse(value);
+                    setState(() {
+                      _ttsSpeed = double.parse(value);
+                    });
                   } catch (_) {
-                    _ttsSpeed = 0.75;
+                    setState(() {
+                      _ttsSpeed = 1.0;
+                    });
                   }
                 },
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
-                  labelText: 'アナウンス速度 [秒]',
+                  labelText: 'アナウンス速度',
                 ),
               )
             ),
@@ -208,14 +212,18 @@ class _Home extends ConsumerState<Home> {
                 initialValue: _ttsDuration.toString(),
                 onChanged: (String value) {
                   try {
-                    _ttsDuration = int.parse(value);
+                    setState(() {
+                      _ttsDuration = double.parse(value);
+                    });
                   } catch (_) {
-                    _ttsDuration = 1000;
+                    setState(() {
+                      _ttsDuration = 3.0;
+                    });
                   }
                 },
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
-                  labelText: 'アナウンス間隔 [ミリ秒]',
+                  labelText: 'アナウンス間隔 [秒]',
                 ),
               )
             ),
@@ -225,7 +233,9 @@ class _Home extends ConsumerState<Home> {
                 Switch(
                   value: _isAnnounceNeighbors,
                   onChanged: (bool value) {
-                    _isAnnounceNeighbors = value;
+                    setState(() {
+                      _isAnnounceNeighbors = value;
+                    });
                   }
                 )
               ]
