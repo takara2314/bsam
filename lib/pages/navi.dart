@@ -18,9 +18,18 @@ import 'package:bsam/services/navi/compass.dart';
 import 'package:bsam/services/navi/mark.dart';
 
 class Navi extends ConsumerStatefulWidget {
-  const Navi({Key? key, required this.raceId}) : super(key: key);
+  const Navi({
+    Key? key,
+    required this.raceId,
+    required this.ttsSpeed,
+    required this.ttsDuration,
+    required this.isAnnounceNeighbors
+  }) : super(key: key);
 
   final String raceId;
+  final double ttsSpeed;
+  final int ttsDuration;
+  final bool isAnnounceNeighbors;
 
   @override
   ConsumerState<Navi> createState() => _Navi();
@@ -44,6 +53,7 @@ class _Navi extends ConsumerState<Navi> {
 
   bool _started = false;
   bool _enabledPeriodicTts = true;
+  int _periodicTtsCount = 0;
 
   double _lat = 0.0;
   double _lng = 0.0;
@@ -55,6 +65,8 @@ class _Navi extends ConsumerState<Navi> {
   List<MarkPosition> _markPos = [];
   double _routeDistance = 0.0;
 
+  int _nearSailNum = 0;
+
   @override
   void initState() {
     super.initState();
@@ -63,7 +75,7 @@ class _Navi extends ConsumerState<Navi> {
     Wakelock.enable();
 
     // Change tts speed
-    tts.setSpeechRate(0.75);
+    tts.setSpeechRate(widget.ttsSpeed);
 
     _sendLocation(null);
     _timerSendLoc = Timer.periodic(
@@ -73,7 +85,7 @@ class _Navi extends ConsumerState<Navi> {
 
     _compass = FlutterCompass.events?.listen(_changeHeading);
 
-    _periodicTts(const Duration(seconds: 1));
+    _periodicTts(Duration(milliseconds: widget.ttsDuration));
 
     _connectWs();
   }
@@ -123,6 +135,10 @@ class _Navi extends ConsumerState<Navi> {
     case 'mark_position':
       _receiveMarkPos(MarkPositionMsg.fromJson(body));
       break;
+
+    case 'near_sail':
+      _receiveNearSail(body);
+      break;
     }
   }
 
@@ -151,6 +167,16 @@ class _Navi extends ConsumerState<Navi> {
         _markPos = updateMarksOnEnable(_markPos, msg.positions!);
       });
     }
+  }
+
+  _receiveNearSail(dynamic msg) {
+    if (!_started || !widget.isAnnounceNeighbors) {
+      return;
+    }
+
+    setState(() {
+      _nearSailNum = msg['neighbors'].length;
+    });
   }
 
   _getPosition() async {
@@ -272,9 +298,18 @@ class _Navi extends ConsumerState<Navi> {
         continue;
       }
 
+      setState(() {
+        _periodicTtsCount += 1;
+      });
+
       if (_started) {
-        await tts.speak('${getDegName(_compassDeg)}方向');
-        await tts.speak('約${_routeDistance.toInt()}メートル');
+        if (_periodicTtsCount % 2 == 0 && _nearSailNum > 0) {
+          await tts.speak('近くにセイルがいます。気をつけてください。');
+
+        } else {
+          await tts.speak('${getDegName(_compassDeg)}方向');
+          await tts.speak('約${_routeDistance.toInt()}メートル');
+        }
       } else {
         await tts.speak('レースは始まっていません');
       }
@@ -420,7 +455,7 @@ class _Navi extends ConsumerState<Navi> {
                     style: Theme.of(context).textTheme.headline3
                   ),
                   Text(
-                    '$_accuracy m'
+                    '${_accuracy.toStringAsFixed(2)} m'
                   ),
                   Text(
                     '端末の方角',

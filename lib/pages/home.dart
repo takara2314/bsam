@@ -24,6 +24,9 @@ class _Home extends ConsumerState<Home> {
 
   String? _raceName;
   String? _userName;
+  double _ttsSpeed = 0.75;
+  int _ttsDuration = 1000;
+  bool _isAnnounceNeighbors = false;
 
   @override
   void initState() {
@@ -161,7 +164,12 @@ class _Home extends ConsumerState<Home> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => Navi(raceId: raceId),
+                    builder: (context) => Navi(
+                      raceId: raceId,
+                      ttsSpeed: _ttsSpeed,
+                      ttsDuration: _ttsDuration,
+                      isAnnounceNeighbors: _isAnnounceNeighbors
+                    ),
                   )
                 );
               }
@@ -176,6 +184,51 @@ class _Home extends ConsumerState<Home> {
                   labelText: '補正角度 [deg]',
                 ),
               )
+            ),
+            SizedBox(
+              width: width * 0.9,
+              child: TextFormField(
+                initialValue: degFix.toString(),
+                onChanged: (String value) {
+                  try {
+                    _ttsSpeed = double.parse(value);
+                  } catch (_) {
+                    _ttsSpeed = 0.75;
+                  }
+                },
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'アナウンス速度 [秒]',
+                ),
+              )
+            ),
+            SizedBox(
+              width: width * 0.9,
+              child: TextFormField(
+                initialValue: degFix.toString(),
+                onChanged: (String value) {
+                  try {
+                    _ttsDuration = int.parse(value);
+                  } catch (_) {
+                    _ttsDuration = 1000;
+                  }
+                },
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'アナウンス間隔 [ミリ秒]',
+                ),
+              )
+            ),
+            Row(
+              children: [
+                const Text('近くのセイルをお知らせする'),
+                Switch(
+                  value: _isAnnounceNeighbors,
+                  onChanged: (bool value) {
+                    _isAnnounceNeighbors = value;
+                  }
+                )
+              ]
             )
           ]
         )
