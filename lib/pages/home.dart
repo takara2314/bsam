@@ -188,7 +188,7 @@ class _Home extends ConsumerState<Home> {
             SizedBox(
               width: width * 0.9,
               child: TextFormField(
-                initialValue: degFix.toString(),
+                initialValue: _ttsSpeed.toString(),
                 onChanged: (String value) {
                   try {
                     _ttsSpeed = double.parse(value);
@@ -205,7 +205,7 @@ class _Home extends ConsumerState<Home> {
             SizedBox(
               width: width * 0.9,
               child: TextFormField(
-                initialValue: degFix.toString(),
+                initialValue: _ttsDuration.toString(),
                 onChanged: (String value) {
                   try {
                     _ttsDuration = int.parse(value);
