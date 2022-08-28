@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -84,7 +85,7 @@ class _Navi extends ConsumerState<Navi> {
 
     _sendLocation(null);
     _timerSendLoc = Timer.periodic(
-      const Duration(seconds: 1),
+      const Duration(milliseconds: 500),
       _sendLocation
     );
 
@@ -225,12 +226,15 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _checkPassed() {
-    final diff = Geolocator.distanceBetween(
+    double diff = Geolocator.distanceBetween(
       _lat,
       _lng,
       _markPos[_nextMarkNo - 1].lat!,
       _markPos[_nextMarkNo - 1].lng!,
     );
+
+    // Correct error
+    diff = max(0.0, diff - 10.0);
 
     setState(() {
       _routeDistance = diff;
@@ -263,6 +267,13 @@ class _Navi extends ConsumerState<Navi> {
 
   _changeHeading(CompassEvent evt) {
     double heading = evt.heading ?? 0.0;
+
+    // Correct magnetic declination
+    heading += 5.0;
+
+    if (heading > 180.0) {
+      heading = -360.0 + heading;
+    }
 
     setState(() {
       _heading = heading;
