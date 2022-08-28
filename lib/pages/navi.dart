@@ -240,9 +240,11 @@ class _Navi extends ConsumerState<Navi> {
       _routeDistance = diff;
     });
 
-    if (diff > 10) {
+    if (diff > 5.0) {
       return;
     }
+
+    // Passed mark
 
     int nextMarkNo = _nextMarkNo % 3 + 1;
 
@@ -269,7 +271,8 @@ class _Navi extends ConsumerState<Navi> {
     double heading = evt.heading ?? 0.0;
 
     // Correct magnetic declination
-    heading += 5.0;
+    // 最適は 5.0
+    heading += 20.0;
 
     if (heading > 180.0) {
       heading = -360.0 + heading;
@@ -320,10 +323,12 @@ class _Navi extends ConsumerState<Navi> {
 
     if (_started) {
       if (_periodicTtsCount % 2 == 0 && _nearSailNum > 0) {
+        // TODO: 近くにセイルいないのに判定されちゃうので修正
         tts.speak('近くにセイルがいます。気をつけてください。');
 
       } else {
-        String text = '${getDegName(_compassDeg)}方向、${_routeDistance.toInt()}メートル';
+        // 「方向」を削除した
+        String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}メートル';
 
         if (_lastPassedTime != null) {
           if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {

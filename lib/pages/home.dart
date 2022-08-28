@@ -22,10 +22,16 @@ class _Home extends ConsumerState<Home> {
 
   static const raceId = '3ae8c214-eb72-481c-b110-8e8f32ecf02d';
 
+  // TODO: 早すぎると方向部分のアナウンスが省略されてしまうので修正する
+  // 最適は 1.0
+  static double ttsSpeedInit = 0.85;
+  // 最適は 3.0
+  static double ttsDurationInit = 4.0;
+
   String? _raceName;
   String? _userName;
-  double _ttsSpeed = 1.0;
-  double _ttsDuration = 3.0;
+  double _ttsSpeed = ttsSpeedInit;
+  double _ttsDuration = ttsDurationInit;
   bool _isAnnounceNeighbors = false;
 
   @override
@@ -196,7 +202,7 @@ class _Home extends ConsumerState<Home> {
                     });
                   } catch (_) {
                     setState(() {
-                      _ttsSpeed = 1.0;
+                      _ttsSpeed = ttsSpeedInit;
                     });
                   }
                 },
@@ -217,7 +223,7 @@ class _Home extends ConsumerState<Home> {
                     });
                   } catch (_) {
                     setState(() {
-                      _ttsDuration = 3.0;
+                      _ttsDuration = ttsDurationInit;
                     });
                   }
                 },
