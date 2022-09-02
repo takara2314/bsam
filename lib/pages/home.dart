@@ -24,9 +24,9 @@ class _Home extends ConsumerState<Home> {
 
   // TODO: 早すぎると方向部分のアナウンスが省略されてしまうので修正する
   // 最適は 1.0
-  static double ttsSpeedInit = 0.85;
+  static double ttsSpeedInit = 1.5;
   // 最適は 3.0
-  static double ttsDurationInit = 4.0;
+  static double ttsDurationInit = 1.0;
 
   String? _raceName;
   String? _userName;
