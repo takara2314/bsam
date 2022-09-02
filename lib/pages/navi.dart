@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,6 +12,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:wavenet/wavenet.dart';
 
 import 'package:bsam/providers.dart';
 import 'package:bsam/models/navi.dart';
@@ -40,9 +43,9 @@ class _Navi extends ConsumerState<Navi> {
   static const markNum = 3;
 
   static const marks = {
-    1: ['上マーク', 'かみまーく'],
-    2: ['サイドマーク', 'さいどまーく'],
-    3: ['下マーク', 'しもまーく']
+    1: ['上', 'かみ'],
+    2: ['サイド', 'さいど'],
+    3: ['下', 'しも']
   };
 
   final FlutterTts tts = FlutterTts();
@@ -70,6 +73,10 @@ class _Navi extends ConsumerState<Navi> {
 
   DateTime? _lastPassedTime;
 
+  final TextToSpeechService _service =
+    TextToSpeechService('AIzaSyA02qUN00G-26xkBvijJDbNZ40K-WflG1A');
+  final audioPlayer = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
@@ -91,10 +98,11 @@ class _Navi extends ConsumerState<Navi> {
 
     _compass = FlutterCompass.events?.listen(_changeHeading);
 
-    _timerPeriodicTts = Timer.periodic(
-      Duration(milliseconds: (widget.ttsDuration * 1000).toInt()),
-      _periodicTts
-    );
+    // _timerPeriodicTts = Timer.periodic(
+    //   Duration(milliseconds: (widget.ttsDuration * 1000).toInt()),
+    //   _periodicTts
+    // );
+    _periodicTts();
 
     _connectWs();
   }
@@ -102,7 +110,7 @@ class _Navi extends ConsumerState<Navi> {
   @override
   void dispose() {
     _timerSendLoc.cancel();
-    _timerPeriodicTts.cancel();
+    // _timerPeriodicTts.cancel();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
     Wakelock.disable();
@@ -312,23 +320,19 @@ class _Navi extends ConsumerState<Navi> {
     });
   }
 
-  _periodicTts(Timer? timer) {
-    if (!_enabledPeriodicTts || !mounted) {
-      return;
-    }
+  _periodicTts() async {
+    while (true) {
+      if (!mounted) {
+        return;
+      }
+      if (!_enabledPeriodicTts) {
+        continue;
+      }
 
-    setState(() {
-      _periodicTtsCount += 1;
-    });
-
-    if (_started) {
-      if (_periodicTtsCount % 2 == 0 && _nearSailNum > 0) {
-        // TODO: 近くにセイルいないのに判定されちゃうので修正
-        tts.speak('近くにセイルがいます。気をつけてください。');
-
+      if (!_started) {
+        await _tts('レースは始まっていません');
       } else {
-        // 「方向」を削除した
-        String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}メートル';
+        String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
 
         if (_lastPassedTime != null) {
           if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
@@ -336,12 +340,43 @@ class _Navi extends ConsumerState<Navi> {
           }
         }
 
-        tts.speak(text);
+        await _tts(text);
       }
-    } else {
-      tts.speak('レースは始まっていません');
+
+      await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
     }
   }
+
+  // _periodicTts(Timer? timer) {
+  //   if (!_enabledPeriodicTts || !mounted) {
+  //     return;
+  //   }
+
+  //   setState(() {
+  //     _periodicTtsCount += 1;
+  //   });
+
+  //   if (_started) {
+  //     if (_periodicTtsCount % 2 == 0 && _nearSailNum > 0) {
+  //       // TODO: 近くにセイルいないのに判定されちゃうので修正
+  //       tts.speak('近くにセイルがいます。気をつけてください。');
+
+  //     } else {
+  //       // 「方向」を削除した
+  //       String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}メートル';
+
+  //       if (_lastPassedTime != null) {
+  //         if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
+  //           text = '${marks[_nextMarkNo]![1]}、$text';
+  //         }
+  //       }
+
+  //       tts.speak(text);
+  //     }
+  //   } else {
+  //     tts.speak('レースは始まっていません');
+  //   }
+  // }
 
   _passedTts(int markNo) async {
     setState(() {
@@ -349,13 +384,24 @@ class _Navi extends ConsumerState<Navi> {
     });
 
     for (int i = 0; i < 5; i++) {
-      tts.speak('${marks[markNo]![1]}に到達');
+      await _tts('${marks[markNo]![1]}に到達');
       await Future.delayed(const Duration(seconds: 3));
     }
 
     setState(() {
       _enabledPeriodicTts = true;
     });
+  }
+
+  _tts(String text) async {
+    File file = await _service.textToSpeech(
+      text: text,
+      voiceName: "ja-JP-Wavenet-B",
+      languageCode: "ja-JP",
+      audioEncoding: "LINEAR16",
+      speakingRate: widget.ttsSpeed,
+    );
+    await audioPlayer.play(DeviceFileSource(file.path));
   }
 
   _forcePassed(int markNo) {
@@ -422,7 +468,7 @@ class _Navi extends ConsumerState<Navi> {
                     )
                   ),
                   Text(
-                    '$_nextMarkNo ${marks[_nextMarkNo]![0]}',
+                    '$_nextMarkNo ${marks[_nextMarkNo]![0]}マーク',
                     style: const TextStyle(
                       fontSize: 28
                     )
