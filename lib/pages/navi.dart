@@ -74,7 +74,7 @@ class _Navi extends ConsumerState<Navi> {
   DateTime? _lastPassedTime;
 
   final TextToSpeechService _service =
-    TextToSpeechService('AIzaSyA02qUN00G-26xkBvijJDbNZ40K-WflG1A');
+    TextToSpeechService('AIzaSyDVTnsqrucvoUOc8AcIQr4RXVM0zsNwJcw');
   final audioPlayer = AudioPlayer();
 
   @override
