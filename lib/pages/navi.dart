@@ -28,7 +28,8 @@ class Navi extends ConsumerStatefulWidget {
     required this.ttsSpeed,
     required this.ttsDuration,
     required this.headingFix,
-    required this.isAnnounceNeighbors
+    required this.isAnnounceNeighbors,
+    required this.isCalcHeadingFromGps
   }) : super(key: key);
 
   final String raceId;
@@ -36,6 +37,7 @@ class Navi extends ConsumerStatefulWidget {
   final double ttsDuration;
   final double headingFix;
   final bool isAnnounceNeighbors;
+  final bool isCalcHeadingFromGps;
 
   @override
   ConsumerState<Navi> createState() => _Navi();
@@ -66,6 +68,9 @@ class _Navi extends ConsumerState<Navi> {
   double _accuracy = 0.0;
   double _heading = 0.0;
   double _compassDeg = 0.0;
+
+  double _pastLat = 0.0;
+  double _pastLng = 0.0;
 
   int _nextMarkNo = 0;
   List<MarkPosition> _markPos = [];
@@ -208,6 +213,11 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     setState(() {
+      _pastLat = _lat;
+      _pastLng = _lng;
+    });
+
+    setState(() {
       _lat = pos.latitude;
       _lng = pos.longitude;
       _accuracy = pos.accuracy;
@@ -276,7 +286,18 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _changeHeading(CompassEvent evt) {
-    double heading = evt.heading ?? 0.0;
+    double heading = 0.0;
+
+    if (!widget.isCalcHeadingFromGps) {
+      heading = evt.heading ?? 0.0;
+    } else {
+      heading = Geolocator.bearingBetween(
+        _pastLat,
+        _pastLng,
+        _lat,
+        _lng,
+      );
+    }
 
     // Correct magnetic declination
     heading += widget.headingFix;
