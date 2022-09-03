@@ -31,13 +31,13 @@ class _Home extends ConsumerState<Home> {
 
   static double ttsSpeedInit = 1.5;
   static double ttsDurationInit = 1.0;
-  static double degFixInit = 15.0;
+  static double headingFixInit = 15.0;
 
   String? _raceName;
   String? _userName;
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
-  double _degFix = degFixInit;
+  double _headingFix = headingFixInit;
   bool _isAnnounceNeighbors = false;
 
   @override
@@ -74,8 +74,6 @@ class _Home extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
-    final degFix = ref.watch(degFixProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -199,7 +197,7 @@ class _Home extends ConsumerState<Home> {
                       raceId: raceId,
                       ttsSpeed: _ttsSpeed,
                       ttsDuration: _ttsDuration,
-                      degFix: _degFix,
+                      headingFix: _headingFix,
                       isAnnounceNeighbors: _isAnnounceNeighbors
                     ),
                   )
@@ -251,15 +249,15 @@ class _Home extends ConsumerState<Home> {
             SizedBox(
               width: width * 0.9,
               child: TextFormField(
-                initialValue: degFixInit.toString(),
+                initialValue: headingFixInit.toString(),
                 onChanged: (String value) {
                   try {
                     setState(() {
-                      _degFix = double.parse(value);
+                      _headingFix = double.parse(value);
                     });
                   } catch (_) {
                     setState(() {
-                      _degFix = degFixInit;
+                      _headingFix = headingFixInit;
                     });
                   }
                 },

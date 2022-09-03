@@ -27,14 +27,14 @@ class Navi extends ConsumerStatefulWidget {
     required this.raceId,
     required this.ttsSpeed,
     required this.ttsDuration,
-    required this.degFix,
+    required this.headingFix,
     required this.isAnnounceNeighbors
   }) : super(key: key);
 
   final String raceId;
   final double ttsSpeed;
   final double ttsDuration;
-  final double degFix;
+  final double headingFix;
   final bool isAnnounceNeighbors;
 
   @override
@@ -220,8 +220,6 @@ class _Navi extends ConsumerState<Navi> {
       _checkPassed();
     }
 
-    final degFix = ref.read(degFixProvider.notifier);
-
     try {
       _channel.sink.add(json.encode({
         'type': 'location',
@@ -229,7 +227,7 @@ class _Navi extends ConsumerState<Navi> {
         'longitude': _lng,
         'accuracy': _accuracy,
         'heading': _heading,
-        'compass_fixing': degFix.state,
+        'heading_fixing': widget.headingFix,
         'compass_degree': _compassDeg
       }));
     } catch (_) {}
@@ -281,7 +279,7 @@ class _Navi extends ConsumerState<Navi> {
     double heading = evt.heading ?? 0.0;
 
     // Correct magnetic declination
-    heading += widget.degFix;
+    heading += widget.headingFix;
 
     if (heading > 180.0) {
       heading = -360.0 + heading;
@@ -295,8 +293,6 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _changeCompassDeg(double heading) {
-    final degFix = ref.read(degFixProvider.notifier);
-
     if (!_started) {
       return;
     }
@@ -317,7 +313,7 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     setState(() {
-      _compassDeg = diff + degFix.state;
+      _compassDeg = diff;
     });
   }
 
@@ -386,8 +382,6 @@ class _Navi extends ConsumerState<Navi> {
 
   @override
   Widget build(BuildContext context) {
-    final degFix = ref.watch(degFixProvider);
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
