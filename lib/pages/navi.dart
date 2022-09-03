@@ -27,12 +27,14 @@ class Navi extends ConsumerStatefulWidget {
     required this.raceId,
     required this.ttsSpeed,
     required this.ttsDuration,
+    required this.degFix,
     required this.isAnnounceNeighbors
   }) : super(key: key);
 
   final String raceId;
   final double ttsSpeed;
   final double ttsDuration;
+  final double degFix;
   final bool isAnnounceNeighbors;
 
   @override
@@ -279,8 +281,7 @@ class _Navi extends ConsumerState<Navi> {
     double heading = evt.heading ?? 0.0;
 
     // Correct magnetic declination
-    // 最適は 5.0
-    heading += 20.0;
+    heading += widget.degFix;
 
     if (heading > 180.0) {
       heading = -360.0 + heading;
@@ -347,37 +348,6 @@ class _Navi extends ConsumerState<Navi> {
     }
   }
 
-  // _periodicTts(Timer? timer) {
-  //   if (!_enabledPeriodicTts || !mounted) {
-  //     return;
-  //   }
-
-  //   setState(() {
-  //     _periodicTtsCount += 1;
-  //   });
-
-  //   if (_started) {
-  //     if (_periodicTtsCount % 2 == 0 && _nearSailNum > 0) {
-  //       // TODO: 近くにセイルいないのに判定されちゃうので修正
-  //       tts.speak('近くにセイルがいます。気をつけてください。');
-
-  //     } else {
-  //       // 「方向」を削除した
-  //       String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}メートル';
-
-  //       if (_lastPassedTime != null) {
-  //         if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
-  //           text = '${marks[_nextMarkNo]![1]}、$text';
-  //         }
-  //       }
-
-  //       tts.speak(text);
-  //     }
-  //   } else {
-  //     tts.speak('レースは始まっていません');
-  //   }
-  // }
-
   _passedTts(int markNo) async {
     setState(() {
       _enabledPeriodicTts = false;
@@ -396,9 +366,9 @@ class _Navi extends ConsumerState<Navi> {
   _tts(String text) async {
     File file = await _service.textToSpeech(
       text: text,
-      voiceName: "ja-JP-Wavenet-B",
-      languageCode: "ja-JP",
-      audioEncoding: "LINEAR16",
+      voiceName: 'ja-JP-Wavenet-B',
+      languageCode: 'ja-JP',
+      audioEncoding: 'LINEAR16',
       speakingRate: widget.ttsSpeed,
     );
     await audioPlayer.play(DeviceFileSource(file.path));
@@ -427,16 +397,16 @@ class _Navi extends ConsumerState<Navi> {
               context: context,
               builder: (_) {
                 return AlertDialog(
-                  title: const Text("本当に戻りますか？"),
-                  content: const Text("レースの真っ最中です。前の画面に戻るとレースを中断することになります。"),
+                  title: const Text('本当に戻りますか？'),
+                  content: const Text('レースの真っ最中です。前の画面に戻るとレースを中断することになります。'),
                   actions: <Widget>[
                     // ボタン領域
                     TextButton(
-                      child: const Text("いいえ"),
+                      child: const Text('いいえ'),
                       onPressed: () => Navigator.pop(context),
                     ),
                     TextButton(
-                      child: const Text("はい"),
+                      child: const Text('はい'),
                       onPressed: () {
                         int count = 0;
                         Navigator.popUntil(context, (_) => count++ >= 2);

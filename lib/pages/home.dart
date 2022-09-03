@@ -29,16 +29,15 @@ class _Home extends ConsumerState<Home> {
 
   static const raceId = '3ae8c214-eb72-481c-b110-8e8f32ecf02d';
 
-  // TODO: 早すぎると方向部分のアナウンスが省略されてしまうので修正する
-  // 最適は 1.0
   static double ttsSpeedInit = 1.5;
-  // 最適は 3.0
   static double ttsDurationInit = 1.0;
+  static double degFixInit = 15.0;
 
   String? _raceName;
   String? _userName;
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
+  double _degFix = degFixInit;
   bool _isAnnounceNeighbors = false;
 
   @override
@@ -70,15 +69,6 @@ class _Home extends ConsumerState<Home> {
     setState(() {
       _userName = value;
     });
-  }
-
-  _changeDegFix(String value) {
-    final degFix = ref.read(degFixProvider.notifier);
-    try {
-      degFix.state = double.parse(value);
-    } catch (_) {
-      degFix.state = 0.0;
-    }
   }
 
   @override
@@ -209,6 +199,7 @@ class _Home extends ConsumerState<Home> {
                       raceId: raceId,
                       ttsSpeed: _ttsSpeed,
                       ttsDuration: _ttsDuration,
+                      degFix: _degFix,
                       isAnnounceNeighbors: _isAnnounceNeighbors
                     ),
                   )
@@ -218,18 +209,7 @@ class _Home extends ConsumerState<Home> {
             SizedBox(
               width: width * 0.9,
               child: TextFormField(
-                initialValue: degFix.toString(),
-                onChanged: _changeDegFix,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: '補正角度 [deg]',
-                ),
-              )
-            ),
-            SizedBox(
-              width: width * 0.9,
-              child: TextFormField(
-                initialValue: _ttsSpeed.toString(),
+                initialValue: ttsSpeedInit.toString(),
                 onChanged: (String value) {
                   try {
                     setState(() {
@@ -250,7 +230,7 @@ class _Home extends ConsumerState<Home> {
             SizedBox(
               width: width * 0.9,
               child: TextFormField(
-                initialValue: _ttsDuration.toString(),
+                initialValue: ttsDurationInit.toString(),
                 onChanged: (String value) {
                   try {
                     setState(() {
@@ -265,6 +245,27 @@ class _Home extends ConsumerState<Home> {
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
                   labelText: 'アナウンス間隔 [秒]',
+                ),
+              )
+            ),
+            SizedBox(
+              width: width * 0.9,
+              child: TextFormField(
+                initialValue: degFixInit.toString(),
+                onChanged: (String value) {
+                  try {
+                    setState(() {
+                      _degFix = double.parse(value);
+                    });
+                  } catch (_) {
+                    setState(() {
+                      _degFix = degFixInit;
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: '補正角度 [deg]',
                 ),
               )
             ),
