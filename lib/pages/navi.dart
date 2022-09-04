@@ -344,6 +344,7 @@ class _Navi extends ConsumerState<Navi> {
         return;
       }
       if (!_enabledPeriodicTts) {
+        await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
         continue;
       }
 
