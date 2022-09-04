@@ -366,6 +366,10 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _passedTts(int markNo) async {
+    if (!mounted) {
+      return;
+    }
+
     setState(() {
       _enabledPeriodicTts = false;
     });
@@ -388,7 +392,9 @@ class _Navi extends ConsumerState<Navi> {
       audioEncoding: 'LINEAR16',
       speakingRate: widget.ttsSpeed,
     );
-    await audioPlayer.play(DeviceFileSource(file.path));
+    try {
+      await audioPlayer.play(DeviceFileSource(file.path));
+    } catch (_) {}
   }
 
   _forcePassed(int markNo) {
@@ -565,11 +571,11 @@ class _Navi extends ConsumerState<Navi> {
                     '$_accuracy m'
                   ),
                   Text(
-                    '端末の方角',
+                    '端末の方角 / コンパスの方角',
                     style: Theme.of(context).textTheme.headline3
                   ),
                   Text(
-                    '${_heading.toStringAsFixed(2)}° '
+                    '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
                   )
                 ])
               )

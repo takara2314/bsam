@@ -31,7 +31,7 @@ class _Home extends ConsumerState<Home> {
 
   static double ttsSpeedInit = 1.5;
   static double ttsDurationInit = 1.0;
-  static double headingFixInit = 15.0;
+  static double headingFixInit = 0.0;
 
   String? _raceName;
   String? _userName;
