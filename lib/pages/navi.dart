@@ -521,8 +521,11 @@ class _Navi extends ConsumerState<Navi> {
                     '${_accuracy.toStringAsFixed(2)} m'
                   ),
                   Text(
-                    '端末の方角',
+                    '端末の方角 / コンパスの方角',
                     style: Theme.of(context).textTheme.headline3
+                  ),
+                  Text(
+                    '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
                   ),
                   Text(
                     '${_heading.toStringAsFixed(2)}° '
