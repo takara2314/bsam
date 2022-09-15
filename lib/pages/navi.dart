@@ -394,7 +394,10 @@ class _Navi extends ConsumerState<Navi> {
       speakingRate: widget.ttsSpeed,
     );
     try {
-      await audioPlayer.play(DeviceFileSource(file.path));
+      await audioPlayer.play(
+        DeviceFileSource(file.path),
+        volume: 1.0
+      );
     } catch (_) {}
   }
 
