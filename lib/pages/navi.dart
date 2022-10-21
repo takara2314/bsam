@@ -386,6 +386,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _tts(String text) async {
+    text.replaceAll('46', 'よんじゅうろく');
+
     File file = await _service.textToSpeech(
       text: text,
       voiceName: 'ja-JP-Wavenet-B',
