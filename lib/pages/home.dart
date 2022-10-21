@@ -15,16 +15,16 @@ class Home extends ConsumerStatefulWidget {
 
 class _Home extends ConsumerState<Home> {
   static const jwts = {
-    'e85c3e4d-21d8-4c42-be90-b79418419c40': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJlODVjM2U0ZC0yMWQ4LTRjNDItYmU5MC1iNzk0MTg0MTljNDAifQ.EXNYO2RGJRN-eo3mt-5JQ7HksRU-q1VlGO6dOWdVcds',
-    '925aea83-44e0-4ff3-9ce6-84a1c5190532': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI5MjVhZWE4My00NGUwLTRmZjMtOWNlNi04NGExYzUxOTA1MzIifQ.FpUB9byHyYNNjYNA685zmpnKxI0z3L1TY1yQyxxrqU8',
-    '4aaee190-e8ef-4fb6-8ee9-510902b68cf4': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI0YWFlZTE5MC1lOGVmLTRmYjYtOGVlOS01MTA5MDJiNjhjZjQifQ.a_7gOFmaPRmYY8Z1wKNWJkrAsw6IBe9Kj5P64dT1e0s',
-    'd6e367e6-c630-410f-bcc7-de02da21dd3a': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJkNmUzNjdlNi1jNjMwLTQxMGYtYmNjNy1kZTAyZGEyMWRkM2EifQ.y2XWFv6wKN64Hyh-R8p3d__95HakA0Yh9FFfCAqIolw',
-    'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJmM2Y0ZGE4Zi02YWIwLTRmMGUtOTBhOS0yNjg5ZDcyZDJhNGYifQ.jHf-OgvVthXEsC7nRA_A0-zm1XNEr7JXhbDSxtajgMs',
-    '23d96555-5ff0-4c5d-8b03-2f1db89141f1': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIyM2Q5NjU1NS01ZmYwLTRjNWQtOGIwMy0yZjFkYjg5MTQxZjEifQ.3_9w3_Pp2CHcxzfGo3saRM-hEp-aJFE4wjZsysPwcfk',
-    'b0e968e9-8dd7-4e20-90a7-6c97834a4e88': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJiMGU5NjhlOS04ZGQ3LTRlMjAtOTBhNy02Yzk3ODM0YTRlODgifQ.PVcMnCdwckwSH9CTrwuGsqMqdPPp7pr8Wp36Rsj_1dY',
-    '605ded0a-ed1f-488b-b0ce-4ccf257c7329': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI2MDVkZWQwYS1lZDFmLTQ4OGItYjBjZS00Y2NmMjU3YzczMjkifQ.wl1VC8TCydNEn7YvoJUioDh30CoPkWMNo-_SMSKS1WI',
-    '0e9737f7-6d62-447f-ad00-bd36c4532729': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIwZTk3MzdmNy02ZDYyLTQ0N2YtYWQwMC1iZDM2YzQ1MzI3MjkifQ.cAt_Izqdw0FpXoqnbho8XFAtw0SeYvTZ30NqcwzC0Cc',
-    '55072870-f00e-4ab9-bc6c-1710eef5b0a0': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2Njk5NTYwNTEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI1NTA3Mjg3MC1mMDBlLTRhYjktYmM2Yy0xNzEwZWVmNWIwYTAifQ.6F2EJnuDh0FXmVaTVsoZr8eN3gARpptlg2VHYxbz2oA'
+    'e85c3e4d-21d8-4c42-be90-b79418419c40': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJlODVjM2U0ZC0yMWQ4LTRjNDItYmU5MC1iNzk0MTg0MTljNDAifQ.NGBqWVBNhLd7RXSaGmVQ2a5V0jKIZ8Y6VV9vARNQjLw',
+    '925aea83-44e0-4ff3-9ce6-84a1c5190532': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI5MjVhZWE4My00NGUwLTRmZjMtOWNlNi04NGExYzUxOTA1MzIifQ.Edl0joAk7GdZPnaXt1qyFobk5iZQqATejeJ2VLclPik',
+    '4aaee190-e8ef-4fb6-8ee9-510902b68cf4': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI0YWFlZTE5MC1lOGVmLTRmYjYtOGVlOS01MTA5MDJiNjhjZjQifQ.NUOkmc7bGpXFRDYSfBculC1Y1PCLYoN06Ze1ToUeRtE',
+    'd6e367e6-c630-410f-bcc7-de02da21dd3a': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJkNmUzNjdlNi1jNjMwLTQxMGYtYmNjNy1kZTAyZGEyMWRkM2EifQ.JdZjFqJsoqu35IHben_zSIfG9mpx2jd-UC9ROhwIqzA',
+    'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJmM2Y0ZGE4Zi02YWIwLTRmMGUtOTBhOS0yNjg5ZDcyZDJhNGYifQ.S-sPB0hGLVGiASyidRtXBVuPWPuZZufbo6-CRfPu-uw',
+    '23d96555-5ff0-4c5d-8b03-2f1db89141f1': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIyM2Q5NjU1NS01ZmYwLTRjNWQtOGIwMy0yZjFkYjg5MTQxZjEifQ.BHokcQWoz-pnp3XntnpQGmexDnd_P8h5nxOS-YDkZIU',
+    'b0e968e9-8dd7-4e20-90a7-6c97834a4e88': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJiMGU5NjhlOS04ZGQ3LTRlMjAtOTBhNy02Yzk3ODM0YTRlODgifQ.V3eMshzn4Nr-xTfkvSfMdDxwgzQVsehmVsaRa7kPppY',
+    '605ded0a-ed1f-488b-b0ce-4ccf257c7329': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI2MDVkZWQwYS1lZDFmLTQ4OGItYjBjZS00Y2NmMjU3YzczMjkifQ.DnMlq0-5hB-f70W9NzhE4i7jeHbiFSxZXvp1YXwZ2ZE',
+    '0e9737f7-6d62-447f-ad00-bd36c4532729': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIwZTk3MzdmNy02ZDYyLTQ0N2YtYWQwMC1iZDM2YzQ1MzI3MjkifQ.qO1iF357VTs0NawYAmSC_57T9GoO-M2fCJUoWqA5Pe4',
+    '55072870-f00e-4ab9-bc6c-1710eef5b0a0': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI1NTA3Mjg3MC1mMDBlLTRhYjktYmM2Yy0xNzEwZWVmNWIwYTAifQ.-6ehzJmbdPQtq2BTqgzJ3hdy_xhLvhUx5bOylyJYjRE'
   };
 
   static const raceId = '3ae8c214-eb72-481c-b110-8e8f32ecf02d';
@@ -33,7 +33,7 @@ class _Home extends ConsumerState<Home> {
   static double ttsDurationInit = 1.0;
   static double headingFixInit = 0.0;
 
-  String? _raceName;
+  String _raceName = 'e85c3e4d-21d8-4c42-be9';
   String? _userName;
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
@@ -52,12 +52,6 @@ class _Home extends ConsumerState<Home> {
         permLocation = await Permission.location.request();
       }
     }();
-  }
-
-  _changeRace(String? value) {
-    setState(() {
-      _raceName = value;
-    });
   }
 
   _changeUser(String? value) {
@@ -80,28 +74,13 @@ class _Home extends ConsumerState<Home> {
       appBar: AppBar(
         title: SizedBox(
           width: width * 0.8,
-          child: DropdownButton(
-            items: const [
-              DropdownMenuItem(
-                value: 'e85c3e4d-21d8-4c42-be9',
-                child: Text('ゴーリキテスト'),
-              ),
-              DropdownMenuItem(
-                value: '925aea83-44e0-4ff3-9ce6',
-                child: Text('ハマグチテスト'),
-              ),
-              DropdownMenuItem(
-                value: 'hogemaru',
-                child: Text('鳥羽商船テスト'),
-              ),
-            ],
-            onChanged: _changeRace,
-            value: _raceName,
+          child: Text(
+            'ゴーリキマリンビレッジ',
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold
             )
-          )
+          ),
         ),
         centerTitle: true
       ),
@@ -145,43 +124,43 @@ class _Home extends ConsumerState<Home> {
               items: const [
                 DropdownMenuItem(
                   value: 'e85c3e4d-21d8-4c42-be90-b79418419c40',
-                  child: Text('テストくんA')
+                    child: Text('テストくん4')
                 ),
                 DropdownMenuItem(
                   value: '925aea83-44e0-4ff3-9ce6-84a1c5190532',
-                  child: Text('テストくんB')
+                    child: Text('テストくん5')
                 ),
                 DropdownMenuItem(
                   value: '4aaee190-e8ef-4fb6-8ee9-510902b68cf4',
-                  child: Text('テストくんC')
+                    child: Text('テストくん6')
                 ),
                 DropdownMenuItem(
                   value: 'd6e367e6-c630-410f-bcc7-de02da21dd3a',
-                  child: Text('テストくんD')
+                    child: Text('テストくん7')
                 ),
                 DropdownMenuItem(
                   value: 'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f',
-                  child: Text('テストくんE')
+                    child: Text('テストくん8')
                 ),
                 DropdownMenuItem(
                   value: '23d96555-5ff0-4c5d-8b03-2f1db89141f1',
-                  child: Text('テストくんF')
+                    child: Text('テストくん9')
                 ),
                 DropdownMenuItem(
                   value: 'b0e968e9-8dd7-4e20-90a7-6c97834a4e88',
-                  child: Text('テストくんG')
+                    child: Text('テストくん10')
                 ),
                 DropdownMenuItem(
                   value: '605ded0a-ed1f-488b-b0ce-4ccf257c7329',
-                  child: Text('テストくんH')
+                    child: Text('テストくん11')
                 ),
                 DropdownMenuItem(
                   value: '0e9737f7-6d62-447f-ad00-bd36c4532729',
-                  child: Text('テストくんI')
+                    child: Text('テストくん12')
                 ),
                 DropdownMenuItem(
                   value: '55072870-f00e-4ab9-bc6c-1710eef5b0a0',
-                  child: Text('テストくんJ')
+                    child: Text('テストくん13')
                 )
               ],
               onChanged: _changeUser,
