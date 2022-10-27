@@ -28,8 +28,7 @@ class Navi extends ConsumerStatefulWidget {
     required this.ttsSpeed,
     required this.ttsDuration,
     required this.headingFix,
-    required this.isAnnounceNeighbors,
-    required this.isCalcHeadingFromGps
+    required this.isAnnounceNeighbors
   }) : super(key: key);
 
   final String raceId;
@@ -37,7 +36,6 @@ class Navi extends ConsumerStatefulWidget {
   final double ttsDuration;
   final double headingFix;
   final bool isAnnounceNeighbors;
-  final bool isCalcHeadingFromGps;
 
   @override
   ConsumerState<Navi> createState() => _Navi();
@@ -286,18 +284,12 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _changeHeading(CompassEvent evt) {
-    double heading = 0.0;
-
-    if (!widget.isCalcHeadingFromGps) {
-      heading = evt.heading ?? 0.0;
-    } else {
-      heading = Geolocator.bearingBetween(
-        _pastLat,
-        _pastLng,
-        _lat,
-        _lng,
-      );
-    }
+    double heading = Geolocator.bearingBetween(
+      _pastLat,
+      _pastLng,
+      _lat,
+      _lng,
+    );
 
     // Correct magnetic declination
     heading += widget.headingFix;

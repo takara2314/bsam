@@ -38,8 +38,7 @@ class _Home extends ConsumerState<Home> {
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
   double _headingFix = headingFixInit;
-  bool _isAnnounceNeighbors = false;
-  bool _isCalcHeadingFromGps = false;
+  final bool _isAnnounceNeighbors = false;
 
   @override
   void initState() {
@@ -169,8 +168,7 @@ class _Home extends ConsumerState<Home> {
                       ttsSpeed: _ttsSpeed,
                       ttsDuration: _ttsDuration,
                       headingFix: _headingFix,
-                      isAnnounceNeighbors: _isAnnounceNeighbors,
-                      isCalcHeadingFromGps: _isCalcHeadingFromGps,
+                      isAnnounceNeighbors: _isAnnounceNeighbors
                     ),
                   )
                 );
@@ -238,19 +236,6 @@ class _Home extends ConsumerState<Home> {
                   labelText: '補正角度 [deg]',
                 ),
               )
-            ),
-            Row(
-              children: [
-                const Text('過去の位置情報をもとに角度を計算'),
-                Switch(
-                  value: _isCalcHeadingFromGps,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _isCalcHeadingFromGps = value;
-                    });
-                  }
-                )
-              ]
             )
           ]
         )
