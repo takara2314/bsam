@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bsam/pages/navi.dart';
 import 'package:bsam/providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class _Home extends ConsumerState<Home> {
   static double ttsDurationInit = 1.0;
   static double headingFixInit = 0.0;
 
-  String? _userName;
+  late String _userId;
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
   double _headingFix = headingFixInit;
@@ -51,18 +52,41 @@ class _Home extends ConsumerState<Home> {
         permLocation = await Permission.location.request();
       }
     }();
+
+    _adaptUserInfo();
   }
 
-  _changeUser(String? value) {
+  _adaptUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    final id = prefs.getString('user_id');
+
+    if (id != null) {
+      _setUser(id);
+    }
+  }
+
+  _setUser(String id) {
     final userId = ref.read(userIdProvider.notifier);
     final jwt = ref.read(jwtProvider.notifier);
 
-    userId.state = value;
-    jwt.state = jwts[value];
+    userId.state = id;
+    jwt.state = jwts[id];
 
     setState(() {
-      _userName = value;
+      _userId = id;
     });
+  }
+
+  _storeUserId(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('user_id', id);
+  }
+
+  _changeUser(String? value) {
+    final id = value!;
+
+    _setUser(id);
+    _storeUserId(id);
   }
 
   @override
@@ -86,84 +110,52 @@ class _Home extends ConsumerState<Home> {
       body: Center(
         child: Column(
           children: <Widget>[
-            // SizedBox(
-            //   width: width * 0.9,
-            //   child: ElevatedButton(
-            //     child: Center(
-            //       child: Text(
-            //         '端末番号',
-            //         style: TextStyle(
-            //           color: Theme.of(context).colorScheme.inverseSurface,
-            //           fontWeight: FontWeight.bold
-            //         )
-            //       ),
-            //     ),
-            //     onPressed: () {},
-            //     style: ButtonStyle(
-            //       gradient: MaterialStateProperty.all(
-            //         LinearGradient(
-            //           colors: [
-            //             Theme.of(context).colorScheme.primary,
-            //             Theme.of(context).colorScheme.secondary
-            //           ]
-            //         )
-            //       )
-            //     )
-            //     // style: ElevatedButton.styleFrom(
-            //     //   primary: Theme.of(context).colorScheme.primaryContainer,
-            //     //   shape: RoundedRectangleBorder(
-            //     //     borderRadius: BorderRadius.circular(10.0)
-            //     //   ),
-            //     //   minimumSize: Size(width * 0.8, height * 0.1)
-            //     // )
-            //   )
-            // ),
-            const Text('ユーザー'),
+            const Text('端末番号を選択'),
             DropdownButton(
               items: const [
                 DropdownMenuItem(
                   value: 'e85c3e4d-21d8-4c42-be90-b79418419c40',
-                    child: Text('端末番号4')
+                  child: Text('端末番号4')
                 ),
                 DropdownMenuItem(
                   value: '925aea83-44e0-4ff3-9ce6-84a1c5190532',
-                    child: Text('端末番号5')
+                  child: Text('端末番号5')
                 ),
                 DropdownMenuItem(
                   value: '4aaee190-e8ef-4fb6-8ee9-510902b68cf4',
-                    child: Text('端末番号6')
+                  child: Text('端末番号6')
                 ),
                 DropdownMenuItem(
                   value: 'd6e367e6-c630-410f-bcc7-de02da21dd3a',
-                    child: Text('端末番号7')
+                  child: Text('端末番号7')
                 ),
                 DropdownMenuItem(
                   value: 'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f',
-                    child: Text('端末番号8')
+                  child: Text('端末番号8')
                 ),
                 DropdownMenuItem(
                   value: '23d96555-5ff0-4c5d-8b03-2f1db89141f1',
-                    child: Text('端末番号9')
+                  child: Text('端末番号9')
                 ),
                 DropdownMenuItem(
                   value: 'b0e968e9-8dd7-4e20-90a7-6c97834a4e88',
-                    child: Text('端末番号10')
+                  child: Text('端末番号10')
                 ),
                 DropdownMenuItem(
                   value: '605ded0a-ed1f-488b-b0ce-4ccf257c7329',
-                    child: Text('端末番号11')
+                  child: Text('端末番号11')
                 ),
                 DropdownMenuItem(
                   value: '0e9737f7-6d62-447f-ad00-bd36c4532729',
-                    child: Text('端末番号12')
+                  child: Text('端末番号12')
                 ),
                 DropdownMenuItem(
                   value: '55072870-f00e-4ab9-bc6c-1710eef5b0a0',
-                    child: Text('端末番号13')
+                  child: Text('端末番号13')
                 )
               ],
               onChanged: _changeUser,
-              value: _userName,
+              value: _userId,
             ),
             ElevatedButton(
               child: const Text(
