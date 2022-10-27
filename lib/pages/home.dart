@@ -33,7 +33,6 @@ class _Home extends ConsumerState<Home> {
   static double ttsDurationInit = 1.0;
   static double headingFixInit = 0.0;
 
-  String _raceName = 'e85c3e4d-21d8-4c42-be9';
   String? _userName;
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
