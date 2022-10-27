@@ -92,7 +92,7 @@ class _Home extends ConsumerState<Home> {
             //   child: ElevatedButton(
             //     child: Center(
             //       child: Text(
-            //         'テストくん',
+            //         '端末番号',
             //         style: TextStyle(
             //           color: Theme.of(context).colorScheme.inverseSurface,
             //           fontWeight: FontWeight.bold
@@ -124,43 +124,43 @@ class _Home extends ConsumerState<Home> {
               items: const [
                 DropdownMenuItem(
                   value: 'e85c3e4d-21d8-4c42-be90-b79418419c40',
-                    child: Text('テストくん4')
+                    child: Text('端末番号4')
                 ),
                 DropdownMenuItem(
                   value: '925aea83-44e0-4ff3-9ce6-84a1c5190532',
-                    child: Text('テストくん5')
+                    child: Text('端末番号5')
                 ),
                 DropdownMenuItem(
                   value: '4aaee190-e8ef-4fb6-8ee9-510902b68cf4',
-                    child: Text('テストくん6')
+                    child: Text('端末番号6')
                 ),
                 DropdownMenuItem(
                   value: 'd6e367e6-c630-410f-bcc7-de02da21dd3a',
-                    child: Text('テストくん7')
+                    child: Text('端末番号7')
                 ),
                 DropdownMenuItem(
                   value: 'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f',
-                    child: Text('テストくん8')
+                    child: Text('端末番号8')
                 ),
                 DropdownMenuItem(
                   value: '23d96555-5ff0-4c5d-8b03-2f1db89141f1',
-                    child: Text('テストくん9')
+                    child: Text('端末番号9')
                 ),
                 DropdownMenuItem(
                   value: 'b0e968e9-8dd7-4e20-90a7-6c97834a4e88',
-                    child: Text('テストくん10')
+                    child: Text('端末番号10')
                 ),
                 DropdownMenuItem(
                   value: '605ded0a-ed1f-488b-b0ce-4ccf257c7329',
-                    child: Text('テストくん11')
+                    child: Text('端末番号11')
                 ),
                 DropdownMenuItem(
                   value: '0e9737f7-6d62-447f-ad00-bd36c4532729',
-                    child: Text('テストくん12')
+                    child: Text('端末番号12')
                 ),
                 DropdownMenuItem(
                   value: '55072870-f00e-4ab9-bc6c-1710eef5b0a0',
-                    child: Text('テストくん13')
+                    child: Text('端末番号13')
                 )
               ],
               onChanged: _changeUser,
