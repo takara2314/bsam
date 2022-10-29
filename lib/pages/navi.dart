@@ -1,3 +1,5 @@
+// TODO: スタート検知のプログラムを検証する
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -161,6 +163,10 @@ class _Navi extends ConsumerState<Navi> {
     case 'near_sail':
       _receiveNearSail(body);
       break;
+
+    case 'start_race':
+      _receiveStartRace(body);
+      break;
     }
   }
 
@@ -169,14 +175,6 @@ class _Navi extends ConsumerState<Navi> {
       setState(() {
         _markPos = msg.positions!;
       });
-
-      if (msg.markNum == markNum) {
-        setState(() {
-          _nextMarkNo = 1;
-          _started = true;
-        });
-      }
-
       return;
     }
 
@@ -198,6 +196,20 @@ class _Navi extends ConsumerState<Navi> {
 
     setState(() {
       _nearSailNum = msg['neighbors'].length;
+    });
+  }
+
+  _receiveStartRace(dynamic msg) {
+    // have started
+    if (_started == false && msg['started']) {
+      setState(() {
+        _nextMarkNo = 1;
+      });
+    }
+
+    // race status
+    setState(() {
+      _started = msg['started'];
     });
   }
 
