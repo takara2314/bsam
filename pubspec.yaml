@@ -33,7 +33,7 @@ dependencies:
   intl: ^0.17.0
   http: ^0.13.4
   web_socket_channel: ^2.2.0
-  flutter_riverpod: ^1.0.4
+  flutter_riverpod: ^2.1.1
   flutter_compass: ^0.7.0
   google_maps_flutter: ^2.1.10
   geolocator: ^9.0.1
@@ -53,7 +53,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  flutter_launcher_icons: ^0.9.3
+  flutter_launcher_icons: ^0.10.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
