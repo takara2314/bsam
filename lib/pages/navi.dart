@@ -1,5 +1,3 @@
-// TODO: スタート検知のプログラムを検証する
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -18,7 +16,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:wavenet/wavenet.dart';
 
 import 'package:bsam/providers.dart';
-import 'package:bsam/models/navi.dart';
+import 'package:bsam/models/position.dart' as mark;
+import 'package:bsam/models/mark_position_msg.dart';
 import 'package:bsam/widgets/compass.dart';
 import 'package:bsam/services/navi/compass.dart';
 import 'package:bsam/services/navi/mark.dart';
@@ -73,7 +72,7 @@ class _Navi extends ConsumerState<Navi> {
   double _pastLng = 0.0;
 
   int _nextMarkNo = 0;
-  List<MarkPosition> _markPos = [];
+  List<mark.Position> _markPos = [];
   double _routeDistance = 0.0;
 
   int _nearSailNum = 0;
@@ -419,183 +418,180 @@ class _Navi extends ConsumerState<Navi> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (_) {
-                return AlertDialog(
-                  title: const Text('本当に戻りますか？'),
-                  content: const Text('レースの真っ最中です。前の画面に戻るとレースを中断することになります。'),
-                  actions: <Widget>[
-                    // ボタン領域
-                    TextButton(
-                      child: const Text('いいえ'),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    TextButton(
-                      child: const Text('はい'),
-                      onPressed: () {
-                        int count = 0;
-                        Navigator.popUntil(context, (_) => count++ >= 2);
-                      }
-                    ),
-                  ],
-                );
-              },
-            );
-          }
-        )
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            (_started
-              ? Column(
-                children: [
-                  Container(
-                    margin: const EdgeInsets.only(top: 30, bottom: 30),
-                    child: SizedBox(
-                      width: 250,
-                      height: 250,
-                      child: CustomPaint(
-                        painter: Compass(heading: _compassDeg)
-                      )
-                    )
-                  ),
-                  Text(
-                    '$_nextMarkNo ${marks[_nextMarkNo]![0]}マーク',
-                    style: const TextStyle(
-                      fontSize: 28
-                    )
-                  ),
-                  // Container(
-                  //   margin: const EdgeInsets.only(top: 10, bottom: 10),
-                  //   child: Text(
-                  //     _routeDirection,
-                  //     style: const TextStyle(
-                  //       color: Color.fromRGBO(0, 94, 115, 1),
-                  //       fontWeight: FontWeight.w900,
-                  //       fontSize: 52
-                  //     )
-                  //   )
-                  // ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        '残り 約',
-                        style: TextStyle(
-                          color: Color.fromRGBO(79, 79, 79, 1),
-                          fontSize: 28
+    return WillPopScope(
+      onWillPop: () async {
+        isReturnDialog(context);
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () => isReturnDialog(context)
+          )
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              (_started
+                ? Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 30, bottom: 30),
+                      child: SizedBox(
+                        width: 250,
+                        height: 250,
+                        child: CustomPaint(
+                          painter: Compass(heading: _compassDeg)
                         )
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 10, right: 10),
-                        child: Text(
-                          '${_routeDistance.toInt()}',
-                          style: const TextStyle(
+                      )
+                    ),
+                    Text(
+                      '$_nextMarkNo ${marks[_nextMarkNo]![0]}マーク',
+                      style: const TextStyle(
+                        fontSize: 28
+                      )
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          '残り 約',
+                          style: TextStyle(
                             color: Color.fromRGBO(79, 79, 79, 1),
-                            fontSize: 36
+                            fontSize: 28
+                          )
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(left: 10, right: 10),
+                          child: Text(
+                            '${_routeDistance.toInt()}',
+                            style: const TextStyle(
+                              color: Color.fromRGBO(79, 79, 79, 1),
+                              fontSize: 36
+                            )
+                          )
+                        ),
+                        const Text(
+                          'm',
+                          style: TextStyle(
+                            color: Color.fromRGBO(79, 79, 79, 1),
+                            fontSize: 28
                           )
                         )
-                      ),
-                      const Text(
-                        'm',
-                        style: TextStyle(
-                          color: Color.fromRGBO(79, 79, 79, 1),
-                          fontSize: 28
-                        )
-                      )
-                    ],
-                  ),
-                  Text(
-                    '緯度 / 経度',
-                    style: Theme.of(context).textTheme.headline3
-                  ),
-                  Text(
-                    '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
-                  ),
-                  Text(
-                    '位置情報の精度',
-                    style: Theme.of(context).textTheme.headline3
-                  ),
-                  Text(
-                    '${_accuracy.toStringAsFixed(2)} m'
-                  ),
-                  Text(
-                    '端末の方角 / コンパスの方角',
-                    style: Theme.of(context).textTheme.headline3
-                  ),
-                  Text(
-                    '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
-                  ),
-                  Text(
-                    '${_heading.toStringAsFixed(2)}° '
-                  ),
-                  Row(
-                    children: [
-                      TextButton(
-                        onPressed: () {_forcePassed(1);},
-                        child: const Text('上通過')
-                      ),
-                      TextButton(
-                        onPressed: () {_forcePassed(2);},
-                        child: const Text('サイド通過')
-                      ),
-                      TextButton(
-                        onPressed: () {_forcePassed(3);},
-                        child: const Text('下通過')
-                      ),
-                    ],
-                  )
-                ]
+                      ],
+                    ),
+                    Text(
+                      '緯度 / 経度',
+                      style: Theme.of(context).textTheme.headline3
+                    ),
+                    Text(
+                      '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
+                    ),
+                    Text(
+                      '位置情報の精度',
+                      style: Theme.of(context).textTheme.headline3
+                    ),
+                    Text(
+                      '${_accuracy.toStringAsFixed(2)} m'
+                    ),
+                    Text(
+                      '端末の方角 / コンパスの方角',
+                      style: Theme.of(context).textTheme.headline3
+                    ),
+                    Text(
+                      '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
+                    ),
+                    Text(
+                      '${_heading.toStringAsFixed(2)}° '
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                          onPressed: () {_forcePassed(1);},
+                          child: const Text('上通過')
+                        ),
+                        TextButton(
+                          onPressed: () {_forcePassed(2);},
+                          child: const Text('サイド通過')
+                        ),
+                        TextButton(
+                          onPressed: () {_forcePassed(3);},
+                          child: const Text('下通過')
+                        ),
+                      ],
+                    )
+                  ]
+                )
+              : Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.only(right: 15, left: 15),
+                child: Column(
+                  children: [
+                    Text(
+                      'レースは始まっていません',
+                      style: Theme.of(context).textTheme.headline1
+                    ),
+                    const Text(
+                      'スタートボタンが押されるまでお待ちください。'
+                    ),
+                    Text(
+                      '緯度 / 経度',
+                      style: Theme.of(context).textTheme.headline3
+                    ),
+                    Text(
+                      '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
+                    ),
+                    Text(
+                      '位置情報の精度',
+                      style: Theme.of(context).textTheme.headline3
+                    ),
+                    Text(
+                      '$_accuracy m'
+                    ),
+                    Text(
+                      '端末の方角 / コンパスの方角',
+                      style: Theme.of(context).textTheme.headline3
+                    ),
+                    Text(
+                      '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
+                    )
+                  ])
+                )
               )
-            : Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.only(right: 15, left: 15),
-              child: Column(
-                children: [
-                  Text(
-                    'レースは始まっていません',
-                    style: Theme.of(context).textTheme.headline1
-                  ),
-                  const Text(
-                    'スタートボタンが押されるまでお待ちください。'
-                  ),
-                  Text(
-                    '緯度 / 経度',
-                    style: Theme.of(context).textTheme.headline3
-                  ),
-                  Text(
-                    '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
-                  ),
-                  Text(
-                    '位置情報の精度',
-                    style: Theme.of(context).textTheme.headline3
-                  ),
-                  Text(
-                    '$_accuracy m'
-                  ),
-                  Text(
-                    '端末の方角 / コンパスの方角',
-                    style: Theme.of(context).textTheme.headline3
-                  ),
-                  Text(
-                    '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
-                  )
-                ])
-              )
-            )
-          ]
+            ]
+          )
         )
       )
     );
   }
+}
+
+void isReturnDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (_) {
+      return AlertDialog(
+        title: const Text("本当に戻りますか？"),
+        content: const Text("レースの真っ最中です。前の画面に戻るとレースを中断することになります。"),
+        actions: <Widget>[
+          // ボタン領域
+          TextButton(
+            child: const Text("いいえ"),
+            onPressed: () => Navigator.pop(context),
+          ),
+          TextButton(
+            child: const Text("はい"),
+            onPressed: () {
+              int count = 0;
+              Navigator.popUntil(context, (_) => count++ >= 2);
+            }
+          ),
+        ],
+      );
+    },
+  );
 }

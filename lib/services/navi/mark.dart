@@ -1,6 +1,6 @@
-import 'package:bsam/models/navi.dart';
+import 'package:bsam/models/position.dart';
 
-List<MarkPosition> updateMarksOnEnable(List<MarkPosition> base, List<dynamic> received) {
+List<Position> updateMarksOnEnable(List<Position> base, List<dynamic> received) {
   final result = List.of(base);
 
   for (int i = 0; i < received.length; i++) {
