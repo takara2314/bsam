@@ -166,6 +166,10 @@ class _Navi extends ConsumerState<Navi> {
     case 'start_race':
       _receiveStartRace(body);
       break;
+
+    case 'set_mark_no':
+      _receiveSetMarkNo(body);
+      break;
     }
   }
 
@@ -209,6 +213,12 @@ class _Navi extends ConsumerState<Navi> {
     // race status
     setState(() {
       _started = msg['started'];
+    });
+  }
+
+  _receiveSetMarkNo(dynamic msg) {
+    setState(() {
+      _nextMarkNo = msg['next_mark_no'];
     });
   }
 
