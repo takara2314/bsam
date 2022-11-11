@@ -305,12 +305,7 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _changeHeading(CompassEvent evt) {
-    double heading = Geolocator.bearingBetween(
-      _pastLat,
-      _pastLng,
-      _lat,
-      _lng,
-    );
+    double heading = evt.heading ?? 0.0;
 
     // Correct magnetic declination
     heading += widget.headingFix;
@@ -514,9 +509,6 @@ class _Navi extends ConsumerState<Navi> {
                     ),
                     Text(
                       '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
-                    ),
-                    Text(
-                      '${_heading.toStringAsFixed(2)}° '
                     ),
                     Row(
                       children: [
