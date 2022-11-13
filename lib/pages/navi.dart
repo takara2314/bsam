@@ -56,11 +56,9 @@ class _Navi extends ConsumerState<Navi> {
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
   late Timer _timerSendLoc;
-  late Timer _timerPeriodicTts;
 
   bool _started = false;
   bool _enabledPeriodicTts = true;
-  int _periodicTtsCount = 0;
 
   double _lat = 0.0;
   double _lng = 0.0;
@@ -68,10 +66,7 @@ class _Navi extends ConsumerState<Navi> {
   double _heading = 0.0;
   double _compassDeg = 0.0;
 
-  double _pastLat = 0.0;
-  double _pastLng = 0.0;
-
-  int _nextMarkNo = 0;
+  int _nextMarkNo = 1;
   List<mark.Position> _markPos = [];
   double _routeDistance = 0.0;
 
@@ -129,7 +124,7 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     _channel = IOWebSocketChannel.connect(
-      Uri.parse('wss://sailing-assist-mie-api.herokuapp.com/v2/racing/${widget.raceId}'),
+      Uri.parse('wss://sailing-assist-mie-api.herokuapp.com/v2/racing/${widget.raceId}?next_mark_no=$_nextMarkNo'),
       pingInterval: const Duration(seconds: 1)
     );
 
@@ -232,11 +227,6 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     setState(() {
-      _pastLat = _lat;
-      _pastLng = _lng;
-    });
-
-    setState(() {
       _lat = pos.latitude;
       _lng = pos.longitude;
       _accuracy = pos.accuracy;
@@ -277,12 +267,15 @@ class _Navi extends ConsumerState<Navi> {
       _routeDistance = diff;
     });
 
-    if (diff > 5.0) {
+    if (diff > 10.0) {
       return;
     }
 
     // Passed mark
+    _onPassed();
+  }
 
+  _onPassed() {
     int nextMarkNo = _nextMarkNo % 3 + 1;
 
     _sendPassed(_nextMarkNo, nextMarkNo);
@@ -351,25 +344,30 @@ class _Navi extends ConsumerState<Navi> {
       if (!mounted) {
         return;
       }
+
       if (!_enabledPeriodicTts) {
+        debugPrint('定期アナウンスが中止されているため、アナウンスをスルーします');
         await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
         continue;
       }
 
+      String text = '';
+
       if (!_started) {
-        await _tts('レースは始まっていません');
+        await Future.delayed(const Duration(milliseconds: 100));
+        continue;
+
       } else {
-        String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
+        text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
 
         if (_lastPassedTime != null) {
           if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
             text = '${marks[_nextMarkNo]![1]}、$text';
           }
         }
-
-        await _tts(text);
       }
 
+      await _tts(text);
       await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
     }
   }
@@ -408,7 +406,9 @@ class _Navi extends ConsumerState<Navi> {
         DeviceFileSource(file.path),
         volume: 1.0
       );
-    } catch (_) {}
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   _forcePassed(int markNo) {
@@ -524,7 +524,11 @@ class _Navi extends ConsumerState<Navi> {
                           onPressed: () {_forcePassed(3);},
                           child: const Text('下通過')
                         ),
-                      ],
+                        TextButton(
+                          onPressed: () {_onPassed();},
+                          child: const Text('マーク通過判定')
+                        )
+                      ]
                     )
                   ]
                 )
