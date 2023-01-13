@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 import 'package:permission_handler/permission_handler.dart';
-import 'package:sailing_assist_mie/pages/race/select.dart' as race;
-import 'package:sailing_assist_mie/pages/settings.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:jwt_decode/jwt_decode.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:sailing_assist_mie/providers.dart';
+
+import 'package:bsam/pages/navi.dart';
+import 'package:bsam/providers.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -19,15 +15,30 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _Home extends ConsumerState<Home> {
-  bool _isAllowedLocation = false;
-  bool _requiredLogin = true;
+  static const jwts = {
+    'e85c3e4d-21d8-4c42-be90-b79418419c40': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJlODVjM2U0ZC0yMWQ4LTRjNDItYmU5MC1iNzk0MTg0MTljNDAifQ.NGBqWVBNhLd7RXSaGmVQ2a5V0jKIZ8Y6VV9vARNQjLw',
+    '925aea83-44e0-4ff3-9ce6-84a1c5190532': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI5MjVhZWE4My00NGUwLTRmZjMtOWNlNi04NGExYzUxOTA1MzIifQ.Edl0joAk7GdZPnaXt1qyFobk5iZQqATejeJ2VLclPik',
+    '4aaee190-e8ef-4fb6-8ee9-510902b68cf4': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI0YWFlZTE5MC1lOGVmLTRmYjYtOGVlOS01MTA5MDJiNjhjZjQifQ.NUOkmc7bGpXFRDYSfBculC1Y1PCLYoN06Ze1ToUeRtE',
+    'd6e367e6-c630-410f-bcc7-de02da21dd3a': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJkNmUzNjdlNi1jNjMwLTQxMGYtYmNjNy1kZTAyZGEyMWRkM2EifQ.JdZjFqJsoqu35IHben_zSIfG9mpx2jd-UC9ROhwIqzA',
+    'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJmM2Y0ZGE4Zi02YWIwLTRmMGUtOTBhOS0yNjg5ZDcyZDJhNGYifQ.S-sPB0hGLVGiASyidRtXBVuPWPuZZufbo6-CRfPu-uw',
+    '23d96555-5ff0-4c5d-8b03-2f1db89141f1': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIyM2Q5NjU1NS01ZmYwLTRjNWQtOGIwMy0yZjFkYjg5MTQxZjEifQ.BHokcQWoz-pnp3XntnpQGmexDnd_P8h5nxOS-YDkZIU',
+    'b0e968e9-8dd7-4e20-90a7-6c97834a4e88': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJiMGU5NjhlOS04ZGQ3LTRlMjAtOTBhNy02Yzk3ODM0YTRlODgifQ.V3eMshzn4Nr-xTfkvSfMdDxwgzQVsehmVsaRa7kPppY',
+    '605ded0a-ed1f-488b-b0ce-4ccf257c7329': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI2MDVkZWQwYS1lZDFmLTQ4OGItYjBjZS00Y2NmMjU3YzczMjkifQ.DnMlq0-5hB-f70W9NzhE4i7jeHbiFSxZXvp1YXwZ2ZE',
+    '0e9737f7-6d62-447f-ad00-bd36c4532729': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIwZTk3MzdmNy02ZDYyLTQ0N2YtYWQwMC1iZDM2YzQ1MzI3MjkifQ.qO1iF357VTs0NawYAmSC_57T9GoO-M2fCJUoWqA5Pe4',
+    '55072870-f00e-4ab9-bc6c-1710eef5b0a0': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI1NTA3Mjg3MC1mMDBlLTRhYjktYmM2Yy0xNzEwZWVmNWIwYTAifQ.-6ehzJmbdPQtq2BTqgzJ3hdy_xhLvhUx5bOylyJYjRE'
+  };
 
-  String _loginMessage = 'ログインしてください。';
+  static const raceId = '3ae8c214-eb72-481c-b110-8e8f32ecf02d';
 
-  String _loginId = '';
-  String _password = '';
+  static double ttsSpeedInit = 1.5;
+  static double ttsDurationInit = 1.0;
+  static double headingFixInit = 0.0;
 
-  bool _ready = false;
+  String? _userId;
+  double _ttsSpeed = ttsSpeedInit;
+  double _ttsDuration = ttsDurationInit;
+  double _headingFix = headingFixInit;
+  final bool _isAnnounceNeighbors = false;
 
   @override
   void initState() {
@@ -38,363 +49,197 @@ class _Home extends ConsumerState<Home> {
 
       if (permLocation == PermissionStatus.denied) {
         permLocation = await Permission.location.request();
-        setState(() {
-          _isAllowedLocation = permLocation != PermissionStatus.denied;
-        });
-
-      } else {
-        setState(() {
-          _isAllowedLocation = true;
-        });
       }
-
-      await _checkAuth();
     }();
+
+    _adaptUserInfo();
   }
 
-  _checkAuth() async {
+  _adaptUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
+    final id = prefs.getString('user_id');
 
-    if (token == null) {
-      setState(() {
-        _requiredLogin = true;
-      });
-    } else {
-      final valid = await _checkToken(token);
-
-      if (valid) {
-        final userId = ref.read(userIdProvider.notifier);
-        userId.state = Jwt.parseJwt(token)['user_id'];
-        setState(() {
-          _requiredLogin = false;
-        });
-      }
+    if (id != null) {
+      _setUser(id);
     }
+  }
+
+  _setUser(String id) {
+    final userId = ref.read(userIdProvider.notifier);
+    final jwt = ref.read(jwtProvider.notifier);
+
+    userId.state = id;
+    jwt.state = jwts[id];
 
     setState(() {
-      _ready = true;
+      _userId = id;
     });
   }
 
-  _updateDeviceId(String userId) async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-
-    try {
-      http.put(
-        Uri.parse('https://sailing-assist-mie-api.herokuapp.com/user/$userId'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'device_id': androidInfo.androidId.toString()
-        })
-      );
-    } catch (_) {}
+  _storeUserId(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setString('user_id', id);
   }
 
-  _checkToken(String token) async {
-    try {
-      final res = await http.post(
-        Uri.parse('https://sailing-assist-mie-api.herokuapp.com/auth/token'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'token': token
-        })
-      );
-      if (res.statusCode != 200) {
-        return false;
-      }
-      return true;
-    } catch (_) {}
-  }
+  _changeUser(String? value) {
+    final id = value!;
 
-  _handlerLoginId(String loginId) {
-    setState(() {
-      _loginId = loginId;
-    });
-  }
-
-  _handlerPassword(String password) {
-    setState(() {
-      _password = password;
-    });
-  }
-
-  _handlerLoginButton() {
-    if (_loginId == '' || _password == '') {
-      setState(() {
-        _loginMessage = 'IDとパスワードの両方を入力してください。';
-      });
-      return;
-    }
-
-    try {
-      http.post(
-        Uri.parse('https://sailing-assist-mie-api.herokuapp.com/auth/password'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'login_id': _loginId,
-          'password': _password
-        })
-      )
-        .then((res) {
-          switch (res.statusCode) {
-            case 200:
-              final body = json.decode(res.body);
-              final payload = Jwt.parseJwt(body['token']);
-              setState(() {
-                _requiredLogin = false;
-              });
-              () async {
-                final prefs = await SharedPreferences.getInstance();
-                await prefs.setString('token', body['token']);
-                await prefs.setString('userId', payload['user_id']);
-              }();
-              final userId = ref.read(userIdProvider.notifier);
-              userId.state = payload['user_id'];
-              _updateDeviceId(payload['user_id']);
-              break;
-
-            case 403:
-              setState(() {
-                _loginMessage = 'IDもしくはパスワードが間違っています。';
-              });
-              break;
-
-            default:
-              setState(() {
-                _loginMessage = 'サーバーエラーが発生しました。';
-              });
-              break;
-          }
-        });
-    } catch (_) {}
+    _setUser(id);
+    _storeUserId(id);
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Center(
-          child: (_ready)
-            ? Column(
-                children: [
-                  Container(
-                    child: const _Logo(),
-                    margin: !_requiredLogin ? const EdgeInsets.only(top: 70, bottom: 70) : const EdgeInsets.only(top: 70, bottom: 40)
-                  ),
-                  (!_requiredLogin)?(
-                    SizedBox(
-                      child: Column(
-                        children: [
-                          ElevatedButton(
-                            child: const Text(
-                              'レースする',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w500
-                              )
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const race.Select(),
-                                )
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: const Color.fromRGBO(0, 98, 104, 1),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)
-                              ),
-                              minimumSize: const Size(280, 60)
-                            )
-                          ),
-                          ElevatedButton(
-                            child: const Text(
-                              'シミュレーションする',
-                              style: TextStyle(
-                                color: Color.fromRGBO(50, 50, 50, 1),
-                                fontSize: 22,
-                                fontWeight: FontWeight.w500
-                              ),
-                            ),
-                            onPressed: () {
-                              // Navigator.of(context).push(
-                              //   MaterialPageRoute(
-                              //     builder: (context) => const Simulation(),
-                              //   )
-                              // );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              primary: const Color.fromRGBO(232, 232, 232, 1),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              minimumSize: const Size(280, 60)
-                            )
-                          ),
-                          TextButton(
-                            child: const Text(
-                              '設定する',
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w500
-                              )
-                            ),
-                            onPressed: () async {
-                              await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const Settings(),
-                                )
-                              );
-                              await _checkAuth();
-                            }
-                          ),
-                          Visibility(
-                            visible: !_isAllowedLocation,
-                            child: const Text(
-                              '位置情報が有効になっていません！',
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold
-                              )
-                            )
-                          )
-                        ],
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      ),
-                      height: 200
-                    )
-                  ):(
-                    SizedBox(
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 20, right: 20),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Text(
-                                    _loginMessage,
-                                    style: const TextStyle(
-                                      fontSize: 20
-                                    )
-                                  )
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(bottom: 5),
-                                  child: Text(
-                                    'ログインID',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  )
-                                ),
-                                TextField(
-                                  style: const TextStyle(fontSize: 20),
-                                  onChanged: _handlerLoginId
-                                ),
-                                const Padding(
-                                  padding: EdgeInsets.only(top: 5, bottom: 5),
-                                  child: Text(
-                                    'パスワード',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold
-                                    )
-                                  )
-                                ),
-                                TextField(
-                                  obscureText: true,
-                                  style: const TextStyle(fontSize: 20),
-                                  onChanged: _handlerPassword
-                                )
-                              ]
-                            )
-                          ),
-                          ElevatedButton(
-                            child: const Text(
-                              'ログイン',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w500
-                              )
-                            ),
-                            onPressed: _handlerLoginButton,
-                            style: ElevatedButton.styleFrom(
-                              primary: const Color.fromRGBO(0, 98, 104, 1),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)
-                              ),
-                              minimumSize: const Size(280, 60)
-                            )
-                          )
-                        ],
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      ),
-                      height: 300
-                    )
-                  )
-                ]
-              )
-            : Padding(
-                padding: const EdgeInsets.only(top: 300),
-                child: Column(
-                  children: const [
-                    SpinKitWave(
-                      color: Color.fromRGBO(79, 150, 255, 1),
-                      size: 80.0,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 20),
-                      child: Text('準備しています…')
-                    )
-                  ]
-                )
-              )
-        )
+      appBar: AppBar(
+        title: SizedBox(
+          width: width * 0.8,
+          child: Text(
+            'ゴーリキマリンビレッジ',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold
+            )
+          ),
+        ),
+        centerTitle: true
       ),
-    );
-  }
-}
-
-class _Logo extends StatelessWidget {
-  const _Logo({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        Text(
-          'Sailing',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(0, 42, 149, 1),
-            fontSize: 60
-          )
-        ),
-        Text(
-          'Assist',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(0, 42, 149, 1),
-            fontSize: 60
-          )
-        ),
-        Text(
-          'Mie',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(0, 42, 149, 1),
-            fontSize: 60
-          )
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            const Text('端末番号を選択'),
+            DropdownButton(
+              items: const [
+                DropdownMenuItem(
+                  value: 'e85c3e4d-21d8-4c42-be90-b79418419c40',
+                  child: Text('端末番号4')
+                ),
+                DropdownMenuItem(
+                  value: '925aea83-44e0-4ff3-9ce6-84a1c5190532',
+                  child: Text('端末番号5')
+                ),
+                DropdownMenuItem(
+                  value: '4aaee190-e8ef-4fb6-8ee9-510902b68cf4',
+                  child: Text('端末番号6')
+                ),
+                DropdownMenuItem(
+                  value: 'd6e367e6-c630-410f-bcc7-de02da21dd3a',
+                  child: Text('端末番号7')
+                ),
+                DropdownMenuItem(
+                  value: 'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f',
+                  child: Text('端末番号8')
+                ),
+                DropdownMenuItem(
+                  value: '23d96555-5ff0-4c5d-8b03-2f1db89141f1',
+                  child: Text('端末番号9')
+                ),
+                DropdownMenuItem(
+                  value: 'b0e968e9-8dd7-4e20-90a7-6c97834a4e88',
+                  child: Text('端末番号10')
+                ),
+                DropdownMenuItem(
+                  value: '605ded0a-ed1f-488b-b0ce-4ccf257c7329',
+                  child: Text('端末番号11')
+                ),
+                DropdownMenuItem(
+                  value: '0e9737f7-6d62-447f-ad00-bd36c4532729',
+                  child: Text('端末番号12')
+                ),
+                DropdownMenuItem(
+                  value: '55072870-f00e-4ab9-bc6c-1710eef5b0a0',
+                  child: Text('端末番号13')
+                )
+              ],
+              onChanged: _changeUser,
+              value: _userId,
+            ),
+            ElevatedButton(
+              child: const Text(
+                'レースを始める'
+              ),
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Navi(
+                      raceId: raceId,
+                      ttsSpeed: _ttsSpeed,
+                      ttsDuration: _ttsDuration,
+                      headingFix: _headingFix,
+                      isAnnounceNeighbors: _isAnnounceNeighbors
+                    ),
+                  )
+                );
+              }
+            ),
+            SizedBox(
+              width: width * 0.9,
+              child: TextFormField(
+                initialValue: ttsSpeedInit.toString(),
+                onChanged: (String value) {
+                  try {
+                    setState(() {
+                      _ttsSpeed = double.parse(value);
+                    });
+                  } catch (_) {
+                    setState(() {
+                      _ttsSpeed = ttsSpeedInit;
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'アナウンス速度',
+                ),
+              )
+            ),
+            SizedBox(
+              width: width * 0.9,
+              child: TextFormField(
+                initialValue: ttsDurationInit.toString(),
+                onChanged: (String value) {
+                  try {
+                    setState(() {
+                      _ttsDuration = double.parse(value);
+                    });
+                  } catch (_) {
+                    setState(() {
+                      _ttsDuration = ttsDurationInit;
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'アナウンス間隔 [秒]',
+                ),
+              )
+            ),
+            SizedBox(
+              width: width * 0.9,
+              child: TextFormField(
+                initialValue: headingFixInit.toString(),
+                onChanged: (String value) {
+                  try {
+                    setState(() {
+                      _headingFix = double.parse(value);
+                    });
+                  } catch (_) {
+                    setState(() {
+                      _headingFix = headingFixInit;
+                    });
+                  }
+                },
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: '補正角度 [deg]',
+                ),
+              )
+            )
+          ]
         )
-      ],
-      crossAxisAlignment: CrossAxisAlignment.start,
+      )
     );
   }
 }

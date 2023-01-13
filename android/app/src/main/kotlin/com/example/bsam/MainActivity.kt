@@ -1,4 +1,4 @@
-package com.example.sailing_assist_mie
+package com.example.bsam
 
 import io.flutter.embedding.android.FlutterActivity
 
