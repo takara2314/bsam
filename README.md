@@ -5,7 +5,7 @@
 
 # Blind Sailing Assist Mie - 視覚障がい者帆走支援アプリ
 
-![Language: Dart](https://img.shields.io/badge/Licence-Dart-00b4ab?style=for-the-badge&logo=dart)
+![Language: Dart](https://img.shields.io/badge/Language-Dart-00b4ab?style=for-the-badge&logo=dart)
 ![Framework: Flutter](https://img.shields.io/badge/Framework-Flutter-54c5f8?style=for-the-badge&logo=flutter)
 ![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-bd0000?style=for-the-badge)
 
