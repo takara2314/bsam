@@ -1,6 +1,6 @@
 <div align="center">
 <a href="https://github.com/takara2314/bsam">
-    <img src="./images/logo.png" width="128" height="128" alt="logo" />
+    <img src="./images/icon.png" width="128" height="128" alt="logo" />
 </a>
 
 # Blind Sailing Assist Mie - 視覚障がい者帆走支援アプリ
