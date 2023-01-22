@@ -25,14 +25,16 @@ import 'package:bsam/services/navi/mark.dart';
 class Navi extends ConsumerStatefulWidget {
   const Navi({
     Key? key,
-    required this.raceId,
+    required this.assocId,
+    required this.userId,
     required this.ttsSpeed,
     required this.ttsDuration,
     required this.headingFix,
     required this.isAnnounceNeighbors
   }) : super(key: key);
 
-  final String raceId;
+  final String assocId;
+  final String userId;
   final double ttsSpeed;
   final double ttsDuration;
   final double headingFix;
@@ -74,13 +76,15 @@ class _Navi extends ConsumerState<Navi> {
 
   DateTime? _lastPassedTime;
 
-  final TextToSpeechService _service =
-    TextToSpeechService('AIzaSyDVTnsqrucvoUOc8AcIQr4RXVM0zsNwJcw');
+  late TextToSpeechService _ttsService;
   final audioPlayer = AudioPlayer();
 
   @override
   void initState() {
     super.initState();
+
+    // Load wavenet tts
+    _loadTts();
 
     // Screen lock
     Wakelock.enable();
@@ -118,13 +122,22 @@ class _Navi extends ConsumerState<Navi> {
     super.dispose();
   }
 
+  _loadTts() {
+    // Get wavenet token (tts)
+    final token = ref.read(wavenetTokenProvider);
+    _ttsService = TextToSpeechService(token);
+  }
+
   _connectWs() {
     if (!mounted) {
       return;
     }
 
+    // Get server url
+    final serverUrl = ref.read(serverUrlProvider);
+
     _channel = IOWebSocketChannel.connect(
-      Uri.parse('wss://sailing-assist-mie-api.herokuapp.com/v2/racing/${widget.raceId}?next_mark_no=$_nextMarkNo'),
+      Uri.parse('$serverUrl/racing/${widget.assocId}'),
       pingInterval: const Duration(seconds: 1)
     );
 
@@ -141,7 +154,9 @@ class _Navi extends ConsumerState<Navi> {
     try {
       _channel.sink.add(json.encode({
         'type': 'auth',
-        'token': jwt
+        'token': jwt,
+        'user_id': widget.userId,
+        'role': 'athlete'
       }));
     } catch (_) {}
   }
@@ -287,11 +302,11 @@ class _Navi extends ConsumerState<Navi> {
     });
   }
 
-  _sendPassed(int markNo, int nextMarkNo) {
+  _sendPassed(int passedMarkNo, int nextMarkNo) {
     try {
       _channel.sink.add(json.encode({
         'type': 'passed',
-        'mark_no': markNo,
+        'passed_mark_no': passedMarkNo,
         'next_mark_no': nextMarkNo
       }));
     } catch (_) {}
@@ -394,7 +409,7 @@ class _Navi extends ConsumerState<Navi> {
   _tts(String text) async {
     text.replaceAll('46', 'よんじゅうろく');
 
-    File file = await _service.textToSpeech(
+    File file = await _ttsService.textToSpeech(
       text: text,
       voiceName: 'ja-JP-Wavenet-B',
       languageCode: 'ja-JP',
