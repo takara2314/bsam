@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.bsam">
+    package="app.bsam.bsam">
    <application
         android:label="B-SAM"
         android:name="${applicationName}"
