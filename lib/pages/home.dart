@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:jwt_decode/jwt_decode.dart';
 
 import 'package:bsam/pages/navi.dart';
+import 'package:bsam/models/user.dart';
 import 'package:bsam/providers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,25 +18,24 @@ class Home extends ConsumerStatefulWidget {
 }
 
 class _Home extends ConsumerState<Home> {
-  static const jwts = {
-    'e85c3e4d-21d8-4c42-be90-b79418419c40': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJlODVjM2U0ZC0yMWQ4LTRjNDItYmU5MC1iNzk0MTg0MTljNDAifQ.NGBqWVBNhLd7RXSaGmVQ2a5V0jKIZ8Y6VV9vARNQjLw',
-    '925aea83-44e0-4ff3-9ce6-84a1c5190532': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI5MjVhZWE4My00NGUwLTRmZjMtOWNlNi04NGExYzUxOTA1MzIifQ.Edl0joAk7GdZPnaXt1qyFobk5iZQqATejeJ2VLclPik',
-    '4aaee190-e8ef-4fb6-8ee9-510902b68cf4': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI0YWFlZTE5MC1lOGVmLTRmYjYtOGVlOS01MTA5MDJiNjhjZjQifQ.NUOkmc7bGpXFRDYSfBculC1Y1PCLYoN06Ze1ToUeRtE',
-    'd6e367e6-c630-410f-bcc7-de02da21dd3a': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJkNmUzNjdlNi1jNjMwLTQxMGYtYmNjNy1kZTAyZGEyMWRkM2EifQ.JdZjFqJsoqu35IHben_zSIfG9mpx2jd-UC9ROhwIqzA',
-    'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJmM2Y0ZGE4Zi02YWIwLTRmMGUtOTBhOS0yNjg5ZDcyZDJhNGYifQ.S-sPB0hGLVGiASyidRtXBVuPWPuZZufbo6-CRfPu-uw',
-    '23d96555-5ff0-4c5d-8b03-2f1db89141f1': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIyM2Q5NjU1NS01ZmYwLTRjNWQtOGIwMy0yZjFkYjg5MTQxZjEifQ.BHokcQWoz-pnp3XntnpQGmexDnd_P8h5nxOS-YDkZIU',
-    'b0e968e9-8dd7-4e20-90a7-6c97834a4e88': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiJiMGU5NjhlOS04ZGQ3LTRlMjAtOTBhNy02Yzk3ODM0YTRlODgifQ.V3eMshzn4Nr-xTfkvSfMdDxwgzQVsehmVsaRa7kPppY',
-    '605ded0a-ed1f-488b-b0ce-4ccf257c7329': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI2MDVkZWQwYS1lZDFmLTQ4OGItYjBjZS00Y2NmMjU3YzczMjkifQ.DnMlq0-5hB-f70W9NzhE4i7jeHbiFSxZXvp1YXwZ2ZE',
-    '0e9737f7-6d62-447f-ad00-bd36c4532729': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiIwZTk3MzdmNy02ZDYyLTQ0N2YtYWQwMC1iZDM2YzQ1MzI3MjkifQ.qO1iF357VTs0NawYAmSC_57T9GoO-M2fCJUoWqA5Pe4',
-    '55072870-f00e-4ab9-bc6c-1710eef5b0a0': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTc0Mjk3ODEsIm1hcmtfbm8iOi0xLCJyb2xlIjoiYXRobGV0ZSIsInVzZXJfaWQiOiI1NTA3Mjg3MC1mMDBlLTRhYjktYmM2Yy0xNzEwZWVmNWIwYTAifQ.-6ehzJmbdPQtq2BTqgzJ3hdy_xhLvhUx5bOylyJYjRE'
-  };
-
-  static const raceId = '3ae8c214-eb72-481c-b110-8e8f32ecf02d';
+  static final users = <User>[
+    User(displayName: '1番艇', id: 'athlete1'),
+    User(displayName: '2番艇', id: 'athlete2'),
+    User(displayName: '3番艇', id: 'athlete3'),
+    User(displayName: '4番艇', id: 'athlete4'),
+    User(displayName: '5番艇', id: 'athlete5'),
+    User(displayName: '6番艇', id: 'athlete6'),
+    User(displayName: '7番艇', id: 'athlete7'),
+    User(displayName: '8番艇', id: 'athlete8'),
+    User(displayName: '9番艇', id: 'athlete9'),
+    User(displayName: '10番艇', id: 'athlete10')
+  ];
 
   static double ttsSpeedInit = 1.5;
   static double ttsDurationInit = 1.0;
   static double headingFixInit = 0.0;
 
+  String? _assocId;
   String? _userId;
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
@@ -50,26 +52,57 @@ class _Home extends ConsumerState<Home> {
       if (permLocation == PermissionStatus.denied) {
         permLocation = await Permission.location.request();
       }
-    }();
 
-    _adaptUserInfo();
+      _loadServerURL();
+      _loadWavenetToken();
+      _loadAssocInfo();
+      _loadUserInfo();
+    }();
   }
 
-  _adaptUserInfo() async {
+  _loadServerURL() {
+    final String? url = dotenv.maybeGet('BSAM_SERVER_URL');
+
+    final provider = ref.read(serverUrlProvider.notifier);
+    provider.state = url;
+  }
+
+  _loadWavenetToken() {
+    final String? token = dotenv.maybeGet('WAVENET_TOKEN');
+
+    final provider = ref.read(wavenetTokenProvider.notifier);
+    provider.state = token;
+  }
+
+  _loadAssocInfo() {
+    final String? token = dotenv.maybeGet('BSAM_SERVER_TOKEN');
+    Map<String, dynamic> payload = Jwt.parseJwt(token!);
+    final String? id = payload['association_id'];
+
+    final assocId = ref.read(assocIdProvider.notifier);
+    final jwt = ref.read(jwtProvider.notifier);
+
+    assocId.state = id;
+    jwt.state = token;
+
+    setState(() {
+      _assocId = id;
+    });
+  }
+
+  _loadUserInfo() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString('user_id');
 
     if (id != null) {
-      _setUser(id);
+      _setUserId(id);
     }
   }
 
-  _setUser(String id) {
+  _setUserId(String id) {
     final userId = ref.read(userIdProvider.notifier);
-    final jwt = ref.read(jwtProvider.notifier);
 
     userId.state = id;
-    jwt.state = jwts[id];
 
     setState(() {
       _userId = id;
@@ -84,7 +117,7 @@ class _Home extends ConsumerState<Home> {
   _changeUser(String? value) {
     final id = value!;
 
-    _setUser(id);
+    _setUserId(id);
     _storeUserId(id);
   }
 
@@ -97,7 +130,7 @@ class _Home extends ConsumerState<Home> {
         title: SizedBox(
           width: width * 0.8,
           child: Text(
-            'ゴーリキマリンビレッジ',
+            'セーリング団体名',
             style: TextStyle(
               color: Theme.of(context).colorScheme.primary,
               fontWeight: FontWeight.bold
@@ -109,49 +142,14 @@ class _Home extends ConsumerState<Home> {
       body: Center(
         child: Column(
           children: <Widget>[
-            const Text('端末番号を選択'),
+            const Text('選手を選択'),
             DropdownButton(
-              items: const [
-                DropdownMenuItem(
-                  value: 'e85c3e4d-21d8-4c42-be90-b79418419c40',
-                  child: Text('端末番号4')
-                ),
-                DropdownMenuItem(
-                  value: '925aea83-44e0-4ff3-9ce6-84a1c5190532',
-                  child: Text('端末番号5')
-                ),
-                DropdownMenuItem(
-                  value: '4aaee190-e8ef-4fb6-8ee9-510902b68cf4',
-                  child: Text('端末番号6')
-                ),
-                DropdownMenuItem(
-                  value: 'd6e367e6-c630-410f-bcc7-de02da21dd3a',
-                  child: Text('端末番号7')
-                ),
-                DropdownMenuItem(
-                  value: 'f3f4da8f-6ab0-4f0e-90a9-2689d72d2a4f',
-                  child: Text('端末番号8')
-                ),
-                DropdownMenuItem(
-                  value: '23d96555-5ff0-4c5d-8b03-2f1db89141f1',
-                  child: Text('端末番号9')
-                ),
-                DropdownMenuItem(
-                  value: 'b0e968e9-8dd7-4e20-90a7-6c97834a4e88',
-                  child: Text('端末番号10')
-                ),
-                DropdownMenuItem(
-                  value: '605ded0a-ed1f-488b-b0ce-4ccf257c7329',
-                  child: Text('端末番号11')
-                ),
-                DropdownMenuItem(
-                  value: '0e9737f7-6d62-447f-ad00-bd36c4532729',
-                  child: Text('端末番号12')
-                ),
-                DropdownMenuItem(
-                  value: '55072870-f00e-4ab9-bc6c-1710eef5b0a0',
-                  child: Text('端末番号13')
-                )
+              items: [
+                for (final user in users)
+                  DropdownMenuItem(
+                    value: user.id!,
+                    child: Text(user.displayName!),
+                  )
               ],
               onChanged: _changeUser,
               value: _userId,
@@ -164,7 +162,8 @@ class _Home extends ConsumerState<Home> {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => Navi(
-                      raceId: raceId,
+                      assocId: _assocId!,
+                      userId: _userId!,
                       ttsSpeed: _ttsSpeed,
                       ttsDuration: _ttsDuration,
                       headingFix: _headingFix,
