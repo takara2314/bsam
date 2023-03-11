@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -127,116 +128,210 @@ class _Home extends ConsumerState<Home> {
 
     return Scaffold(
       appBar: AppBar(
-        title: SizedBox(
-          width: width * 0.8,
-          child: Text(
-            'セーリング団体名',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.primary,
-              fontWeight: FontWeight.bold
-            )
-          ),
-        ),
-        centerTitle: true
-      ),
-      body: Center(
-        child: Column(
-          children: <Widget>[
-            const Text('選手を選択'),
-            DropdownButton(
-              items: [
-                for (final user in users)
-                  DropdownMenuItem(
-                    value: user.id!,
-                    child: Text(user.displayName!),
-                  )
-              ],
-              onChanged: _changeUser,
-              value: _userId,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            SvgPicture.asset(
+              'images/logo.svg',
+              semanticsLabel: 'logo',
+              width: 42,
+              height: 42
             ),
-            ElevatedButton(
-              child: const Text(
-                'レースを始める'
+            Container(
+              width: width * 0.6,
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 8),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(9999)
               ),
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => Navi(
-                      assocId: _assocId!,
-                      userId: _userId!,
-                      ttsSpeed: _ttsSpeed,
-                      ttsDuration: _ttsDuration,
-                      headingFix: _headingFix,
-                      isAnnounceNeighbors: _isAnnounceNeighbors
-                    ),
-                  )
-                );
-              }
-            ),
-            SizedBox(
-              width: width * 0.9,
-              child: TextFormField(
-                initialValue: ttsSpeedInit.toString(),
-                onChanged: (String value) {
-                  try {
-                    setState(() {
-                      _ttsSpeed = double.parse(value);
-                    });
-                  } catch (_) {
-                    setState(() {
-                      _ttsSpeed = ttsSpeedInit;
-                    });
-                  }
-                },
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'アナウンス速度',
-                ),
+              child: Text(
+                'セーリング団体名',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16
+                )
               )
             ),
-            SizedBox(
-              width: width * 0.9,
-              child: TextFormField(
-                initialValue: ttsDurationInit.toString(),
-                onChanged: (String value) {
-                  try {
-                    setState(() {
-                      _ttsDuration = double.parse(value);
-                    });
-                  } catch (_) {
-                    setState(() {
-                      _ttsDuration = ttsDurationInit;
-                    });
-                  }
-                },
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'アナウンス間隔 [秒]',
-                ),
-              )
-            ),
-            SizedBox(
-              width: width * 0.9,
-              child: TextFormField(
-                initialValue: headingFixInit.toString(),
-                onChanged: (String value) {
-                  try {
-                    setState(() {
-                      _headingFix = double.parse(value);
-                    });
-                  } catch (_) {
-                    setState(() {
-                      _headingFix = headingFixInit;
-                    });
-                  }
-                },
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: '補正角度 [deg]',
-                ),
-              )
+            IconButton(
+              icon: const Icon(Icons.settings),
+              iconSize: 32,
+              onPressed: () {}
             )
           ]
+        )
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              Container(
+                width: width * 0.9,
+                margin: const EdgeInsets.only(top: 20, bottom: 30),
+                padding: const EdgeInsets.only(top: 20, bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10)
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: width * 0.4,
+                      child: Column(
+                        children: [
+                          for (final user in users.sublist(0, users.length ~/ 2))
+                            RadioListTile(
+                              title: Text(user.displayName!),
+                              value: user.id!,
+                              groupValue: _userId,
+                              onChanged: _changeUser,
+                            )
+                        ]
+                      )
+                    ),
+                    SizedBox(
+                      width: width * 0.4,
+                      child: Column(
+                        children: [
+                          for (final user in users.sublist(users.length ~/ 2))
+                            RadioListTile(
+                              title: Text(user.displayName!),
+                              value: user.id!,
+                              groupValue: _userId,
+                              onChanged: _changeUser,
+                            )
+                        ]
+                      )
+                    ),
+                  ]
+                )
+              ),
+              const Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Text('テストレース2023')
+              ),
+              SizedBox(
+                width: width * 0.9,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => Navi(
+                          assocId: _assocId!,
+                          userId: _userId!,
+                          ttsSpeed: _ttsSpeed,
+                          ttsDuration: _ttsDuration,
+                          headingFix: _headingFix,
+                          isAnnounceNeighbors: _isAnnounceNeighbors
+                        ),
+                      )
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.cyan,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)
+                    ),
+                    padding: const EdgeInsets.only(top: 20, bottom: 20)
+                  ),
+                  child: const Text(
+                    'レースに参加する',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20
+                    )
+                  )
+                ),
+              ),
+              Container(
+                width: width * 0.9,
+                margin: const EdgeInsets.only(top: 20, bottom: 20),
+                child: Table(
+                  children: <TableRow>[
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.only(top: 10, bottom: 10),
+                          alignment: Alignment.centerLeft,
+                          child: const Text('アナウンス速度')
+                        ),
+                        TextFormField(
+                          initialValue: ttsSpeedInit.toString(),
+                          onChanged: (String value) {
+                            try {
+                              setState(() {
+                                _ttsSpeed = double.parse(value);
+                              });
+                            } catch (_) {
+                              setState(() {
+                                _ttsSpeed = ttsSpeedInit;
+                              });
+                            }
+                          },
+                          textAlign: TextAlign.center,
+                          decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            // border-radius (not border line)
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: EdgeInsets.only(top: 8, bottom: 8, left: 10, right: 10),
+                          ),
+                        ),
+                      ]
+                    ),
+                  ],
+                ),
+              ),
+
+              // SizedBox(
+              //   width: width * 0.9,
+              //   child: TextFormField(
+              //     initialValue: ttsDurationInit.toString(),
+              //     onChanged: (String value) {
+              //       try {
+              //         setState(() {
+              //           _ttsDuration = double.parse(value);
+              //         });
+              //       } catch (_) {
+              //         setState(() {
+              //           _ttsDuration = ttsDurationInit;
+              //         });
+              //       }
+              //     },
+              //     decoration: const InputDecoration(
+              //       border: UnderlineInputBorder(),
+              //       labelText: 'アナウンス間隔 [秒]',
+              //     ),
+              //   )
+              // ),
+              // SizedBox(
+              //   width: width * 0.9,
+              //   child: TextFormField(
+              //     initialValue: headingFixInit.toString(),
+              //     onChanged: (String value) {
+              //       try {
+              //         setState(() {
+              //           _headingFix = double.parse(value);
+              //         });
+              //       } catch (_) {
+              //         setState(() {
+              //           _headingFix = headingFixInit;
+              //         });
+              //       }
+              //     },
+              //     decoration: const InputDecoration(
+              //       border: UnderlineInputBorder(),
+              //       labelText: '補正角度 [deg]',
+              //     ),
+              //   )
+              // )
+            ]
+          )
         )
       )
     );
