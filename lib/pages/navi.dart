@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -12,8 +11,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:wavenet/wavenet.dart';
 
 import 'package:bsam/providers.dart';
 import 'package:bsam/models/position.dart' as mark;
@@ -76,15 +73,12 @@ class _Navi extends ConsumerState<Navi> {
 
   DateTime? _lastPassedTime;
 
-  late TextToSpeechService _ttsService;
-  final audioPlayer = AudioPlayer();
-
   @override
   void initState() {
     super.initState();
 
-    // Load wavenet tts
-    _loadTts();
+    // Init text to speech
+    _initTts();
 
     // Screen lock
     Wakelock.enable();
@@ -103,10 +97,6 @@ class _Navi extends ConsumerState<Navi> {
 
     _compass = FlutterCompass.events?.listen(_changeHeading);
 
-    // _timerPeriodicTts = Timer.periodic(
-    //   Duration(milliseconds: (widget.ttsDuration * 1000).toInt()),
-    //   _periodicTts
-    // );
     _periodicTts();
 
     _connectWs();
@@ -114,18 +104,20 @@ class _Navi extends ConsumerState<Navi> {
 
   @override
   void dispose() {
+    tts.pause();
     _timerSendLoc.cancel();
-    // _timerPeriodicTts.cancel();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
     Wakelock.disable();
     super.dispose();
   }
 
-  _loadTts() {
-    // Get wavenet token (tts)
-    final token = ref.read(wavenetTokenProvider);
-    _ttsService = TextToSpeechService(token);
+  _initTts() async {
+    await tts.setLanguage("ja-JP");
+    await tts.setSpeechRate(widget.ttsSpeed);
+    await tts.setVolume(1.0);
+    await tts.setPitch(1.0);
+    await tts.awaitSpeakCompletion(true);
   }
 
   _connectWs() {
@@ -213,13 +205,6 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _receiveStartRace(dynamic msg) {
-    // have started
-    if (_started == false && msg['started']) {
-      setState(() {
-        _nextMarkNo = 1;
-      });
-    }
-
     // race status
     setState(() {
       _started = msg['started'];
@@ -364,29 +349,30 @@ class _Navi extends ConsumerState<Navi> {
         return;
       }
 
+      // If not started, skip tts
+      if (!_started) {
+        await Future.delayed(const Duration(milliseconds: 10));
+        continue;
+      }
+
+      // If stopped periodic tts, skip tts
       if (!_enabledPeriodicTts) {
-        debugPrint('定期アナウンスが中止されているため、アナウンスをスルーします');
         await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
         continue;
       }
 
-      String text = '';
+      await Future.delayed(Duration(milliseconds: (1.5 * 1000).toInt()));
 
-      if (!_started) {
-        await Future.delayed(const Duration(milliseconds: 100));
-        continue;
+      String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
 
-      } else {
-        text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
-
-        if (_lastPassedTime != null) {
+      // If passed mark, speak mark name additionally
+      if (_lastPassedTime != null) {
           if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
             text = '${marks[_nextMarkNo]![1]}、$text';
           }
         }
-      }
 
-      await _tts(text);
+      await tts.speak(text);
       await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
     }
   }
@@ -401,33 +387,13 @@ class _Navi extends ConsumerState<Navi> {
     });
 
     for (int i = 0; i < 5; i++) {
-      await _tts('${marks[markNo]![1]}に到達');
-      await Future.delayed(const Duration(seconds: 3));
+      await tts.speak('${marks[markNo]![1]}に到達');
+      await Future.delayed(const Duration(seconds: 1));
     }
 
     setState(() {
       _enabledPeriodicTts = true;
     });
-  }
-
-  _tts(String text) async {
-    text.replaceAll('46', 'よんじゅうろく');
-
-    File file = await _ttsService.textToSpeech(
-      text: text,
-      voiceName: 'ja-JP-Wavenet-B',
-      languageCode: 'ja-JP',
-      audioEncoding: 'LINEAR16',
-      speakingRate: widget.ttsSpeed,
-    );
-    try {
-      await audioPlayer.play(
-        DeviceFileSource(file.path),
-        volume: 1.0
-      );
-    } catch (e) {
-      debugPrint(e.toString());
-    }
   }
 
   _forcePassed(int markNo) {
