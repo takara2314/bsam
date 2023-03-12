@@ -274,7 +274,6 @@ class _Home extends ConsumerState<Home> {
                           decoration: const InputDecoration(
                             filled: true,
                             fillColor: Colors.white,
-                            // border-radius (not border line)
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.all(Radius.circular(10.0)),
                               borderSide: BorderSide.none,
@@ -284,52 +283,45 @@ class _Home extends ConsumerState<Home> {
                         ),
                       ]
                     ),
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.only(top: 20, bottom: 10),
+                          alignment: Alignment.centerLeft,
+                          child: const Text('アナウンス間隔 [秒]')
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: TextFormField(
+                            initialValue: ttsDurationInit.toString(),
+                            onChanged: (String value) {
+                              try {
+                                setState(() {
+                                  _ttsDuration = double.parse(value);
+                                });
+                              } catch (_) {
+                                setState(() {
+                                  _ttsDuration = ttsDurationInit;
+                                });
+                              }
+                            },
+                            textAlign: TextAlign.center,
+                            decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.only(top: 8, bottom: 8, left: 10, right: 10),
+                            ),
+                          ),
+                        ),
+                      ]
+                    ),
                   ],
                 ),
-              ),
-
-              // SizedBox(
-              //   width: width * 0.9,
-              //   child: TextFormField(
-              //     initialValue: ttsDurationInit.toString(),
-              //     onChanged: (String value) {
-              //       try {
-              //         setState(() {
-              //           _ttsDuration = double.parse(value);
-              //         });
-              //       } catch (_) {
-              //         setState(() {
-              //           _ttsDuration = ttsDurationInit;
-              //         });
-              //       }
-              //     },
-              //     decoration: const InputDecoration(
-              //       border: UnderlineInputBorder(),
-              //       labelText: 'アナウンス間隔 [秒]',
-              //     ),
-              //   )
-              // ),
-              // SizedBox(
-              //   width: width * 0.9,
-              //   child: TextFormField(
-              //     initialValue: headingFixInit.toString(),
-              //     onChanged: (String value) {
-              //       try {
-              //         setState(() {
-              //           _headingFix = double.parse(value);
-              //         });
-              //       } catch (_) {
-              //         setState(() {
-              //           _headingFix = headingFixInit;
-              //         });
-              //       }
-              //     },
-              //     decoration: const InputDecoration(
-              //       border: UnderlineInputBorder(),
-              //       labelText: '補正角度 [deg]',
-              //     ),
-              //   )
-              // )
+              )
             ]
           )
         )
