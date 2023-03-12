@@ -237,7 +237,7 @@ class _Navi extends ConsumerState<Navi> {
       desiredAccuracy: LocationAccuracy.best,
     );
 
-    if (pos.accuracy > 15.0 || !mounted) {
+    if (pos.accuracy > 30.0 || !mounted) {
       return;
     }
 
@@ -249,6 +249,10 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _sendLocation(Timer? timer) async {
+    if (!mounted) {
+      return;
+    }
+
     await _getPosition();
     if (_started) {
       _checkPassed();
