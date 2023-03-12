@@ -11,6 +11,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:battery_plus/battery_plus.dart';
 
 import 'package:bsam/providers.dart';
 import 'package:bsam/models/position.dart' as mark;
@@ -51,10 +52,12 @@ class _Navi extends ConsumerState<Navi> {
   };
 
   final FlutterTts tts = FlutterTts();
+  final Battery battery = Battery();
 
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
   late Timer _timerSendLoc;
+  late Timer _timerSendBattery;
 
   bool _started = false;
   bool _enabledPeriodicTts = true;
@@ -93,6 +96,12 @@ class _Navi extends ConsumerState<Navi> {
     _timerSendLoc = Timer.periodic(
       const Duration(milliseconds: 500),
       _sendLocation
+    );
+
+    _sendBattery(null);
+    _timerSendBattery = Timer.periodic(
+      const Duration(seconds: 10),
+      _sendBattery
     );
 
     _compass = FlutterCompass.events?.listen(_changeHeading);
@@ -256,6 +265,21 @@ class _Navi extends ConsumerState<Navi> {
     } catch (_) {}
   }
 
+  _sendBattery(Timer? timer) async {
+    if (!mounted) {
+      return;
+    }
+
+    final level = await _getBattery();
+
+    try {
+      _channel.sink.add(json.encode({
+        'type': 'battery',
+        'level': level
+      }));
+    } catch (_) {}
+  }
+
   _checkPassed() {
     double diff = Geolocator.distanceBetween(
       _lat,
@@ -404,6 +428,10 @@ class _Navi extends ConsumerState<Navi> {
     setState(() {
       _nextMarkNo = nextMarkNo;
     });
+  }
+
+  Future<int> _getBattery() async {
+    return await battery.batteryLevel;
   }
 
   @override
