@@ -32,7 +32,7 @@ class _Home extends ConsumerState<Home> {
     User(displayName: '10番艇', id: 'athlete10')
   ];
 
-  static double ttsSpeedInit = 1.5;
+  static double ttsSpeedInit = 1.0;
   static double ttsDurationInit = 1.0;
   static double headingFixInit = 0.0;
 
