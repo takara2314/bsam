@@ -56,9 +56,11 @@ class _Navi extends ConsumerState<Navi> {
 
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
+  late Timer _timerSendLoc;
+  late Timer _timerSendBattery;
 
   bool _started = false;
-  bool _enabledPeriodicAnnounce = true;
+  bool _enabledPeriodicTts = true;
 
   double _lat = 0.0;
   double _lng = 0.0;
@@ -90,11 +92,21 @@ class _Navi extends ConsumerState<Navi> {
     // Change tts speed
     tts.setSpeechRate(widget.ttsSpeed);
 
+    _sendLocation(null);
+    _timerSendLoc = Timer.periodic(
+      const Duration(milliseconds: 500),
+      _sendLocation
+    );
+
+    _sendBattery(null);
+    _timerSendBattery = Timer.periodic(
+      const Duration(seconds: 10),
+      _sendBattery
+    );
+
     _compass = FlutterCompass.events?.listen(_changeHeading);
 
-    _initIsolate();
-
-    // _periodicAnnounce();
+    _periodicTts();
 
     _connectWs();
   }
@@ -102,6 +114,7 @@ class _Navi extends ConsumerState<Navi> {
   @override
   void dispose() {
     tts.pause();
+    _timerSendLoc.cancel();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
     Wakelock.disable();
@@ -114,42 +127,6 @@ class _Navi extends ConsumerState<Navi> {
     await tts.setVolume(1.0);
     await tts.setPitch(1.0);
     await tts.awaitSpeakCompletion(true);
-  }
-
-  _initIsolate() async {
-    _announceIsolate((widget.ttsDuration * 1000).toInt());
-    _sendLocationIsolate(500);
-    _sendBatteryIsolate(10000);
-  }
-
-  _announceIsolate(int interval) async {
-    while (true) {
-      if (!mounted) {
-        return;
-      }
-      await _announce();
-      await Future.delayed(Duration(milliseconds: interval));
-    }
-  }
-
-  _sendLocationIsolate(int interval) async {
-    while (true) {
-      if (!mounted) {
-        return;
-      }
-      await _sendLocation();
-      await Future.delayed(Duration(milliseconds: interval));
-    }
-  }
-
-  _sendBatteryIsolate(int interval) async {
-    while (true) {
-      if (!mounted) {
-        return;
-      }
-      await _sendBattery();
-      await Future.delayed(Duration(milliseconds: interval));
-    }
   }
 
   _connectWs() {
@@ -281,7 +258,11 @@ class _Navi extends ConsumerState<Navi> {
     });
   }
 
-  _sendLocation() async {
+  _sendLocation(Timer? timer) async {
+    if (!mounted) {
+      return;
+    }
+
     await _getPosition();
     if (_started) {
       _checkPassed();
@@ -300,7 +281,11 @@ class _Navi extends ConsumerState<Navi> {
     } catch (_) {}
   }
 
-  _sendBattery() async {
+  _sendBattery(Timer? timer) async {
+    if (!mounted) {
+      return;
+    }
+
     final level = await _getBattery();
 
     try {
@@ -338,7 +323,7 @@ class _Navi extends ConsumerState<Navi> {
     int nextMarkNo = _nextMarkNo % 3 + 1;
 
     _sendPassed(_nextMarkNo, nextMarkNo);
-    _passedAnnounce(_nextMarkNo);
+    _passedTts(_nextMarkNo);
 
     setState(() {
       _lastPassedTime = DateTime.now();
@@ -398,36 +383,47 @@ class _Navi extends ConsumerState<Navi> {
     });
   }
 
-  _announce() async {
-    // If not started, skip tts
-    if (!_started) {
-      return;
-    }
-
-    // If stopped periodic tts, skip tts
-    if (!_enabledPeriodicAnnounce) {
-      return;
-    }
-
-    String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
-
-    // If passed mark, speak mark name additionally
-    if (_lastPassedTime != null) {
-      if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
-        text = '${marks[_nextMarkNo]![1]}、$text';
+  _periodicTts() async {
+    while (true) {
+      if (!mounted) {
+        return;
       }
-    }
 
-    await tts.speak(text);
+      // If not started, skip tts
+      if (!_started) {
+        await Future.delayed(const Duration(milliseconds: 10));
+        continue;
+      }
+
+      // If stopped periodic tts, skip tts
+      if (!_enabledPeriodicTts) {
+        await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
+        continue;
+      }
+
+      await Future.delayed(Duration(milliseconds: (1.5 * 1000).toInt()));
+
+      String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
+
+      // If passed mark, speak mark name additionally
+      if (_lastPassedTime != null) {
+          if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
+            text = '${marks[_nextMarkNo]![1]}、$text';
+          }
+        }
+
+      await tts.speak(text);
+      await Future.delayed(Duration(milliseconds: (widget.ttsDuration * 1000).toInt()));
+    }
   }
 
-  _passedAnnounce(int markNo) async {
+  _passedTts(int markNo) async {
     if (!mounted) {
       return;
     }
 
     setState(() {
-      _enabledPeriodicAnnounce = false;
+      _enabledPeriodicTts = false;
     });
 
     for (int i = 0; i < 5; i++) {
@@ -436,7 +432,7 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     setState(() {
-      _enabledPeriodicAnnounce = true;
+      _enabledPeriodicTts = true;
     });
   }
 
