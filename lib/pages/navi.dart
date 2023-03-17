@@ -187,8 +187,14 @@ class _Navi extends ConsumerState<Navi> {
 
   _readWsMsg(dynamic msg) {
     final body = json.decode(msg);
+    debugPrint(body);
 
     switch (body['type']) {
+    case 'auth_result':
+      debugPrint('auth_resultもらいましたよ！！');
+      _receiveAuth(body);
+      break;
+
     case 'mark_position':
       _receiveMarkPos(MarkPositionMsg.fromJson(body));
       break;
@@ -205,6 +211,16 @@ class _Navi extends ConsumerState<Navi> {
       _receiveSetMarkNo(body);
       break;
     }
+  }
+
+  _receiveAuth(dynamic msg) {
+    if (msg['link_type'] != 'store') {
+      return;
+    }
+
+    setState(() {
+      _nextMarkNo = msg['next_mark_no'];
+    });
   }
 
   _receiveMarkPos(MarkPositionMsg msg) {
