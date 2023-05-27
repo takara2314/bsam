@@ -8,7 +8,7 @@ for (const key in contents) {
   content += `${key}=${contents[key]}\n`;
 }
 
-Deno.writeTextFileSync('.env', content)
+Deno.writeTextFile('.env', content)
   .then(() => {
     console.log('The dummy .env file has been created.');
   })
