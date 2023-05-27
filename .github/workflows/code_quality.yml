@@ -13,6 +13,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: '1.34.0'
+
+      - name: Create dummy .env
+        run: deno run --allow-write=. .github/createDummyEnv.ts
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2.10.0
         with:
