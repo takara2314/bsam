@@ -70,8 +70,6 @@ class _Navi extends ConsumerState<Navi> {
   List<mark.Position> _markPos = [];
   double _routeDistance = 0.0;
 
-  int _nearSailNum = 0;
-
   DateTime? _lastPassedTime;
 
   @override
@@ -243,9 +241,9 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
-    setState(() {
-      _nearSailNum = msg['neighbors'].length;
-    });
+    // setState(() {
+    //   _nearSailNum = msg['neighbors'].length;
+    // });
   }
 
   _receiveStartRace(dynamic msg) {
@@ -520,21 +518,21 @@ class _Navi extends ConsumerState<Navi> {
                     ),
                     Text(
                       '緯度 / 経度',
-                      style: Theme.of(context).textTheme.headline3
+                      style: Theme.of(context).textTheme.displaySmall
                     ),
                     Text(
                       '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
                     ),
                     Text(
                       '位置情報の精度',
-                      style: Theme.of(context).textTheme.headline3
+                      style: Theme.of(context).textTheme.displaySmall
                     ),
                     Text(
                       '${_accuracy.toStringAsFixed(2)} m'
                     ),
                     Text(
                       '端末の方角 / コンパスの方角',
-                      style: Theme.of(context).textTheme.headline3
+                      style: Theme.of(context).textTheme.displaySmall
                     ),
                     Text(
                       '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
@@ -568,28 +566,28 @@ class _Navi extends ConsumerState<Navi> {
                   children: [
                     Text(
                       'レースは始まっていません',
-                      style: Theme.of(context).textTheme.headline1
+                      style: Theme.of(context).textTheme.displayLarge
                     ),
                     const Text(
                       'スタートボタンが押されるまでお待ちください。'
                     ),
                     Text(
                       '緯度 / 経度',
-                      style: Theme.of(context).textTheme.headline3
+                      style: Theme.of(context).textTheme.displaySmall
                     ),
                     Text(
                       '${_lat.toStringAsFixed(6)} / ${_lng.toStringAsFixed(6)}'
                     ),
                     Text(
                       '位置情報の精度',
-                      style: Theme.of(context).textTheme.headline3
+                      style: Theme.of(context).textTheme.displaySmall
                     ),
                     Text(
                       '$_accuracy m'
                     ),
                     Text(
                       '端末の方角 / コンパスの方角',
-                      style: Theme.of(context).textTheme.headline3
+                      style: Theme.of(context).textTheme.displaySmall
                     ),
                     Text(
                       '${_heading.toStringAsFixed(2)}° / ${_compassDeg.toStringAsFixed(2)}°'
