@@ -48,7 +48,7 @@ class Navi extends ConsumerStatefulWidget {
 class _Navi extends ConsumerState<Navi> {
   static const markNum = 3;
 
-  static const marks = {
+  static const markNames = {
     1: ['上', 'かみ'],
     2: ['サイド', 'さいど'],
     3: ['下', 'しも']
@@ -70,7 +70,7 @@ class _Navi extends ConsumerState<Navi> {
   double _compassDeg = 0.0;
 
   int _nextMarkNo = 1;
-  List<mark.Position> _markPos = [];
+  List<mark.PositionWithId> _marks = [];
   double _routeDistance = 0.0;
 
   DateTime? _lastPassedTime;
@@ -223,18 +223,19 @@ class _Navi extends ConsumerState<Navi> {
   _receiveMarkPos(MarkPositionMsg msg) {
     if (!_started) {
       setState(() {
-        _markPos = msg.positions!;
+        _marks = msg.marks!;
       });
       return;
     }
 
     if (msg.markNum == markNum) {
       setState(() {
-        _markPos = msg.positions!;
+        _marks = msg.marks!;
       });
     } else {
       setState(() {
-        _markPos = updateMarksOnEnable(_markPos, msg.positions!);
+        // 送られてきた緯度経度が0.0のものは更新しない
+        _marks = updateMarksOnEnable(_marks, msg.marks!);
       });
     }
   }
@@ -312,8 +313,8 @@ class _Navi extends ConsumerState<Navi> {
     double diff = Geolocator.distanceBetween(
       _lat,
       _lng,
-      _markPos[_nextMarkNo - 1].lat!,
-      _markPos[_nextMarkNo - 1].lng!,
+      _marks[_nextMarkNo - 1].lat!,
+      _marks[_nextMarkNo - 1].lng!,
     );
 
     // Correct error
@@ -378,8 +379,8 @@ class _Navi extends ConsumerState<Navi> {
     double bearingDeg = Geolocator.bearingBetween(
       _lat,
       _lng,
-      _markPos[_nextMarkNo - 1].lat!,
-      _markPos[_nextMarkNo - 1].lng!,
+      _marks[_nextMarkNo - 1].lat!,
+      _marks[_nextMarkNo - 1].lng!,
     );
 
     double diff = bearingDeg - heading;
@@ -411,7 +412,7 @@ class _Navi extends ConsumerState<Navi> {
     // If passed mark, speak mark name additionally
     if (_lastPassedTime != null) {
       if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
-        text = '${marks[_nextMarkNo]![1]}、$text';
+        text = '${markNames[_nextMarkNo]![1]}、$text';
       }
     }
 
@@ -428,7 +429,7 @@ class _Navi extends ConsumerState<Navi> {
     });
 
     for (int i = 0; i < 5; i++) {
-      await tts.speak('${marks[markNo]![1]}に到達');
+      await tts.speak('${markNames[markNo]![1]}に到達');
       await Future.delayed(const Duration(seconds: 1));
     }
 
@@ -471,7 +472,7 @@ class _Navi extends ConsumerState<Navi> {
                   accuracy: _accuracy,
                   heading: _heading,
                   compassDeg: _compassDeg,
-                  marks: marks,
+                  markNames: markNames,
                   nextMarkNo: _nextMarkNo,
                   routeDistance: _routeDistance,
                   forcePassed: _forcePassed,

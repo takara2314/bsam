@@ -10,7 +10,7 @@ class Navigating extends StatelessWidget {
     required this.accuracy,
     required this.heading,
     required this.compassDeg,
-    required this.marks,
+    required this.markNames,
     required this.nextMarkNo,
     required this.routeDistance,
     required this.forcePassed,
@@ -22,7 +22,7 @@ class Navigating extends StatelessWidget {
   final double accuracy;
   final double heading;
   final double compassDeg;
-  final Map<int, List<String>> marks;
+  final Map<int, List<String>> markNames;
   final int nextMarkNo;
   final double routeDistance;
   final void Function(int) forcePassed;
@@ -43,7 +43,7 @@ class Navigating extends StatelessWidget {
           )
         ),
         Text(
-          '$nextMarkNo ${marks[nextMarkNo]![0]}マーク',
+          '$nextMarkNo ${markNames[nextMarkNo]![0]}マーク',
           style: const TextStyle(
             fontSize: 28
           )

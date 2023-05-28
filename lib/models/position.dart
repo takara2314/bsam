@@ -1,10 +1,16 @@
-class Position {
+class PositionWithId {
+  String? userId;
   double? lat;
   double? lng;
 
-  Position({this.lat, this.lng});
+  PositionWithId({
+    this.userId,
+    this.lat,
+    this.lng
+  });
 
-  Position.fromJson(Map<String, dynamic> json) {
+  PositionWithId.fromJson(Map<String, dynamic> json) {
+    userId = json['user_id'];
     lat = json['latitude'].toDouble();
     lng = json['longitude'].toDouble();
   }
