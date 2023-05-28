@@ -1,6 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.bsam.bsam">
-   <application
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
         android:label="B-SAM"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
