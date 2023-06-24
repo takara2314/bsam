@@ -156,35 +156,37 @@ class _Home extends ConsumerState<Home> {
         assocName: 'セーリング団体名'
       ),
       body: SingleChildScrollView(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            AthleteSelect(
-              users: users,
-              userId: _userId,
-              changeUser: _changeUser
-            ),
-            const RaceNameArea(
-              raceName: 'テストレース2023'
-            ),
-            ParticipateButton(
-              assocId: _assocId,
-              userId: _userId,
-              ttsSpeed: _ttsSpeed,
-              ttsDuration: _ttsDuration,
-              headingFix: _headingFix,
-              isAnnounceNeighbors: _isAnnounceNeighbors
-            ),
-            Settings(
-              ttsSpeed: _ttsSpeed,
-              ttsSpeedInit: ttsSpeedInit,
-              changeTtsSpeedAtTextForm: _changeTtsSpeedAtTextForm,
-              ttsDuration: _ttsDuration,
-              changeTtsDurationAtTextForm: _changeTtsDurationAtTextForm,
-              ttsDurationInit: ttsDurationInit
-            )
-          ]
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              AthleteSelect(
+                users: users,
+                userId: _userId,
+                changeUser: _changeUser
+              ),
+              const RaceNameArea(
+                raceName: 'テストレース2023'
+              ),
+              ParticipateButton(
+                assocId: _assocId,
+                userId: _userId,
+                ttsSpeed: _ttsSpeed,
+                ttsDuration: _ttsDuration,
+                headingFix: _headingFix,
+                isAnnounceNeighbors: _isAnnounceNeighbors
+              ),
+              Settings(
+                ttsSpeed: _ttsSpeed,
+                ttsSpeedInit: ttsSpeedInit,
+                changeTtsSpeedAtTextForm: _changeTtsSpeedAtTextForm,
+                ttsDuration: _ttsDuration,
+                changeTtsDurationAtTextForm: _changeTtsDurationAtTextForm,
+                ttsDurationInit: ttsDurationInit
+              )
+            ]
+          )
         )
       )
     );
