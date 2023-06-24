@@ -158,6 +158,8 @@ class _Home extends ConsumerState<Home> {
       body: SingleChildScrollView(
         child: Center(
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               AthleteSelect(
                 users: users,

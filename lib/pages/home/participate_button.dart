@@ -27,20 +27,23 @@ class ParticipateButton extends StatelessWidget {
     return SizedBox(
       width: width * 0.9,
       child: ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => Navi(
-                assocId: assocId!,
-                userId: userId!,
-                ttsSpeed: ttsSpeed,
-                ttsDuration: ttsDuration,
-                headingFix: headingFix,
-                isAnnounceNeighbors: isAnnounceNeighbors
-              ),
-            )
-          );
-        },
+        onPressed:
+          userId != null || assocId != null
+            ? () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Navi(
+                      assocId: assocId!,
+                      userId: userId!,
+                      ttsSpeed: ttsSpeed,
+                      ttsDuration: ttsDuration,
+                      headingFix: headingFix,
+                      isAnnounceNeighbors: isAnnounceNeighbors
+                    ),
+                  )
+                );
+              }
+            : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.cyan,
           shape: RoundedRectangleBorder(
