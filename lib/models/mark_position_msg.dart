@@ -1,18 +1,21 @@
-import 'package:bsam/models/position.dart';
+import 'package:bsam/models/mark.dart';
 
 class MarkPositionMsg {
   int? markNum;
-  List<Position>? positions;
+  List<Mark>? marks;
 
-  MarkPositionMsg({this.markNum, this.positions});
+  MarkPositionMsg({
+    this.markNum,
+    this.marks
+  });
 
   MarkPositionMsg.fromJson(Map<String, dynamic> json) {
     markNum = json['mark_num'];
 
-    if (json['positions'] != null) {
-      positions = <Position>[];
-      json['positions'].forEach((v) {
-        positions!.add(Position.fromJson(v));
+    if (json['marks'] != null) {
+      marks = <Mark>[];
+      json['marks'].forEach((v) {
+        marks!.add(Mark.fromJson(v));
       });
     }
   }
