@@ -14,7 +14,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:battery_plus/battery_plus.dart';
 
 import 'package:bsam/providers.dart';
-import 'package:bsam/models/position.dart' as mark;
+import 'package:bsam/models/mark.dart';
 import 'package:bsam/models/mark_position_msg.dart';
 import 'package:bsam/services/navi/compass.dart';
 import 'package:bsam/services/navi/mark.dart';
@@ -70,7 +70,7 @@ class _Navi extends ConsumerState<Navi> {
   double _compassDeg = 0.0;
 
   int _nextMarkNo = 1;
-  List<mark.PositionWithId> _marks = [];
+  List<Mark> _marks = [];
   double _routeDistance = 0.0;
 
   DateTime? _lastPassedTime;
@@ -313,8 +313,8 @@ class _Navi extends ConsumerState<Navi> {
     double diff = Geolocator.distanceBetween(
       _lat,
       _lng,
-      _marks[_nextMarkNo - 1].lat!,
-      _marks[_nextMarkNo - 1].lng!,
+      _marks[_nextMarkNo - 1].position!.lat!,
+      _marks[_nextMarkNo - 1].position!.lng!,
     );
 
     // Correct error
@@ -379,8 +379,8 @@ class _Navi extends ConsumerState<Navi> {
     double bearingDeg = Geolocator.bearingBetween(
       _lat,
       _lng,
-      _marks[_nextMarkNo - 1].lat!,
-      _marks[_nextMarkNo - 1].lng!,
+      _marks[_nextMarkNo - 1].position!.lat!,
+      _marks[_nextMarkNo - 1].position!.lng!,
     );
 
     double diff = bearingDeg - heading;
