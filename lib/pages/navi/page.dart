@@ -204,7 +204,7 @@ class _Navi extends ConsumerState<Navi> {
       _receiveStartRace(body);
       break;
 
-    case 'set_mark_no':
+    case 'set_next_mark_no':
       _receiveSetMarkNo(body);
       break;
     }
