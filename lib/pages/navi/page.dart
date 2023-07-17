@@ -47,6 +47,7 @@ class Navi extends ConsumerStatefulWidget {
 
 class _Navi extends ConsumerState<Navi> {
   static const markNum = 3;
+  static const maxDistance = 10000;
 
   static const markNames = {
     1: ['上', 'かみ'],
@@ -415,6 +416,9 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
+    if (_routeDistance >= maxDistance) {
+      text = '向き、距離、不明';
+    }
 
     // If passed mark, speak mark name additionally
     if (_lastPassedTime != null) {
@@ -482,6 +486,7 @@ class _Navi extends ConsumerState<Navi> {
                   markNames: markNames,
                   nextMarkNo: _nextMarkNo,
                   routeDistance: _routeDistance,
+                  maxDistance: maxDistance,
                   forcePassed: _forcePassed,
                   onPassed: _onPassed
                 )
