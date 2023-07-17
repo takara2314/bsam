@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:bsam/widgets/compass.dart';
+import 'package:bsam/pages/navi/compass_area.dart';
 
 class Navigating extends StatelessWidget {
   const Navigating({
@@ -32,15 +31,8 @@ class Navigating extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          margin: const EdgeInsets.only(top: 30, bottom: 30),
-          child: SizedBox(
-            width: 250,
-            height: 250,
-            child: CustomPaint(
-              painter: Compass(heading: compassDeg)
-            )
-          )
+        CompassArea(
+          compassDeg: compassDeg
         ),
         Text(
           '$nextMarkNo ${markNames[nextMarkNo]![0]}マーク',
