@@ -292,8 +292,7 @@ class _Navi extends ConsumerState<Navi> {
         'longitude': _lng,
         'accuracy': _accuracy,
         'heading': _heading,
-        'heading_fixing': widget.headingFix,
-        'compass_degree': _compassDeg
+        'heading_fixing': widget.headingFix
       }));
     } catch (_) {}
   }
@@ -398,7 +397,7 @@ class _Navi extends ConsumerState<Navi> {
     if (diff > 180) {
       diff -= 360;
     } else if (diff < -180) {
-      diff = 360 - diff;
+      diff += 360;
     }
 
     return diff;
