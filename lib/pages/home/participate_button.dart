@@ -28,7 +28,7 @@ class ParticipateButton extends StatelessWidget {
       width: width * 0.9,
       child: ElevatedButton(
         onPressed:
-          userId != null || assocId != null
+          userId != null && assocId != null
             ? () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
