@@ -117,7 +117,7 @@ class _Navi extends ConsumerState<Navi> {
 
   _initIsolate() async {
     _announceIsolate((widget.ttsDuration * 1000).toInt());
-    _sendLocationIsolate(500);
+    _sendLocationIsolate(1000);
     _sendBatteryIsolate(10000);
   }
 
@@ -376,6 +376,16 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
+    setState(() {
+      _compassDeg = _calcCompassDeg(heading);
+    });
+  }
+
+  double _calcCompassDeg(double heading) {
+    if (!_started) {
+      return 0;
+    }
+
     double bearingDeg = Geolocator.bearingBetween(
       _lat,
       _lng,
@@ -391,9 +401,7 @@ class _Navi extends ConsumerState<Navi> {
       diff = 360 - diff;
     }
 
-    setState(() {
-      _compassDeg = diff;
-    });
+    return diff;
   }
 
   _announce() async {
