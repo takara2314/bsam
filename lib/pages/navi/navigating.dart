@@ -12,6 +12,7 @@ class Navigating extends StatelessWidget {
     required this.markNames,
     required this.nextMarkNo,
     required this.routeDistance,
+    required this.maxDistance,
     required this.forcePassed,
     required this.onPassed
   }) : super(key: key);
@@ -24,6 +25,7 @@ class Navigating extends StatelessWidget {
   final Map<int, List<String>> markNames;
   final int nextMarkNo;
   final double routeDistance;
+  final int maxDistance;
   final void Function(int) forcePassed;
   final void Function() onPassed;
 
@@ -54,7 +56,7 @@ class Navigating extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(left: 10, right: 10),
               child: Text(
-                '${routeDistance.toInt()}',
+                '${routeDistance < maxDistance ? routeDistance.toInt() : '?'}',
                 style: const TextStyle(
                   color: Color.fromRGBO(79, 79, 79, 1),
                   fontSize: 36
