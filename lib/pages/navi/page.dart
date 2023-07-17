@@ -310,6 +310,10 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _checkPassed() {
+    if (_lat == 0.0 && _lng == 0.0) {
+      return;
+    }
+
     double diff = Geolocator.distanceBetween(
       _lat,
       _lng,
