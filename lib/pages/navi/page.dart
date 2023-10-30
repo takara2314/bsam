@@ -330,15 +330,16 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _onPassed() {
-    int nextMarkNo = _nextMarkNo % 3 + 1;
-
-    _sendPassed(_nextMarkNo, nextMarkNo);
-    _passedAnnounce(_nextMarkNo);
+    int oldMarkNo = _nextMarkNo;
+    int nextMarkNo = oldMarkNo % 3 + 1;
 
     setState(() {
       _lastPassedTime = DateTime.now();
       _nextMarkNo = nextMarkNo;
     });
+
+    _sendPassed(oldMarkNo, nextMarkNo);
+    _passedAnnounce(oldMarkNo);
   }
 
   _sendPassed(int passedMarkNo, int nextMarkNo) {
@@ -436,9 +437,10 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _forcePassed(int markNo) {
+    int oldMarkNo = _nextMarkNo;
     int nextMarkNo = markNo % 3 + 1;
 
-    _sendPassed(_nextMarkNo, nextMarkNo);
+    _sendPassed(oldMarkNo, nextMarkNo);
 
     setState(() {
       _nextMarkNo = nextMarkNo;
