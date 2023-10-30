@@ -317,14 +317,11 @@ class _Navi extends ConsumerState<Navi> {
       _marks[_nextMarkNo - 1].position!.lng!,
     );
 
-    // Correct error
-    diff = max(0.0, diff - 10.0);
-
     setState(() {
       _routeDistance = diff;
     });
 
-    if (diff > 10.0) {
+    if (diff > 20.0) {
       return;
     }
 
