@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -25,14 +24,14 @@ import 'package:bsam/pages/navi/pop_dialog.dart';
 
 class Navi extends ConsumerStatefulWidget {
   const Navi({
-    Key? key,
+    super.key,
     required this.assocId,
     required this.userId,
     required this.ttsSpeed,
     required this.ttsDuration,
     required this.headingFix,
     required this.isAnnounceNeighbors
-  }) : super(key: key);
+  });
 
   final String assocId;
   final String userId;
@@ -321,14 +320,11 @@ class _Navi extends ConsumerState<Navi> {
       _marks[_nextMarkNo - 1].position!.lng!,
     );
 
-    // Correct error
-    diff = max(0.0, diff - 10.0);
-
     setState(() {
       _routeDistance = diff;
     });
 
-    if (diff > 10.0) {
+    if (diff > 20.0) {
       return;
     }
 
@@ -337,15 +333,16 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _onPassed() {
-    int nextMarkNo = _nextMarkNo % 3 + 1;
-
-    _sendPassed(_nextMarkNo, nextMarkNo);
-    _passedAnnounce(_nextMarkNo);
+    int oldMarkNo = _nextMarkNo;
+    int nextMarkNo = oldMarkNo % 3 + 1;
 
     setState(() {
       _lastPassedTime = DateTime.now();
       _nextMarkNo = nextMarkNo;
     });
+
+    _sendPassed(oldMarkNo, nextMarkNo);
+    _passedAnnounce(oldMarkNo);
   }
 
   _sendPassed(int passedMarkNo, int nextMarkNo) {
@@ -454,9 +451,10 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _forcePassed(int markNo) {
+    int oldMarkNo = _nextMarkNo;
     int nextMarkNo = markNo % 3 + 1;
 
-    _sendPassed(_nextMarkNo, nextMarkNo);
+    _sendPassed(oldMarkNo, nextMarkNo);
 
     setState(() {
       _nextMarkNo = nextMarkNo;

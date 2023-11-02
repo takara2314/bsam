@@ -4,11 +4,11 @@ import 'package:bsam/models/user.dart';
 
 class AthleteSelect extends StatelessWidget {
   const AthleteSelect({
-    Key? key,
+    super.key,
     required this.users,
     required this.userId,
     required this.changeUser
-  }) : super(key: key);
+  });
 
   final List<User> users;
   final String? userId;
