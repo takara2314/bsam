@@ -46,6 +46,7 @@ class Navi extends ConsumerStatefulWidget {
 
 class _Navi extends ConsumerState<Navi> {
   static const markNum = 3;
+  static const maxDistance = 10000;
 
   static const markNames = {
     1: ['上', 'かみ'],
@@ -116,7 +117,7 @@ class _Navi extends ConsumerState<Navi> {
 
   _initIsolate() async {
     _announceIsolate((widget.ttsDuration * 1000).toInt());
-    _sendLocationIsolate(500);
+    _sendLocationIsolate(1000);
     _sendBatteryIsolate(10000);
   }
 
@@ -203,7 +204,7 @@ class _Navi extends ConsumerState<Navi> {
       _receiveStartRace(body);
       break;
 
-    case 'set_mark_no':
+    case 'set_next_mark_no':
       _receiveSetMarkNo(body);
       break;
     }
@@ -291,8 +292,7 @@ class _Navi extends ConsumerState<Navi> {
         'longitude': _lng,
         'accuracy': _accuracy,
         'heading': _heading,
-        'heading_fixing': widget.headingFix,
-        'compass_degree': _compassDeg
+        'heading_fixing': widget.headingFix
       }));
     } catch (_) {}
   }
@@ -309,6 +309,10 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _checkPassed() {
+    if (_lat == 0.0 && _lng == 0.0) {
+      return;
+    }
+
     double diff = Geolocator.distanceBetween(
       _lat,
       _lng,
@@ -373,6 +377,16 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
+    setState(() {
+      _compassDeg = _calcCompassDeg(heading);
+    });
+  }
+
+  double _calcCompassDeg(double heading) {
+    if (!_started) {
+      return 0;
+    }
+
     double bearingDeg = Geolocator.bearingBetween(
       _lat,
       _lng,
@@ -385,12 +399,10 @@ class _Navi extends ConsumerState<Navi> {
     if (diff > 180) {
       diff -= 360;
     } else if (diff < -180) {
-      diff = 360 - diff;
+      diff += 360;
     }
 
-    setState(() {
-      _compassDeg = diff;
-    });
+    return diff;
   }
 
   _announce() async {
@@ -405,6 +417,9 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
+    if (_routeDistance >= maxDistance) {
+      text = '向き、距離、不明';
+    }
 
     // If passed mark, speak mark name additionally
     if (_lastPassedTime != null) {
@@ -473,6 +488,7 @@ class _Navi extends ConsumerState<Navi> {
                   markNames: markNames,
                   nextMarkNo: _nextMarkNo,
                   routeDistance: _routeDistance,
+                  maxDistance: maxDistance,
                   forcePassed: _forcePassed,
                   onPassed: _onPassed
                 )
