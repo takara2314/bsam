@@ -15,7 +15,7 @@ import 'package:bsam/pages/home/race_name_area.dart';
 import 'package:bsam/pages/home/settings.dart';
 
 class Home extends ConsumerStatefulWidget {
-  const Home({Key? key}) : super(key: key);
+  const Home({super.key});
 
   @override
   ConsumerState<Home> createState() => _Home();

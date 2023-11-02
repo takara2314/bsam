@@ -24,14 +24,14 @@ import 'package:bsam/pages/navi/pop_dialog.dart';
 
 class Navi extends ConsumerStatefulWidget {
   const Navi({
-    Key? key,
+    super.key,
     required this.assocId,
     required this.userId,
     required this.ttsSpeed,
     required this.ttsDuration,
     required this.headingFix,
     required this.isAnnounceNeighbors
-  }) : super(key: key);
+  });
 
   final String assocId;
   final String userId;

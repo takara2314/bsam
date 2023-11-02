@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class Waiting extends StatelessWidget {
   const Waiting({
-    Key? key,
+    super.key,
     required this.latitude,
     required this.longitude,
     required this.accuracy,
     required this.heading,
     required this.compassDeg
-  }) : super(key: key);
+  });
 
   final double latitude;
   final double longitude;
