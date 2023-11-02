@@ -35,14 +35,14 @@ dependencies:
   http: ^1.0.0
   web_socket_channel: ^2.4.0
   flutter_riverpod: ^2.3.6
-  flutter_compass: ^0.7.0
-  geolocator: ^9.0.1
+  flutter_compass: ^0.8.0
+  geolocator: ^10.1.0
   wakelock: ^0.6.2
-  permission_handler: ^10.2.0
+  permission_handler: ^11.0.1
   shared_preferences: ^2.1.1
   jwt_decode: ^0.3.1
   flutter_tts: ^3.6.3
-  battery_plus: ^3.0.3
+  battery_plus: ^4.1.0
   flutter_dotenv: ^5.0.2
 
   # The following adds the Cupertino Icons font to your application.
@@ -60,7 +60,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^2.0.0
+  flutter_lints: ^3.0.0
 
 flutter_icons:
   android: "launcher_icon"

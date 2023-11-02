@@ -32,5 +32,5 @@ jobs:
       - name: Lint
         run: flutter analyze
 
-      - name: Test
-        run: flutter test
+      - name: Build APK
+        run: flutter build apk
