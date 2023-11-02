@@ -416,16 +416,10 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
-    String text = '${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
+    String text = '${markNames[_nextMarkNo]![1]}、${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
+    // If route distance is over max distance, announce 'unknown'
     if (_routeDistance >= maxDistance) {
       text = '向き、距離、不明';
-    }
-
-    // If passed mark, speak mark name additionally
-    if (_lastPassedTime != null) {
-      if (DateTime.now().difference(_lastPassedTime!).inSeconds < 30) {
-        text = '${markNames[_nextMarkNo]![1]}、$text';
-      }
     }
 
     await tts.speak(text);
