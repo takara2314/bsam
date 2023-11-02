@@ -4,9 +4,9 @@ import 'package:bsam/widgets/compass.dart';
 
 class CompassArea extends StatefulWidget {
   const CompassArea({
-    Key? key,
+    super.key,
     required this.compassDeg
-  }) : super(key: key);
+  });
 
   final double compassDeg;
 
