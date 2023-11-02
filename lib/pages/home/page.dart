@@ -153,7 +153,7 @@ class _Home extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const HomeAppBar(
-        assocName: 'セーリング団体名'
+        assocName: 'セーリング伊勢'
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -167,7 +167,7 @@ class _Home extends ConsumerState<Home> {
                 changeUser: _changeUser
               ),
               const RaceNameArea(
-                raceName: 'テストレース2023'
+                raceName: '全国ハンザクラスブラインドセーリング大会'
               ),
               ParticipateButton(
                 assocId: _assocId,
