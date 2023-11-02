@@ -73,7 +73,7 @@ class _Navi extends ConsumerState<Navi> {
   List<Mark> _marks = [];
   double _routeDistance = 0.0;
 
-  DateTime? _lastPassedTime;
+  // DateTime? _lastPassedTime;
 
   @override
   void initState() {
@@ -337,7 +337,7 @@ class _Navi extends ConsumerState<Navi> {
     int nextMarkNo = oldMarkNo % 3 + 1;
 
     setState(() {
-      _lastPassedTime = DateTime.now();
+      // _lastPassedTime = DateTime.now();
       _nextMarkNo = nextMarkNo;
     });
 
