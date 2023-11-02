@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 class Settings extends StatelessWidget {
   const Settings({
-    Key? key,
+    super.key,
     required this.ttsSpeed,
     required this.ttsSpeedInit,
     required this.changeTtsSpeedAtTextForm,
     required this.ttsDuration,
     required this.changeTtsDurationAtTextForm,
     required this.ttsDurationInit
-  }) : super(key: key);
+  });
 
   final double ttsSpeed;
   final double ttsSpeedInit;

@@ -4,8 +4,8 @@ import 'package:bsam/pages/navi/pop_dialog.dart';
 
 class NaviAppBar extends StatelessWidget implements PreferredSizeWidget {
   const NaviAppBar({
-    Key? key
-  }) : super(key: key);
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {

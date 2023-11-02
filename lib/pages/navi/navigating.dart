@@ -3,7 +3,7 @@ import 'package:bsam/pages/navi/compass_area.dart';
 
 class Navigating extends StatelessWidget {
   const Navigating({
-    Key? key,
+    super.key,
     required this.latitude,
     required this.longitude,
     required this.accuracy,
@@ -15,7 +15,7 @@ class Navigating extends StatelessWidget {
     required this.maxDistance,
     required this.forcePassed,
     required this.onPassed
-  }) : super(key: key);
+  });
 
   final double latitude;
   final double longitude;
