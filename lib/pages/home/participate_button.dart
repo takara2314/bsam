@@ -4,14 +4,14 @@ import 'package:bsam/pages/navi/page.dart';
 
 class ParticipateButton extends StatelessWidget {
   const ParticipateButton({
-    Key? key,
+    super.key,
     required this.assocId,
     required this.userId,
     required this.ttsSpeed,
     required this.ttsDuration,
     required this.headingFix,
     required this.isAnnounceNeighbors
-  }) : super(key: key);
+  });
 
   final String? assocId;
   final String? userId;
