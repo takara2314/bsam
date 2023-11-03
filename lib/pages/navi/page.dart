@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -72,6 +73,7 @@ class _Navi extends ConsumerState<Navi> {
   int _nextMarkNo = 1;
   List<Mark> _marks = [];
   double _routeDistance = 0.0;
+  bool _reconnected = false;
 
   // DateTime? _lastPassedTime;
 
@@ -168,6 +170,9 @@ class _Navi extends ConsumerState<Navi> {
       onDone: () {
         if (mounted) {
           debugPrint('reconnect');
+          setState(() {
+            _reconnected = true;
+          });
           _connectWs();
         }
       }
@@ -215,9 +220,18 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
-    setState(() {
-      _nextMarkNo = msg['next_mark_no'];
-    });
+    if (_reconnected) {
+      int oldMarkNo = _nextMarkNo - 1;
+      if (oldMarkNo == 0) {
+        oldMarkNo = markNum;
+      }
+      _sendPassed(oldMarkNo, _nextMarkNo);
+
+    } else {
+      setState(() {
+        _nextMarkNo = msg['next_mark_no'];
+      });
+    }
   }
 
   _receiveMarkPos(MarkPositionMsg msg) {
@@ -405,6 +419,16 @@ class _Navi extends ConsumerState<Navi> {
     return diff;
   }
 
+  _speak(String text) async {
+    try {
+      await tts.speak(text);
+    } catch (e) {
+      debugPrint('error!');
+      debugPrint(e.toString());
+      await _initTts();
+    }
+  }
+
   _announce() async {
     // If not started, skip tts
     if (!_started) {
@@ -422,7 +446,7 @@ class _Navi extends ConsumerState<Navi> {
       text = '向き、距離、不明';
     }
 
-    await tts.speak(text);
+    await _speak(text);
   }
 
   _passedAnnounce(int markNo) async {
@@ -435,7 +459,7 @@ class _Navi extends ConsumerState<Navi> {
     });
 
     for (int i = 0; i < 5; i++) {
-      await tts.speak('${markNames[markNo]![1]}に到達');
+      await _speak('${markNames[markNo]![1]}に到達');
       await Future.delayed(const Duration(seconds: 1));
     }
 
