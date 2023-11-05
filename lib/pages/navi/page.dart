@@ -421,6 +421,9 @@ class _Navi extends ConsumerState<Navi> {
 
   _speak(String text) async {
     try {
+      // TTSの仕様で 46 のみ英語の発音なので、ひらがな読みにする
+      text = text.replaceAll('46', 'よんじゅうろく');
+
       await tts.speak(text);
     } catch (e) {
       debugPrint('error!');
