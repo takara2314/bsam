@@ -11,6 +11,7 @@ import 'package:web_socket_channel/status.dart' as status;
 import 'package:wakelock/wakelock.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:battery_plus/battery_plus.dart';
+import "package:async_locks/async_locks.dart";
 
 import 'package:bsam/providers.dart';
 import 'package:bsam/models/mark.dart';
@@ -77,6 +78,8 @@ class _Navi extends ConsumerState<Navi> {
   List<Mark> _marks = [];
   double _routeDistance = 0.0;
   bool _reconnected = false;
+
+  final speakLock = Lock();
 
   // DateTime? _lastPassedTime;
 
@@ -423,16 +426,19 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _speak(String text) async {
-    try {
-      // TTSの仕様で 46 のみ英語の発音なので、ひらがな読みにする
-      text = text.replaceAll('46', 'よんじゅうろく');
+    // 非同期による同時の発話を防ぐ (MethodChannelでクラッシュするため)
+    await speakLock.run(() async {
+      try {
+        // TTSの仕様で 46 のみ英語の発音なので、ひらがな読みにする
+        text = text.replaceAll('46', 'よんじゅうろく');
 
-      await tts.speak(text);
-    } catch (e) {
-      debugPrint('error!');
-      debugPrint(e.toString());
-      await _initTts();
-    }
+        await tts.speak(text);
+      } catch (e) {
+        debugPrint('error!');
+        debugPrint(e.toString());
+        await _initTts();
+      }
+    });
   }
 
   _announce() async {
