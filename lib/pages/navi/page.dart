@@ -113,7 +113,7 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _initTts() async {
-    await tts.setLanguage("ja-JP");
+    await tts.setLanguage('ja-JP');
     await tts.setSpeechRate(widget.ttsSpeed);
     await tts.setVolume(1.0);
     await tts.setPitch(1.0);

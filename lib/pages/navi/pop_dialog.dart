@@ -5,16 +5,16 @@ void isPopDialog(BuildContext context) {
     context: context,
     builder: (_) {
       return AlertDialog(
-        title: const Text("本当に戻りますか？"),
-        content: const Text("レースの真っ最中です。前の画面に戻るとレースを中断することになります。"),
+        title: const Text('本当に戻りますか？'),
+        content: const Text('レースの真っ最中です。前の画面に戻るとレースを中断することになります。'),
         actions: <Widget>[
           // ボタン領域
           TextButton(
-            child: const Text("いいえ"),
+            child: const Text('いいえ'),
             onPressed: () => Navigator.pop(context),
           ),
           TextButton(
-            child: const Text("はい"),
+            child: const Text('はい'),
             onPressed: () {
               int count = 0;
               Navigator.popUntil(context, (_) => count++ >= 2);
