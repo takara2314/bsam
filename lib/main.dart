@@ -23,6 +23,12 @@ void main() async {
     // クラッシュハンドラ (Flutterフレームワーク内でスローされたすべてのエラー)
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
+    WidgetsFlutterBinding.ensureInitialized();
+    // 画面の向きを縦に固定
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
     runApp(const ProviderScope(child: App()));
   },
     // クラッシュハンドラ (Flutterフレームワーク内でキャッチされないエラー)
