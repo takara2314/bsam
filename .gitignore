@@ -46,5 +46,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Google services (e.g. APIs or Firebase)
+google-services.json
+
 # Environment variables
 .env
