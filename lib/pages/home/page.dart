@@ -37,12 +37,16 @@ class _Home extends ConsumerState<Home> {
 
   static double ttsSpeedInit = 0.9;
   static double ttsDurationInit = 1.0;
+  static int reachJudgeRadiusInit = 15;
+  static int reachNoticeNumInit = 2;
   static double headingFixInit = 0.0;
 
   String? _assocId;
   String? _userId;
   double _ttsSpeed = ttsSpeedInit;
   double _ttsDuration = ttsDurationInit;
+  int _reachJudgeRadius = reachJudgeRadiusInit;
+  int _reachNoticeNum = reachNoticeNumInit;
   final double _headingFix = headingFixInit;
   final bool _isAnnounceNeighbors = false;
 
@@ -149,6 +153,30 @@ class _Home extends ConsumerState<Home> {
     }
   }
 
+  _changeReachJudgeRadiusAtTextForm(String value) {
+    try {
+      setState(() {
+        _reachJudgeRadius = int.parse(value);
+      });
+    } catch (_) {
+      setState(() {
+        _reachJudgeRadius = reachJudgeRadiusInit;
+      });
+    }
+  }
+
+  _changeReachNoticeNumAtTextForm(String value) {
+    try {
+      setState(() {
+        _reachNoticeNum = int.parse(value);
+      });
+    } catch (_) {
+      setState(() {
+        _reachNoticeNum = reachNoticeNumInit;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -174,6 +202,8 @@ class _Home extends ConsumerState<Home> {
                 userId: _userId,
                 ttsSpeed: _ttsSpeed,
                 ttsDuration: _ttsDuration,
+                reachJudgeRadius: _reachJudgeRadius,
+                reachNoticeNum: _reachNoticeNum,
                 headingFix: _headingFix,
                 isAnnounceNeighbors: _isAnnounceNeighbors
               ),
@@ -182,8 +212,14 @@ class _Home extends ConsumerState<Home> {
                 ttsSpeedInit: ttsSpeedInit,
                 changeTtsSpeedAtTextForm: _changeTtsSpeedAtTextForm,
                 ttsDuration: _ttsDuration,
+                ttsDurationInit: ttsDurationInit,
                 changeTtsDurationAtTextForm: _changeTtsDurationAtTextForm,
-                ttsDurationInit: ttsDurationInit
+                reachJudgeRadius: _reachJudgeRadius,
+                reachJudgeRadiusInit: reachJudgeRadiusInit,
+                changeReachJudgeRadiusAtTextForm: _changeReachJudgeRadiusAtTextForm,
+                reachNoticeNum: _reachNoticeNum,
+                reachNoticeNumInit: reachNoticeNumInit,
+                changeReachNoticeNumAtTextForm: _changeReachNoticeNumAtTextForm
               )
             ]
           )

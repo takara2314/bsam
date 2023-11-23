@@ -9,6 +9,8 @@ class ParticipateButton extends StatelessWidget {
     required this.userId,
     required this.ttsSpeed,
     required this.ttsDuration,
+    required this.reachJudgeRadius,
+    required this.reachNoticeNum,
     required this.headingFix,
     required this.isAnnounceNeighbors
   });
@@ -17,6 +19,8 @@ class ParticipateButton extends StatelessWidget {
   final String? userId;
   final double ttsSpeed;
   final double ttsDuration;
+  final int reachJudgeRadius;
+  final int reachNoticeNum;
   final double headingFix;
   final bool isAnnounceNeighbors;
 
@@ -37,6 +41,8 @@ class ParticipateButton extends StatelessWidget {
                       userId: userId!,
                       ttsSpeed: ttsSpeed,
                       ttsDuration: ttsDuration,
+                      reachJudgeRadius: reachJudgeRadius,
+                      reachNoticeNum: reachNoticeNum,
                       headingFix: headingFix,
                       isAnnounceNeighbors: isAnnounceNeighbors
                     ),

@@ -29,6 +29,8 @@ class Navi extends ConsumerStatefulWidget {
     required this.userId,
     required this.ttsSpeed,
     required this.ttsDuration,
+    required this.reachJudgeRadius,
+    required this.reachNoticeNum,
     required this.headingFix,
     required this.isAnnounceNeighbors
   });
@@ -37,6 +39,8 @@ class Navi extends ConsumerStatefulWidget {
   final String userId;
   final double ttsSpeed;
   final double ttsDuration;
+  final int reachJudgeRadius;
+  final int reachNoticeNum;
   final double headingFix;
   final bool isAnnounceNeighbors;
 
@@ -337,7 +341,7 @@ class _Navi extends ConsumerState<Navi> {
       _routeDistance = diff;
     });
 
-    if (diff > 20.0) {
+    if (diff > widget.reachJudgeRadius) {
       return;
     }
 
@@ -460,7 +464,7 @@ class _Navi extends ConsumerState<Navi> {
       _enabledPeriodicAnnounce = false;
     });
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < widget.reachNoticeNum; i++) {
       await _speak('${markNames[markNo]![1]}に到達');
       await Future.delayed(const Duration(seconds: 1));
     }
