@@ -49,6 +49,7 @@ app.*.map.json
 # Google services (e.g. APIs or Firebase)
 google-services.json
 GoogleService-Info.plist
+firebase_app_id_file.json
 firebase_options.dart
 
 # Environment variables
