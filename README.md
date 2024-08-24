@@ -1,33 +1,47 @@
-<div align="center">
-<a href="https://github.com/takara2314/bsam">
-    <img src="./images/icon.png" width="128" height="128" alt="logo" />
+<section align="center">
+
+<a href="https://github.com/takara2314/bsam-server">
+    <img src="./documents/logo.svg" width="128" height="128" alt="logo" />
 </a>
 
-# Blind Sailing Assist Mie - 視覚障がい者帆走支援アプリ
+# B-SAM - 視覚障がい者セーリング支援アプリ 選手用アプリ
 
-![Language: Dart](https://img.shields.io/badge/Language-Dart-00b4ab?style=for-the-badge&logo=dart)
-![Framework: Flutter](https://img.shields.io/badge/Framework-Flutter-54c5f8?style=for-the-badge&logo=flutter)
-![License: GPL-3.0](https://img.shields.io/badge/License-GPL%203.0-bd0000?style=for-the-badge)
+[![Dart](https://img.shields.io/badge/Go-ffffff?style=for-the-badge&labelColor=00b4ab&logoColor=ffffff&color=f5f5f5&logo=dart)](https://dart.dev/)
+[![Flutter](https://img.shields.io/badge/Flutter-ffffff?style=for-the-badge&labelColor=54c5f8&logoColor=ffffff&color=f5f5f5&logo=flutter)](https://flutter.dev/)
 
-</div>
+</section>
 
-視覚障がいをお持ちの方がセーリング（ヨット競技）を行うのを支援するスマートフォンアプリです。競技中、指定されたマークまでヨットで向かうとき、音声で方向ナビゲーションを行うことで、走行を支援します。マークは風や波の影響で位置が変わるため、最新の位置情報をリアルタイムに選手スマートフォンに送信します。
+視覚障がいのある方が、セーリング（ヨット競技）をより安全かつ楽しく行えるようにサポートするシステム「B-SAM（Blind Sailing Assist Mie）」のサーバーです。
 
-## 関連リポジトリ
+コース上に設置されたブイに搭載されたスマートフォンから、そのブイの位置情報をリアルタイムで取得します。そして、この位置情報を競技者のスマートフォンに送り続け、常に最新のレース状況を把握できるようにします。これにより、視覚情報に頼ることなく、競技者はレースに集中することができます。
 
+## 🔗 関連リポジトリ
 [本部用アプリ](https://github.com/takara2314/bsam-admin)
 
 [サーバー](https://github.com/takara2314/bsam-server)
 
 [レースモニター（外部公開用）](https://github.com/takara2314/bsam-web)
 
-## ライセンス
+## 🛠 前提
+- Dart 3.5.1
+- Flutter 3.24.1
 
-[GPL-3.0](./LICENSE)
+## ⚖️ ライセンス
+このプロジェクトは [GPL-3.0](./LICENSE) ライセンスの下で公開しています。
 
-## 開発者
+### 自由な利用と配布
+ソフトウェアを自由に使用、修正、配布する権利が保証されています。
+### ソースコードの公開
+配布時にはソースコードを提供するか、入手方法を明示する必要があります。
+### 派生作品の継承
+派生作品も同じGPLv3ライセンスで公開しなければなりません（コピーレフト）。
+### 特許権の取り扱い
+ソフトウェアに含まれる特許の無償利用を認め、貢献者がユーザーに対して特許訴訟を起こすことを禁止しています。
+### 商用利用
+営利目的での使用や販売が可能ですが、ソースコードの公開や、派生物へのGPLv3適用などの条件を守る必要があります。
 
-[Takara Hamaguchi](https://github.com/takara2314)
+## 👨‍💻 開発者
+[濱口 宝 (Takara Hamaguchi)](https://github.com/takara2314)
 
 <div align="center">
 <small>
