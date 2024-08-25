@@ -6,6 +6,13 @@ const apiServerBaseUrl = 'https://stg.api.bsam.app';
 const authServerBaseUrl = 'https://stg.auth.bsam.app';
 const gameServerBaseUrlWs = 'wss://stg.game.bsam.app';
 
+const bodyTextSize = 16.0;
+const bodyHeadingSize = 20.0;
+
+const bodyTextColor = Color.fromARGB(255, 62, 62, 62);
+const primaryColor = Color.fromARGB(255, 0, 42, 149);
+const secondaryColor = Color.fromARGB(255, 79, 150, 255);
+
 void main() {
   runApp(
     const ProviderScope(
@@ -23,6 +30,7 @@ class App extends StatelessWidget {
       title: 'B-SAM',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue),
+        scaffoldBackgroundColor: const Color.fromARGB(255, 242, 242, 242),
         useMaterial3: true,
       ),
       routerDelegate: router.routerDelegate,

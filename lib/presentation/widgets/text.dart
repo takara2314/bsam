@@ -1,13 +1,18 @@
+import 'package:bsam/main.dart';
 import 'package:flutter/material.dart';
 
 class NormalText extends StatelessWidget {
   final String text;
   final TextAlign? textAlign;
+  final Color? color;
+  final double? fontSize;
 
   const NormalText(
     this.text,
     {
       this.textAlign,
+      this.color,
+      this.fontSize,
       super.key
     }
   );
@@ -16,9 +21,9 @@ class NormalText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Color.fromARGB(255, 62, 62, 62),
-        fontSize: 16
+      style: TextStyle(
+        color: color ?? bodyTextColor,
+        fontSize: fontSize ?? bodyTextSize
       ),
       textAlign: textAlign
     );
@@ -27,20 +32,28 @@ class NormalText extends StatelessWidget {
 
 class Heading extends StatelessWidget {
   final String text;
+  final TextAlign? textAlign;
+  final Color? color;
+  final double? fontSize;
 
   const Heading(
     this.text,
-    {super.key}
+    {
+      this.textAlign,
+      this.color,
+      this.fontSize,
+      super.key
+    }
   );
 
   @override
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        color: Color.fromARGB(255, 62, 62, 62),
+      style: TextStyle(
+        color: color ?? bodyTextColor,
         fontWeight: FontWeight.bold,
-        fontSize: 20
+        fontSize: fontSize ?? bodyHeadingSize
       )
     );
   }

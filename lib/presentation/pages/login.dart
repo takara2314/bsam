@@ -1,3 +1,6 @@
+import 'package:bsam/main.dart';
+import 'package:bsam/presentation/widgets/icon.dart';
+import 'package:bsam/presentation/widgets/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -7,25 +10,73 @@ class LoginPage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final counter = useState(0);
+    final associationId = useState('');
+    final password = useState('');
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: Center(
-        // HookConsumer is a builder widget that allows you to read providers and utilise hooks.
-        child: Text(
-          '${counter.value}',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          counter.value++;
-        },
-        child: const Icon(Icons.add),
-      ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const Introduction(),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              color: Colors.white,
+              width: double.infinity,
+              height: 300,
+            ),
+          ),
+        ],
+      )
+    );
+  }
+}
+
+class Introduction extends StatelessWidget {
+  const Introduction({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.topLeft,
+      padding: const EdgeInsets.only(top: 100, left: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: const AppIcon(
+              size: 100
+            )
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 20),
+            child: const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Heading(
+                  'セーリングを',
+                  fontSize: 28,
+                  color: primaryColor
+                ),
+                Heading(
+                  'すべての人に。',
+                  fontSize: 28,
+                  color: primaryColor
+                ),
+                Heading(
+                  '私がマークまで安全に',
+                  fontSize: 28
+                ),
+                Heading(
+                  'ナビゲーションします。',
+                  fontSize: 28
+                )
+              ]
+            )
+          ),
+        ]
+      )
     );
   }
 }
