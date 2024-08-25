@@ -2,6 +2,10 @@ import 'package:bsam/router.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+const apiServerBaseUrl = 'https://stg.api.bsam.app';
+const authServerBaseUrl = 'https://stg.auth.bsam.app';
+const gameServerBaseUrlWs = 'wss://stg.game.bsam.app';
+
 void main() {
   runApp(
     const ProviderScope(

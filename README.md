@@ -1,7 +1,7 @@
 <section align="center">
 
 <a href="https://github.com/takara2314/bsam-server">
-    <img src="./documents/logo.svg" width="128" height="128" alt="logo" />
+    <img src="./assets/icon.svg" width="128" height="128" alt="logo" />
 </a>
 
 # B-SAM - 視覚障がい者セーリング支援アプリ 選手用アプリ
