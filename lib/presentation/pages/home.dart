@@ -2,6 +2,7 @@ import 'package:bsam/app/jwt/jwt.dart';
 import 'package:bsam/domain/athlete.dart';
 import 'package:bsam/infrastructure/repository/token.dart';
 import 'package:bsam/main.dart';
+import 'package:bsam/presentation/widgets/button.dart';
 import 'package:bsam/presentation/widgets/icon.dart';
 import 'package:bsam/presentation/widgets/text.dart';
 import 'package:bsam/provider.dart';
@@ -40,6 +41,11 @@ class HomePage extends HookConsumerWidget {
               chosenAthleteId: chosenAthleteId.value,
               setChosenAthleteId: setChosenAthleteId,
               joinedAthleteIds: joinedAthleteIds.value,
+            ),
+            RaceStartButton(
+              chosenAthleteId: chosenAthleteId.value,
+              joinedAthleteIds: joinedAthleteIds.value,
+              onPressed: () {}
             )
           ]
         )
@@ -266,6 +272,48 @@ class ChoiceAthleteChip extends StatelessWidget {
         showCheckmark: false,
         side: BorderSide.none,
       ),
+    );
+  }
+}
+
+class RaceStartButton extends StatelessWidget {
+  final String? chosenAthleteId;
+  final List<String> joinedAthleteIds;
+  final void Function() onPressed;
+
+  const RaceStartButton({
+    required this.chosenAthleteId,
+    required this.joinedAthleteIds,
+    required this.onPressed,
+    super.key
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    String label;
+    if (chosenAthleteId == null) {
+      label = '選手を選択してください';
+    } else if (joinedAthleteIds.contains(chosenAthleteId)) {
+      label = 'この艇はすでに参加しています';
+    } else {
+      label = 'レースを開始する';
+    }
+
+    bool disabled = (
+      chosenAthleteId == null
+      || joinedAthleteIds.contains(chosenAthleteId)
+    ) ? true : false;
+
+    return Container(
+      margin: const EdgeInsets.only(
+        top: 20,
+        left: 30,
+        right: 30,
+      ),
+      child: PrimaryButton(
+        label: label,
+        onPressed: disabled ? null : onPressed
+      )
     );
   }
 }
