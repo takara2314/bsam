@@ -1,6 +1,8 @@
+import 'package:bsam/app/jwt/jwt.dart';
 import 'package:bsam/infrastructure/repository/token.dart';
 import 'package:bsam/main.dart';
 import 'package:bsam/presentation/widgets/icon.dart';
+import 'package:bsam/provider.dart';
 import 'package:bsam/router.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -12,30 +14,21 @@ class HomePage extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final counter = useState(0);
+    final tokenNotifier = ref.watch(tokenProvider.notifier);
 
     return Scaffold(
       appBar: HomeAppBar(
-        associationName: 'エグサンポー協会',
+        associationName: Jwt.fromToken(tokenNotifier.state).associationName,
         onPressedLogout: () => logoutDialogBuilder(context, ref),
         preferredSize: const Size.fromHeight(72),
       ),
       body: Center(
         // HookConsumer is a builder widget that allows you to read providers and utilise hooks.
         child: Text(
-          '${counter.value}',
+          '0',
           style: Theme.of(context).textTheme.headlineMedium,
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          counter.value++;
-          if (counter.value == 5) {
-            context.push(racePagePath);
-          }
-        },
-        child: const Icon(Icons.add),
-      ),
+      )
     );
   }
 }
