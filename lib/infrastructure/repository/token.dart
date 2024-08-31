@@ -22,3 +22,11 @@ Future<void> saveToken(WidgetRef ref, String token) async {
   final tokenNotifier = ref.watch(tokenProvider.notifier);
   tokenNotifier.state = token;
 }
+
+Future<void> deleteToken(WidgetRef ref) async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('token');
+
+  final tokenNotifier = ref.watch(tokenProvider.notifier);
+  tokenNotifier.state = '';
+}

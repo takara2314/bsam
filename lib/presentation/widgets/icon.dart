@@ -24,9 +24,11 @@ class AppIcon extends StatelessWidget {
 
 class NoNetworkIcon extends StatelessWidget {
   final double size;
+  final Color? color;
 
   const NoNetworkIcon({
     required this.size,
+    this.color,
     super.key
   });
 
@@ -37,8 +39,8 @@ class NoNetworkIcon extends StatelessWidget {
       semanticsLabel: 'No Network Icon',
       width: size,
       height: size,
-      colorFilter: const ColorFilter.mode(
-        basicIconColor,
+      colorFilter: ColorFilter.mode(
+        color ?? basicIconColor,
         BlendMode.srcIn,
       ),
     );
@@ -47,9 +49,11 @@ class NoNetworkIcon extends StatelessWidget {
 
 class ErrorIcon extends StatelessWidget {
   final double size;
+  final Color? color;
 
   const ErrorIcon({
     required this.size,
+    this.color,
     super.key
   });
 
@@ -60,8 +64,8 @@ class ErrorIcon extends StatelessWidget {
       semanticsLabel: 'Error Icon',
       width: size,
       height: size,
-      colorFilter: const ColorFilter.mode(
-        basicIconColor,
+      colorFilter: ColorFilter.mode(
+        color ?? basicIconColor,
         BlendMode.srcIn,
       ),
     );
@@ -70,9 +74,11 @@ class ErrorIcon extends StatelessWidget {
 
 class LogoutIcon extends StatelessWidget {
   final double size;
+  final Color? color;
 
   const LogoutIcon({
     required this.size,
+    this.color,
     super.key
   });
 
@@ -83,8 +89,8 @@ class LogoutIcon extends StatelessWidget {
       semanticsLabel: 'Logout Icon',
       width: size,
       height: size,
-      colorFilter: const ColorFilter.mode(
-        basicIconColor,
+      colorFilter: ColorFilter.mode(
+        color ?? basicIconColor,
         BlendMode.srcIn,
       ),
     );
