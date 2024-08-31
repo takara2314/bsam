@@ -12,9 +12,14 @@ class RacePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // TODO: 仮の値のため、実際の値に変更する
     final raceName = useState('サンプルレース');
-    final compassHeading = useState(0.0);
     final nextMarkNo = useState(1);
     final nextMarkName = useState('上マーク');
+
+    final latitude = useState(35.658581);
+    final longitude = useState(139.745433);
+    final accuracyMeter = useState(10.0);
+    final heading = useState(0.0);
+    final compassDegree = useState(0.0);
     final distanceToNextMarkMeter = useState(46.5);
 
     return Scaffold(
@@ -25,11 +30,18 @@ class RacePage extends HookConsumerWidget {
       body: Center(
         child: Column(
           children: [
-            RaceCompass(heading: compassHeading.value),
+            RaceCompass(heading: compassDegree.value),
             RaceMarkDirectionInfo(
               nextMarkNo: nextMarkNo.value,
               nextMarkName: nextMarkName.value,
               distanceToNextMarkMeter: distanceToNextMarkMeter.value
+            ),
+            RaceMarkSensorInfo(
+              latitude: latitude.value,
+              longitude: longitude.value,
+              accuracyMeter: accuracyMeter.value,
+              heading: heading.value,
+              compassDegree: compassDegree.value
             )
           ]
         )
@@ -178,6 +190,108 @@ class RaceMarkNoIcon extends StatelessWidget {
           fontWeight: FontWeight.bold
         )
       )
+    );
+  }
+}
+
+class RaceMarkSensorInfo extends StatelessWidget {
+  final double latitude;
+  final double longitude;
+  final double accuracyMeter;
+  final double heading;
+  final double compassDegree;
+
+  const RaceMarkSensorInfo({
+    required this.latitude,
+    required this.longitude,
+    required this.accuracyMeter,
+    required this.heading,
+    required this.compassDegree,
+    super.key
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 20, left: 30, right: 30),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Table(
+        columnWidths: const {
+          0: FlexColumnWidth(3),
+          1: FlexColumnWidth(5),
+        },
+        children: [
+          TableRow(
+            children: [
+              const RaceMarkSensorInfoLabelCell('緯度 / 経度'),
+              RaceMarkSensorInfoValueCell(
+                '${latitude.toStringAsFixed(6)} / ${longitude.toStringAsFixed(6)}'
+              ),
+            ],
+          ),
+          TableRow(
+            children: [
+              const RaceMarkSensorInfoLabelCell('位置情報の精度'),
+              RaceMarkSensorInfoValueCell(
+                '${accuracyMeter.toStringAsFixed(2)}m'
+              ),
+            ],
+          ),
+          TableRow(
+            children: [
+              const RaceMarkSensorInfoLabelCell('方向の角度'),
+              RaceMarkSensorInfoValueCell(
+                '${heading.toStringAsFixed(2)}°'
+              ),
+            ],
+          ),
+          TableRow(
+            children: [
+              const RaceMarkSensorInfoLabelCell('コンパスの角度'),
+              RaceMarkSensorInfoValueCell(
+                '${compassDegree.toStringAsFixed(2)}°'
+              ),
+            ],
+          )
+        ]
+      )
+    );
+  }
+}
+
+class RaceMarkSensorInfoLabelCell extends StatelessWidget {
+  final String label;
+
+  const RaceMarkSensorInfoLabelCell(
+    this.label,
+    {super.key}
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return TableCell(
+      verticalAlignment: TableCellVerticalAlignment.middle,
+      child: NormalText(label)
+    );
+  }
+}
+
+class RaceMarkSensorInfoValueCell extends StatelessWidget {
+  final String value;
+
+  const RaceMarkSensorInfoValueCell(
+    this.value,
+    {super.key}
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return TableCell(
+      child: StrongText(value)
     );
   }
 }
