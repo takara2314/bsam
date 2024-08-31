@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bsam/infrastructure/repository/token.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -9,7 +10,6 @@ import 'package:bsam/presentation/widgets/icon.dart';
 import 'package:bsam/presentation/widgets/text.dart';
 import 'package:bsam/provider.dart';
 import 'package:bsam/router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 enum ViewName {
   authing,
@@ -27,11 +27,10 @@ class AuthPage extends HookConsumerWidget {
 
     useEffect(() {
       () async {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        final String? tokenInSp = prefs.getString('token');
+        await loadToken(ref);
 
         // トークンが保存されていないなら、ログインページに推移する
-        if (tokenInSp == null) {
+        if (tokenNotifier.state == '') {
           if (context.mounted) {
             context.go(loginPagePath);
           }
@@ -45,11 +44,10 @@ class AuthPage extends HookConsumerWidget {
         }
 
         // トークンを検証し、有効であればトークンを更新する
-        verifyToken(tokenInSp)
+        verifyToken(tokenNotifier.state)
           .then((res) async {
             // トークンを更新し、ホームページに推移する
-            tokenNotifier.state = res.token;
-            await prefs.setString('token', res.token);
+            saveToken(ref, res.token);
             if (context.mounted) {
               context.go(homePagePath);
             }
