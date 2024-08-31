@@ -80,7 +80,7 @@ class LoginPage extends HookConsumerWidget {
               width: double.infinity,
               height: 450,
               decoration: const BoxDecoration(
-                  color: Colors.white,
+                color: Colors.white,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16)
