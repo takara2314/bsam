@@ -1,5 +1,6 @@
 import 'package:bsam/router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const apiServerBaseUrl = 'https://stg.api.bsam.app';
@@ -29,6 +30,12 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 画面の向きを縦に固定
+    WidgetsFlutterBinding.ensureInitialized();
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
+
     return MaterialApp.router(
       title: 'B-SAM',
       theme: ThemeData(
