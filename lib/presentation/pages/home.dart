@@ -21,6 +21,7 @@ class HomePage extends HookConsumerWidget {
     final chosenAthleteId = useState<String?>(null);
 
     // TODO: 仮の値のため、実際の値に変更する
+    final raceName = useState('サンプルレース');
     final joinedAthleteIds = useState(['athlete1', 'athlete2', 'athlete3']);
 
     void setChosenAthleteId(String? athleteId) {
@@ -36,7 +37,7 @@ class HomePage extends HookConsumerWidget {
       body: Center(
         child: Column(
           children: [
-            Heading('サンプルレース'),
+            Heading(raceName.value),
             ChoiceAthlete(
               chosenAthleteId: chosenAthleteId.value,
               setChosenAthleteId: setChosenAthleteId,
@@ -45,7 +46,9 @@ class HomePage extends HookConsumerWidget {
             RaceStartButton(
               chosenAthleteId: chosenAthleteId.value,
               joinedAthleteIds: joinedAthleteIds.value,
-              onPressed: () {}
+              onPressed: () {
+                context.push(racePagePath);
+              }
             )
           ]
         )

@@ -35,6 +35,7 @@ class Heading extends StatelessWidget {
   final TextAlign? textAlign;
   final Color? color;
   final double? fontSize;
+  final FontWeight? fontWeight;
 
   const Heading(
     this.text,
@@ -42,6 +43,7 @@ class Heading extends StatelessWidget {
       this.textAlign,
       this.color,
       this.fontSize,
+      this.fontWeight,
       super.key
     }
   );
@@ -52,7 +54,7 @@ class Heading extends StatelessWidget {
       text,
       style: TextStyle(
         color: color ?? bodyTextColor,
-        fontWeight: FontWeight.bold,
+        fontWeight: fontWeight ?? FontWeight.bold,
         fontSize: fontSize ?? bodyHeadingSize
       )
     );
