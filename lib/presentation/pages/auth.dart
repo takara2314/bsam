@@ -53,14 +53,14 @@ class AuthPage extends HookConsumerWidget {
             }
           })
           .catchError((error) {
-            // タイムアウトしたなら、サーバーエラーと表示
-            if (error is TimeoutException) {
+            // サーバーに接続できない or タイムアウトなら、サーバーエラーと表示
+            if (error is TimeoutException || error is TimeoutException) {
               viewName.value = ViewName.serverError;
               return;
-            }
+
             // タイムアウト以外のエラーは認証失敗とみなし、
             // ログインページに遷移する
-            if (context.mounted) {
+            } else if (context.mounted) {
               context.go(loginPagePath);
             }
           });

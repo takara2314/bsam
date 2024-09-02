@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:bsam/app/auth/auth.dart';
 import 'package:bsam/app/inapp_notification/inapp_notification.dart';
 import 'package:bsam/infrastructure/repository/token.dart';
@@ -49,17 +50,17 @@ class LoginPage extends HookConsumerWidget {
           }
         })
         .catchError((error) {
-          // タイムアウトしたなら、サーバーエラーと表示
-          if (error is TimeoutException) {
+          // サーバーに接続できない or タイムアウトなら、サーバーエラーと表示
+          if (error is SocketException || error is TimeoutException) {
             if (context.mounted) {
               showNotificationWarning(
                 context,
                 'サーバーエラーが発生しました'
               );
             }
-          }
+
           // タイムアウト以外のエラーは認証失敗とみなす
-          if (context.mounted) {
+          } else if (context.mounted) {
             showNotificationError(
               context,
               'IDまたはパスワードが間違っています'
