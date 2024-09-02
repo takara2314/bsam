@@ -1,15 +1,35 @@
-import 'package:bsam/main.dart';
-import 'package:bsam/presentation/widgets/compass.dart';
-import 'package:bsam/presentation/widgets/text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:bsam/app/game/game.dart';
+import 'package:bsam/app/jwt/jwt.dart';
+import 'package:bsam/main.dart';
+import 'package:bsam/presentation/widgets/compass.dart';
+import 'package:bsam/presentation/widgets/text.dart';
+import 'package:bsam/provider.dart';
+
+const defaultWantMarkCounts = 3;
 
 class RacePage extends HookConsumerWidget {
-  const RacePage({super.key});
+  final String athleteId;
+
+  const RacePage({
+    required this.athleteId,
+    super.key
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final tokenNotifier = ref.watch(tokenProvider.notifier);
+    final jwt = Jwt.fromToken(tokenNotifier.state);
+
+    final game = useState<Game>(Game(
+      tokenNotifier.state,
+      jwt.associationId,
+      athleteId,
+      defaultWantMarkCounts,
+    ));
+
     // TODO: 仮の値のため、実際の値に変更する
     final raceName = useState('サンプルレース');
     final nextMarkNo = useState(1);
@@ -21,6 +41,16 @@ class RacePage extends HookConsumerWidget {
     final heading = useState(0.0);
     final compassDegree = useState(0.0);
     final distanceToNextMarkMeter = useState(46.5);
+
+    useEffect(() {
+      game.value.connect();
+
+      return () {
+        if (game.value.connected) {
+          game.value.disconnect();
+        }
+      };
+    }, []);
 
     return Scaffold(
       appBar: RaceAppBar(

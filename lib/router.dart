@@ -7,7 +7,7 @@ import 'package:bsam/presentation/pages/race.dart';
 const authPagePath = '/auth';
 const loginPagePath = '/login';
 const homePagePath = '/';
-const racePagePath = '/race';
+const racePagePathBase = '/race/';
 
 final GoRouter router = GoRouter(
   initialLocation: authPagePath,
@@ -25,8 +25,10 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const HomePage(),
     ),
     GoRoute(
-      path: racePagePath,
-      builder: (context, state) => const RacePage(),
+      path: '$racePagePathBase:athleteId',
+      builder: (context, state) => RacePage(
+        athleteId: state.pathParameters['athleteId']!,
+      ),
     ),
   ],
 );

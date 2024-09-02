@@ -47,7 +47,7 @@ class HomePage extends HookConsumerWidget {
               chosenAthleteId: chosenAthleteId.value,
               joinedAthleteIds: joinedAthleteIds.value,
               onPressed: () {
-                context.push(racePagePath);
+                context.push('$racePagePathBase${chosenAthleteId.value}');
               }
             )
           ]
