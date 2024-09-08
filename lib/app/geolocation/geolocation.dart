@@ -30,25 +30,32 @@ UseGeolocation useGeolocation() {
   final heading = useState(0.0);
   final speedMeterPerSec = useState(0.0);
 
-  const LocationSettings locationSettings = LocationSettings(
-    accuracy: LocationAccuracy.best,
-    distanceFilter: 0,
-  );
-  Geolocator.getPositionStream(
-    locationSettings: locationSettings
-  ).listen((Position? position) {
-    if (position == null) {
-      return;
-    }
+  useEffect(() {
+    const LocationSettings locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 0,
+    );
 
-    latitude.value = position.latitude;
-    longitude.value = position.longitude;
-    altitudeMeter.value = position.altitude;
-    accuracyMeter.value = position.accuracy;
-    altitudeAccuracyMeter.value = position.altitudeAccuracy;
-    heading.value = position.heading;
-    speedMeterPerSec.value = position.speed;
-  });
+    final subscription = Geolocator.getPositionStream(
+      locationSettings: locationSettings
+    ).listen((Position? position) {
+      if (position == null) {
+        return;
+      }
+
+      latitude.value = position.latitude;
+      longitude.value = position.longitude;
+      altitudeMeter.value = position.altitude;
+      accuracyMeter.value = position.accuracy;
+      altitudeAccuracyMeter.value = position.altitudeAccuracy;
+      heading.value = position.heading;
+      speedMeterPerSec.value = position.speed;
+    });
+
+    return () {
+      subscription.cancel();
+    };
+  }, []);
 
   return UseGeolocation(
     latitude: latitude.value,
