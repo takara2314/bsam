@@ -7,96 +7,59 @@ const handlerTypeMarkGeolocations = 'mark_geolocations';
 const handlerTypeManageRaceStatus = 'manage_race_status';
 const handlerTypeManageNextMark = 'manage_next_mark';
 
-enum HandlerType {
-  connectResult,
-  authResult,
-  markGeolocations,
-  manageRaceStatus,
-  manageNextMark,
-}
-
 class GameHandler {
-  final Map<HandlerType, Function> _handlers = {};
+  bool authed = false;
+  bool started = false;
 
   void handlePayload(dynamic payload) {
     final msg = json.decode(payload);
 
-    final handlerType = _getHandlerType(msg['type']);
-    if (handlerType != null) {
-      final handler = _handlers[handlerType];
-      if (handler != null) {
-        // メッセージタイプに応じてパースし、対応するハンドラを呼び出す
-        final parsed = _parseMessage(handlerType, msg);
-        handler(parsed);
-      } else {
-        debugPrint('Handler not set for type: ${msg['type']}');
-      }
-    } else {
-      debugPrint('Unknown message type: ${msg['type']}');
-    }
-  }
-
-  void setConnectResultHandler(
-    void Function(ConnectResultHandlerMessage) handler
-  ) {
-    _handlers[HandlerType.connectResult] = handler;
-  }
-
-  void setAuthResultHandler(
-    void Function(AuthResultHandlerMessage) handler
-  ) {
-    _handlers[HandlerType.authResult] = handler;
-  }
-
-  void setMarkGeolocationsHandler(
-    void Function(MarkGeolocationsHandlerMessage) handler
-  ) {
-    _handlers[HandlerType.markGeolocations] = handler;
-  }
-
-  void setManageRaceStatusHandler(
-    void Function(ManageRaceStatusHandlerMessage) handler
-  ) {
-    _handlers[HandlerType.manageRaceStatus] = handler;
-  }
-
-  void setManageNextMarkHandler(
-    void Function(ManageNextMarkHandlerMessage) handler
-  ) {
-    _handlers[HandlerType.manageNextMark] = handler;
-  }
-
-  HandlerType? _getHandlerType(String type) {
-    switch (type) {
+    switch (msg['type']) {
       case handlerTypeConnectResult:
-        return HandlerType.connectResult;
+        final parsed = ConnectResultHandlerMessage.fromJson(msg);
+        _handleConnectResult(parsed);
+        break;
+
       case handlerTypeAuthResult:
-        return HandlerType.authResult;
+        final parsed = AuthResultHandlerMessage.fromJson(msg);
+        _handleAuthResult(parsed);
+        break;
+
       case handlerTypeMarkGeolocations:
-        return HandlerType.markGeolocations;
+        final parsed = MarkGeolocationsHandlerMessage.fromJson(msg);
+        _handleMarkGeolocations(parsed);
+        break;
+
       case handlerTypeManageRaceStatus:
-        return HandlerType.manageRaceStatus;
+        final parsed = ManageRaceStatusHandlerMessage.fromJson(msg);
+        _handleManageRaceStatus(parsed);
+        break;
+
       case handlerTypeManageNextMark:
-        return HandlerType.manageNextMark;
+        final parsed = ManageNextMarkHandlerMessage.fromJson(msg);
+        _handleManageNextMark(parsed);
+        break;
+
       default:
-        return null;
+        debugPrint(
+          'Unknown message type: ${msg['type']}'
+        );
     }
   }
 
-  dynamic _parseMessage(HandlerType type, Map<String, dynamic> msg) {
-    switch (type) {
-      case HandlerType.connectResult:
-        return ConnectResultHandlerMessage.fromJson(msg);
-      case HandlerType.authResult:
-        return AuthResultHandlerMessage.fromJson(msg);
-      case HandlerType.markGeolocations:
-        return MarkGeolocationsHandlerMessage.fromJson(msg);
-      case HandlerType.manageRaceStatus:
-        return ManageRaceStatusHandlerMessage.fromJson(msg);
-      case HandlerType.manageNextMark:
-        return ManageNextMarkHandlerMessage.fromJson(msg);
-    }
+  void _handleConnectResult(ConnectResultHandlerMessage msg) {}
+
+  void _handleAuthResult(AuthResultHandlerMessage msg) {
+    authed = msg.authed;
   }
+
+  void _handleMarkGeolocations(MarkGeolocationsHandlerMessage msg) {}
+
+  void _handleManageRaceStatus(ManageRaceStatusHandlerMessage msg) {
+    started = msg.started;
+  }
+
+  void _handleManageNextMark(ManageNextMarkHandlerMessage msg) {}
 }
 
 class ConnectResultHandlerMessage {

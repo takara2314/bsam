@@ -28,6 +28,8 @@ class Game {
   void connect() => ws.connect(associationId);
   void disconnect() => ws.disconnect();
   get connected => ws.connected;
+  get authed => handler.authed;
+  get started => handler.started;
 
   void tryAuth() {
     action.sendAuthAction(AuthActionMessage(

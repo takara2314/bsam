@@ -36,7 +36,6 @@ class RacePage extends HookConsumerWidget {
     ));
 
     // TODO: 仮の値のため、実際の値に変更する
-    final started = useState(false);
     final raceName = useState('サンプルレース');
     final nextMarkNo = useState(1);
     final nextMarkName = useState('上マーク');
@@ -79,17 +78,13 @@ class RacePage extends HookConsumerWidget {
       };
     }, []);
 
-    game.value.handler.setManageRaceStatusHandler((msg) {
-      started.value = msg.started;
-    });
-
     return Scaffold(
       appBar: RaceAppBar(
         raceName: raceName.value,
         preferredSize: const Size.fromHeight(72),
       ),
       body: Center(
-        child: started.value
+        child: game.value.started
           ? RaceStarted(
             compassDegree: compassDegree.value,
             nextMarkNo: nextMarkNo.value,
