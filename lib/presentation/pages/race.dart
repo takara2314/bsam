@@ -1,4 +1,5 @@
 import 'package:bsam/app/game/action.dart';
+import 'package:bsam/presentation/widgets/icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_use/flutter_use.dart';
@@ -35,6 +36,7 @@ class RacePage extends HookConsumerWidget {
     ));
 
     // TODO: 仮の値のため、実際の値に変更する
+    final started = useState(false);
     final raceName = useState('サンプルレース');
     final nextMarkNo = useState(1);
     final nextMarkName = useState('上マーク');
@@ -77,29 +79,27 @@ class RacePage extends HookConsumerWidget {
       };
     }, []);
 
+    game.value.handler.setManageRaceStatusHandler((msg) {
+      started.value = msg.started;
+    });
+
     return Scaffold(
       appBar: RaceAppBar(
         raceName: raceName.value,
         preferredSize: const Size.fromHeight(72),
       ),
       body: Center(
-        child: Column(
-          children: [
-            RaceCompass(heading: compassDegree.value),
-            RaceMarkDirectionInfo(
-              nextMarkNo: nextMarkNo.value,
-              nextMarkName: nextMarkName.value,
-              distanceToNextMarkMeter: distanceToNextMarkMeter.value
-            ),
-            RaceMarkSensorInfo(
-              latitude: geolocation.position?.latitude ?? 0,
-              longitude: geolocation.position?.longitude ?? 0,
-              accuracyMeter: geolocation.position?.accuracy ?? 0,
-              heading: geolocation.position?.heading ?? 0,
-              compassDegree: compassDegree.value
-            )
-          ]
-        )
+        child: started.value
+          ? RaceStarted(
+            compassDegree: compassDegree.value,
+            nextMarkNo: nextMarkNo.value,
+            nextMarkName: nextMarkName.value,
+            distanceToNextMarkMeter: distanceToNextMarkMeter.value,
+            geolocation: geolocation
+          )
+          : RaceWaiting(
+            geolocation: geolocation
+          )
       )
     );
   }
@@ -130,6 +130,76 @@ class RaceAppBar extends StatelessWidget implements PreferredSizeWidget {
           fontWeight: FontWeight.bold
         ),
       ),
+    );
+  }
+}
+
+class RaceWaiting extends StatelessWidget {
+  final GeolocationState geolocation;
+
+  const RaceWaiting({
+    required this.geolocation,
+    super.key
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: const EdgeInsets.only(bottom: 20),
+          child: const AppIcon(
+            size: 200
+          )
+        ),
+        const NormalText('レース開始をお待ちください...'),
+        RaceMarkSensorInfo(
+          latitude: geolocation.position?.latitude ?? 0,
+          longitude: geolocation.position?.longitude ?? 0,
+          accuracyMeter: geolocation.position?.accuracy ?? 0,
+          heading: geolocation.position?.heading ?? 0,
+          compassDegree: 0,
+          showingCompass: false
+        )
+      ]
+    );
+  }
+}
+
+class RaceStarted extends StatelessWidget {
+  final double compassDegree;
+  final int nextMarkNo;
+  final String nextMarkName;
+  final double distanceToNextMarkMeter;
+  final GeolocationState geolocation;
+
+  const RaceStarted({
+    required this.compassDegree,
+    required this.nextMarkNo,
+    required this.nextMarkName,
+    required this.distanceToNextMarkMeter,
+    required this.geolocation,
+    super.key
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        RaceCompass(heading: compassDegree),
+        RaceMarkDirectionInfo(
+          nextMarkNo: nextMarkNo,
+          nextMarkName: nextMarkName,
+          distanceToNextMarkMeter: distanceToNextMarkMeter
+        ),
+        RaceMarkSensorInfo(
+          latitude: geolocation.position?.latitude ?? 0,
+          longitude: geolocation.position?.longitude ?? 0,
+          accuracyMeter: geolocation.position?.accuracy ?? 0,
+          heading: geolocation.position?.heading ?? 0,
+          compassDegree: compassDegree
+        )
+      ]
     );
   }
 }
@@ -255,6 +325,7 @@ class RaceMarkSensorInfo extends StatelessWidget {
   final double accuracyMeter;
   final double heading;
   final double compassDegree;
+  final bool showingCompass;
 
   const RaceMarkSensorInfo({
     required this.latitude,
@@ -262,6 +333,7 @@ class RaceMarkSensorInfo extends StatelessWidget {
     required this.accuracyMeter,
     required this.heading,
     required this.compassDegree,
+    this.showingCompass = true,
     super.key
   });
 
@@ -304,14 +376,15 @@ class RaceMarkSensorInfo extends StatelessWidget {
               ),
             ],
           ),
-          TableRow(
-            children: [
-              const RaceMarkSensorInfoLabelCell('コンパスの角度'),
-              RaceMarkSensorInfoValueCell(
-                '${compassDegree.toStringAsFixed(2)}°'
-              ),
-            ],
-          )
+          if (showingCompass)
+            TableRow(
+              children: [
+                const RaceMarkSensorInfoLabelCell('コンパスの角度'),
+                RaceMarkSensorInfoValueCell(
+                  '${compassDegree.toStringAsFixed(2)}°'
+                ),
+              ],
+            )
         ]
       )
     );
