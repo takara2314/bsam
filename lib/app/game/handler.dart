@@ -7,52 +7,96 @@ const handlerTypeMarkGeolocations = 'mark_geolocations';
 const handlerTypeManageRaceStatus = 'manage_race_status';
 const handlerTypeManageNextMark = 'manage_next_mark';
 
+enum HandlerType {
+  connectResult,
+  authResult,
+  markGeolocations,
+  manageRaceStatus,
+  manageNextMark,
+}
+
 class GameHandler {
+  final Map<HandlerType, Function> _handlers = {};
+
   void handlePayload(dynamic payload) {
     final msg = json.decode(payload);
 
-    debugPrint(
-      'Received message: $msg'
-    );
-
-    switch (msg['type']) {
-      case handlerTypeConnectResult:
-        final parsed = ConnectResultHandlerMessage.fromJson(msg);
-        handleConnectResult(parsed);
-        break;
-
-      case handlerTypeAuthResult:
-        final parsed = AuthResultHandlerMessage.fromJson(msg);
-        handleAuthResult(parsed);
-        break;
-
-      case handlerTypeMarkGeolocations:
-        final parsed = MarkGeolocationsHandlerMessage.fromJson(msg);
-        handleMarkGeolocations(parsed);
-        break;
-
-      case handlerTypeManageRaceStatus:
-        final parsed = ManageRaceStatusHandlerMessage.fromJson(msg);
-        handleManageRaceStatus(parsed);
-        break;
-
-      case handlerTypeManageNextMark:
-        final parsed = ManageNextMarkHandlerMessage.fromJson(msg);
-        handleManageNextMark(parsed);
-        break;
-
-      default:
-        debugPrint(
-          'Unknown message type: ${msg['type']}'
-        );
+    final handlerType = _getHandlerType(msg['type']);
+    if (handlerType != null) {
+      final handler = _handlers[handlerType];
+      if (handler != null) {
+        // メッセージタイプに応じてパースし、対応するハンドラを呼び出す
+        final parsed = _parseMessage(handlerType, msg);
+        handler(parsed);
+      } else {
+        debugPrint('Handler not set for type: ${msg['type']}');
+      }
+    } else {
+      debugPrint('Unknown message type: ${msg['type']}');
     }
   }
 
-  void handleConnectResult(ConnectResultHandlerMessage msg) {}
-  void handleAuthResult(AuthResultHandlerMessage msg) {}
-  void handleMarkGeolocations(MarkGeolocationsHandlerMessage msg) {}
-  void handleManageRaceStatus(ManageRaceStatusHandlerMessage msg) {}
-  void handleManageNextMark(ManageNextMarkHandlerMessage msg) {}
+  void setConnectResultHandler(
+    void Function(ConnectResultHandlerMessage) handler
+  ) {
+    _handlers[HandlerType.connectResult] = handler;
+  }
+
+  void setAuthResultHandler(
+    void Function(AuthResultHandlerMessage) handler
+  ) {
+    _handlers[HandlerType.authResult] = handler;
+  }
+
+  void setMarkGeolocationsHandler(
+    void Function(MarkGeolocationsHandlerMessage) handler
+  ) {
+    _handlers[HandlerType.markGeolocations] = handler;
+  }
+
+  void setManageRaceStatusHandler(
+    void Function(ManageRaceStatusHandlerMessage) handler
+  ) {
+    _handlers[HandlerType.manageRaceStatus] = handler;
+  }
+
+  void setManageNextMarkHandler(
+    void Function(ManageNextMarkHandlerMessage) handler
+  ) {
+    _handlers[HandlerType.manageNextMark] = handler;
+  }
+
+  HandlerType? _getHandlerType(String type) {
+    switch (type) {
+      case handlerTypeConnectResult:
+        return HandlerType.connectResult;
+      case handlerTypeAuthResult:
+        return HandlerType.authResult;
+      case handlerTypeMarkGeolocations:
+        return HandlerType.markGeolocations;
+      case handlerTypeManageRaceStatus:
+        return HandlerType.manageRaceStatus;
+      case handlerTypeManageNextMark:
+        return HandlerType.manageNextMark;
+      default:
+        return null;
+    }
+  }
+
+  dynamic _parseMessage(HandlerType type, Map<String, dynamic> msg) {
+    switch (type) {
+      case HandlerType.connectResult:
+        return ConnectResultHandlerMessage.fromJson(msg);
+      case HandlerType.authResult:
+        return AuthResultHandlerMessage.fromJson(msg);
+      case HandlerType.markGeolocations:
+        return MarkGeolocationsHandlerMessage.fromJson(msg);
+      case HandlerType.manageRaceStatus:
+        return ManageRaceStatusHandlerMessage.fromJson(msg);
+      case HandlerType.manageNextMark:
+        return ManageNextMarkHandlerMessage.fromJson(msg);
+    }
+  }
 }
 
 class ConnectResultHandlerMessage {
