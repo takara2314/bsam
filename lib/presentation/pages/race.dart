@@ -1,5 +1,7 @@
+import 'package:bsam/app/game/action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_use/flutter_use.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_use_geolocation/flutter_use_geolocation.dart';
@@ -45,6 +47,25 @@ class RacePage extends HookConsumerWidget {
       accuracy: LocationAccuracy.best,
       distanceFilter: 0,
     ));
+
+    useInterval(() {
+      if (!game.value.connected || !geolocation.fetched) {
+        return;
+      }
+
+      game.value.action.sendPostGeolocationAction(
+        PostGeolocationActionMessage(
+          latitude: geolocation.position!.latitude,
+          longitude: geolocation.position!.longitude,
+          altitudeMeter: geolocation.position!.altitude,
+          accuracyMeter: geolocation.position!.accuracy,
+          altitudeAccuracyMeter: geolocation.position!.altitudeAccuracy,
+          heading: geolocation.position!.heading,
+          speedMeterPerSec: geolocation.position!.speed,
+          recordedAt: geolocation.position!.timestamp,
+        )
+      );
+    }, const Duration(seconds: 1));
 
     useEffect(() {
       game.value.connect();
