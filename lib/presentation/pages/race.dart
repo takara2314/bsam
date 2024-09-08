@@ -1,3 +1,4 @@
+import 'package:bsam/app/geolocation/geolocation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -35,12 +36,10 @@ class RacePage extends HookConsumerWidget {
     final nextMarkNo = useState(1);
     final nextMarkName = useState('上マーク');
 
-    final latitude = useState(35.658581);
-    final longitude = useState(139.745433);
-    final accuracyMeter = useState(10.0);
-    final heading = useState(0.0);
     final compassDegree = useState(0.0);
     final distanceToNextMarkMeter = useState(46.5);
+
+    final geoLoc = useGeolocation();
 
     useEffect(() {
       game.value.connect();
@@ -67,10 +66,10 @@ class RacePage extends HookConsumerWidget {
               distanceToNextMarkMeter: distanceToNextMarkMeter.value
             ),
             RaceMarkSensorInfo(
-              latitude: latitude.value,
-              longitude: longitude.value,
-              accuracyMeter: accuracyMeter.value,
-              heading: heading.value,
+              latitude: geoLoc.latitude,
+              longitude: geoLoc.longitude,
+              accuracyMeter: geoLoc.accuracyMeter,
+              heading: geoLoc.heading,
               compassDegree: compassDegree.value
             )
           ]

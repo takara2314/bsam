@@ -1,9 +1,11 @@
+import 'package:bsam/presentation/pages/check_permission.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bsam/presentation/pages/auth.dart';
 import 'package:bsam/presentation/pages/home.dart';
 import 'package:bsam/presentation/pages/login.dart';
 import 'package:bsam/presentation/pages/race.dart';
 
+const checkPermissionPagePath = '/check_permission';
 const authPagePath = '/auth';
 const loginPagePath = '/login';
 const homePagePath = '/';
@@ -15,6 +17,10 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: authPagePath,
       builder: (context, state) => const AuthPage(),
+    ),
+    GoRoute(
+      path: checkPermissionPagePath,
+      builder: (context, state) => const CheckPermissionPage(),
     ),
     GoRoute(
       path: loginPagePath,

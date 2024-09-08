@@ -10,6 +10,7 @@ import 'package:bsam/presentation/widgets/icon.dart';
 import 'package:bsam/presentation/widgets/text.dart';
 import 'package:bsam/provider.dart';
 import 'package:bsam/router.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 enum ViewName {
   authing,
@@ -27,6 +28,15 @@ class AuthPage extends HookConsumerWidget {
 
     useEffect(() {
       () async {
+        // 位置情報が許可されていないなら、位置情報許可ページに推移する
+        final status = await Permission.location.status;
+        if (status != PermissionStatus.granted) {
+          if (context.mounted) {
+            context.go(checkPermissionPagePath);
+          }
+          return;
+        }
+
         await loadToken(ref);
 
         // トークンが保存されていないなら、ログインページに推移する
