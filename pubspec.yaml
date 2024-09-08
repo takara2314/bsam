@@ -43,8 +43,10 @@ dependencies:
   internet_connection_checker_plus: ^2.5.1
   jwt_decoder: ^2.0.1
   web_socket_channel: ^3.0.1
-  geolocator: ^13.0.1
   permission_handler: ^11.3.1
+  flutter_use: ^0.0.4
+  geolocator: ^9.0.1
+  flutter_use_geolocation: ^0.0.4
 
 dev_dependencies:
   flutter_test:
