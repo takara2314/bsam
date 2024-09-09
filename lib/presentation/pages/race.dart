@@ -37,8 +37,6 @@ class RacePage extends HookConsumerWidget {
 
     // TODO: 仮の値のため、実際の値に変更する
     final raceName = useState('サンプルレース');
-    final nextMarkNo = useState(1);
-    final nextMarkName = useState('上マーク');
 
     final compassDegree = useState(0.0);
     final distanceToNextMarkMeter = useState(46.5);
@@ -87,8 +85,8 @@ class RacePage extends HookConsumerWidget {
         child: game.value.started
           ? RaceStarted(
             compassDegree: compassDegree.value,
-            nextMarkNo: nextMarkNo.value,
-            nextMarkName: nextMarkName.value,
+            nextMarkNo: game.value.navigate.nextMarkNo,
+            nextMarkName: game.value.navigate.nextMarkLabel.name,
             distanceToNextMarkMeter: distanceToNextMarkMeter.value,
             geolocation: geolocation
           )

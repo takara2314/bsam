@@ -10,6 +10,7 @@ const handlerTypeManageNextMark = 'manage_next_mark';
 class GameHandler {
   bool authed = false;
   bool started = false;
+  List<MarkGeolocation> marks = [];
 
   void handlePayload(dynamic payload) {
     final msg = json.decode(payload);
@@ -53,7 +54,9 @@ class GameHandler {
     authed = msg.authed;
   }
 
-  void _handleMarkGeolocations(MarkGeolocationsHandlerMessage msg) {}
+  void _handleMarkGeolocations(MarkGeolocationsHandlerMessage msg) {
+    marks = msg.marks;
+  }
 
   void _handleManageRaceStatus(ManageRaceStatusHandlerMessage msg) {
     started = msg.started;
@@ -117,7 +120,7 @@ class AuthResultHandlerMessage {
 class MarkGeolocationsHandlerMessage {
   final String messageType;
   final int markCounts;
-  final List<MarkGeolocationsMarkHandlerMessage> marks;
+  final List<MarkGeolocation> marks;
 
   MarkGeolocationsHandlerMessage({
     required this.messageType,
@@ -130,13 +133,13 @@ class MarkGeolocationsHandlerMessage {
       messageType: json['type'] as String,
       markCounts: json['mark_counts'] as int,
       marks: (json['marks'] as List<dynamic>)
-          .map((e) => MarkGeolocationsMarkHandlerMessage.fromJson(e as Map<String, dynamic>))
+          .map((e) => MarkGeolocation.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
 }
 
-class MarkGeolocationsMarkHandlerMessage {
+class MarkGeolocation {
   final int markNo;
   final bool stored;
   final double latitude;
@@ -145,7 +148,7 @@ class MarkGeolocationsMarkHandlerMessage {
   final double heading;
   final DateTime recordedAt;
 
-  MarkGeolocationsMarkHandlerMessage({
+  MarkGeolocation({
     required this.markNo,
     required this.stored,
     required this.latitude,
@@ -155,8 +158,8 @@ class MarkGeolocationsMarkHandlerMessage {
     required this.recordedAt,
   });
 
-  factory MarkGeolocationsMarkHandlerMessage.fromJson(Map<String, dynamic> json) {
-    return MarkGeolocationsMarkHandlerMessage(
+  factory MarkGeolocation.fromJson(Map<String, dynamic> json) {
+    return MarkGeolocation(
       markNo: json['mark_no'] as int,
       stored: json['stored'] as bool,
       latitude: json['latitude'].toDouble() as double,

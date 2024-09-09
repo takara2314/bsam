@@ -1,13 +1,15 @@
 import 'package:bsam/app/game/action.dart';
 import 'package:bsam/app/game/handler.dart';
+import 'package:bsam/app/game/navigate.dart';
 import 'package:bsam/app/game/websocket.dart';
 
 const pingInterval = Duration(seconds: 1);
 
 class Game {
   late final GameWebSocket ws;
-  late final GameHandler handler;
   late final GameAction action;
+  late final GameNavigate navigate;
+  final GameHandler handler = GameHandler();
 
   final String token;
   final String associationId;
@@ -20,16 +22,17 @@ class Game {
     this.deviceId,
     this.wantMarkCounts
   ) {
-    handler = GameHandler();
     ws = GameWebSocket(this, handler);
     action = GameAction(ws);
+    navigate = GameNavigate(this);
   }
 
   void connect() => ws.connect(associationId);
   void disconnect() => ws.disconnect();
-  get connected => ws.connected;
-  get authed => handler.authed;
-  get started => handler.started;
+  bool get connected => ws.connected;
+  bool get authed => handler.authed;
+  bool get started => handler.started;
+  List<MarkGeolocation> get marks => handler.marks;
 
   void tryAuth() {
     action.sendAuthAction(AuthActionMessage(
