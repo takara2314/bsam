@@ -15,6 +15,8 @@ class GameHandler {
   void handlePayload(dynamic payload) {
     final msg = json.decode(payload);
 
+    debugPrint(msg.toString());
+
     switch (msg['type']) {
       case handlerTypeConnectResult:
         final parsed = ConnectResultHandlerMessage.fromJson(msg);

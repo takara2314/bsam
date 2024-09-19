@@ -1,4 +1,6 @@
 import 'package:bsam/app/game/game.dart';
+import 'package:bsam/app/game/handler.dart';
+import 'package:geolocator/geolocator.dart';
 
 class GameNavigate {
   int nextMarkNo = 1;
@@ -10,6 +12,32 @@ class GameNavigate {
   MarkLabel get nextMarkLabel {
     final labels = markLabels[game.wantMarkCounts]!;
     return labels[nextMarkNo - 1];
+  }
+
+  MarkGeolocation get nextMark {
+    return game.marks[nextMarkNo - 1];
+  }
+
+  double calcNextMarkDistanceMeter(double lat, double lng) {
+    return Geolocator.distanceBetween(lat, lng, nextMark.latitude, nextMark.longitude);
+  }
+
+  double calcNextMarkCompassDeg(double lat, double lng, double heading) {
+    // 現在位置から次のマークまでの方位角を計算
+    double bearingDeg = Geolocator.bearingBetween(lat, lng, nextMark.latitude, nextMark.longitude);
+
+    // 現在の進行方向と目的地への方位角の差を計算
+    double diff = bearingDeg - heading;
+
+    // 差を-180度から180度の範囲に正規化
+    if (diff > 180) {
+      diff -= 360;
+    } else if (diff < -180) {
+      diff += 360;
+    }
+
+    // 正規化された差を返す（これがコンパスに表示される角度）
+    return diff;
   }
 }
 

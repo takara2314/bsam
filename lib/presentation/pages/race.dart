@@ -39,7 +39,7 @@ class RacePage extends HookConsumerWidget {
     final raceName = useState('サンプルレース');
 
     final compassDegree = useState(0.0);
-    final distanceToNextMarkMeter = useState(46.5);
+    final distanceToNextMarkMeter = useState(0.0);
 
     final geolocation = useGeolocation(
       locationSettings: const LocationSettings(
@@ -75,6 +75,25 @@ class RacePage extends HookConsumerWidget {
         }
       };
     }, []);
+
+    useEffect(() {
+      if (!geolocation.fetched) {
+        return;
+      }
+
+      compassDegree.value = game.value.navigate.calcNextMarkCompassDeg(
+        geolocation.position!.latitude,
+        geolocation.position!.longitude,
+        geolocation.position!.heading
+      );
+
+      distanceToNextMarkMeter.value = game.value.navigate.calcNextMarkDistanceMeter(
+        geolocation.position!.latitude,
+        geolocation.position!.longitude
+      );
+
+      return null;
+    }, [geolocation]);
 
     return Scaffold(
       appBar: RaceAppBar(
