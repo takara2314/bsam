@@ -7,7 +7,7 @@ import 'package:web_socket_channel/status.dart' as status;
 
 const pingInterval = Duration(seconds: 1);
 
-class GameWebSocket {
+class GameWebSocket extends ChangeNotifier {
   final Game game;
   final GameHandler handler;
 
@@ -31,6 +31,7 @@ class GameWebSocket {
       (dynamic payload) {
         if (!connected) {
           connected = true;
+          notifyListeners();
           game.tryAuth();
         }
 
@@ -38,6 +39,7 @@ class GameWebSocket {
       },
       onDone: () {
         connected = false;
+        notifyListeners();
         if (_allowReconnect) {
           debugPrint('reconnect...');
           connect(associationId);
@@ -45,6 +47,7 @@ class GameWebSocket {
       },
       onError: (error) {
         connected = false;
+        notifyListeners();
         if (_allowReconnect) {
           debugPrint('reconnect... (with error: $error)');
           connect(associationId);

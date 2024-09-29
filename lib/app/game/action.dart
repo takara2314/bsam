@@ -1,10 +1,12 @@
 import 'package:bsam/app/game/websocket.dart';
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+
 const actionTypeAuth = 'auth';
 const actionTypePostGeolocation = 'post_geolocation';
 
-class GameAction {
+class GameAction extends ChangeNotifier {
   final GameWebSocket ws;
 
   GameAction(this.ws);

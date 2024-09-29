@@ -7,7 +7,7 @@ const handlerTypeMarkGeolocations = 'mark_geolocations';
 const handlerTypeManageRaceStatus = 'manage_race_status';
 const handlerTypeManageNextMark = 'manage_next_mark';
 
-class GameHandler {
+class GameHandler extends ChangeNotifier {
   bool authed = false;
   bool started = false;
   List<MarkGeolocation> marks = [];
@@ -15,7 +15,7 @@ class GameHandler {
   void handlePayload(dynamic payload) {
     final msg = json.decode(payload);
 
-    debugPrint(msg.toString());
+    // debugPrint(msg.toString());
 
     switch (msg['type']) {
       case handlerTypeConnectResult:
@@ -54,14 +54,17 @@ class GameHandler {
 
   void _handleAuthResult(AuthResultHandlerMessage msg) {
     authed = msg.authed;
+    notifyListeners();
   }
 
   void _handleMarkGeolocations(MarkGeolocationsHandlerMessage msg) {
     marks = msg.marks;
+    notifyListeners();
   }
 
   void _handleManageRaceStatus(ManageRaceStatusHandlerMessage msg) {
     started = msg.started;
+    notifyListeners();
   }
 
   void _handleManageNextMark(ManageNextMarkHandlerMessage msg) {}

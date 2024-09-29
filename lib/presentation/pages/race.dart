@@ -1,8 +1,11 @@
-import 'package:bsam/app/game/action.dart';
+import 'package:bsam/app/game/announcer.dart';
+import 'package:bsam/app/game/judgement.dart';
+import 'package:bsam/app/game/sender.dart';
+import 'package:bsam/app/voice/voice.dart';
+import 'package:bsam/domain/distance.dart';
 import 'package:bsam/presentation/widgets/icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_use/flutter_use.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_use_geolocation/flutter_use_geolocation.dart';
@@ -28,66 +31,90 @@ class RacePage extends HookConsumerWidget {
     final tokenNotifier = ref.watch(tokenProvider.notifier);
     final jwt = Jwt.fromToken(tokenNotifier.state);
 
-    final game = useState<Game>(Game(
+    // TODO: 仮の値のため、実際の値に変更する
+    final raceName = useState('サンプルレース');
+
+    // コンパスの角度
+    final compassDegree = useState<double?>(null);
+    // 次のマークまでの距離
+    final distanceToNextMarkMeter = useState<double?>(null);
+
+    // レースサーバークライアント
+    final gameProvider = ChangeNotifierProvider((ref) => Game(
       tokenNotifier.state,
       jwt.associationId,
       athleteId,
       defaultWantMarkCounts,
     ));
 
-    // TODO: 仮の値のため、実際の値に変更する
-    final raceName = useState('サンプルレース');
+    final game = ref.watch(gameProvider);
 
-    final compassDegree = useState(0.0);
-    final distanceToNextMarkMeter = useState(0.0);
-
+    // 位置情報を取得する
     final geolocation = useGeolocation(
       locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.best,
       distanceFilter: 0,
     ));
 
-    useInterval(() {
-      if (!game.value.connected || !geolocation.fetched) {
-        return;
+    // アナウンスに使用するTTS
+    final voice = useVoice(
+      'ja-JP',
+      0.6,
+      1.0,
+      1.0,
+    );
+
+    // アナウンスを行う
+    final announcer = useAnnouncer(
+      context,
+      voice,
+      game.started,
+      game.navigate.nextMarkLabel.nameKatakana,
+      compassDegree.value,
+      distanceToNextMarkMeter.value,
+    );
+
+    // マークの通過判定を行う
+    useJudgement(
+      distanceToNextMarkMeter.value,
+      () {
+        final passedMarkNameKatakana = game.navigate.nextMarkLabel.nameKatakana;
+        game.navigate.passMark(game.navigate.nextMarkNo);
+        announcer.announceMarkPassedRepeatedly(passedMarkNameKatakana);
       }
+    );
 
-      game.value.action.sendPostGeolocationAction(
-        PostGeolocationActionMessage(
-          latitude: geolocation.position!.latitude,
-          longitude: geolocation.position!.longitude,
-          altitudeMeter: geolocation.position!.altitude,
-          accuracyMeter: geolocation.position!.accuracy,
-          altitudeAccuracyMeter: geolocation.position!.altitudeAccuracy,
-          heading: geolocation.position!.heading,
-          speedMeterPerSec: geolocation.position!.speed,
-          recordedAt: geolocation.position!.timestamp,
-        )
-      );
-    }, const Duration(seconds: 1));
+    // 定期的に位置情報を送信する
+    useGeolocationSender(
+      context,
+      game,
+      geolocation,
+    );
 
+    // レースサーバーに接続する
     useEffect(() {
-      game.value.connect();
+      game.connect();
 
       return () {
-        if (game.value.connected) {
-          game.value.disconnect();
+        if (game.connected) {
+          game.disconnect();
         }
       };
     }, []);
 
+    // 位置情報を取得したら、コンパスの角度と次のマークまでの距離を計算する
     useEffect(() {
       if (!geolocation.fetched) {
         return;
       }
 
-      compassDegree.value = game.value.navigate.calcNextMarkCompassDeg(
+      compassDegree.value = game.navigate.calcNextMarkCompassDeg(
         geolocation.position!.latitude,
         geolocation.position!.longitude,
         geolocation.position!.heading
       );
 
-      distanceToNextMarkMeter.value = game.value.navigate.calcNextMarkDistanceMeter(
+      distanceToNextMarkMeter.value = game.navigate.calcNextMarkDistanceMeter(
         geolocation.position!.latitude,
         geolocation.position!.longitude
       );
@@ -101,11 +128,11 @@ class RacePage extends HookConsumerWidget {
         preferredSize: const Size.fromHeight(72),
       ),
       body: Center(
-        child: game.value.started
+        child: game.started
           ? RaceStarted(
             compassDegree: compassDegree.value,
-            nextMarkNo: game.value.navigate.nextMarkNo,
-            nextMarkName: game.value.navigate.nextMarkLabel.name,
+            nextMarkNo: game.navigate.nextMarkNo,
+            nextMarkName: game.navigate.nextMarkLabel.name,
             distanceToNextMarkMeter: distanceToNextMarkMeter.value,
             geolocation: geolocation
           )
@@ -179,10 +206,10 @@ class RaceWaiting extends StatelessWidget {
 }
 
 class RaceStarted extends StatelessWidget {
-  final double compassDegree;
+  final double? compassDegree;
   final int nextMarkNo;
   final String nextMarkName;
-  final double distanceToNextMarkMeter;
+  final double? distanceToNextMarkMeter;
   final GeolocationState geolocation;
 
   const RaceStarted({
@@ -217,7 +244,7 @@ class RaceStarted extends StatelessWidget {
 }
 
 class RaceCompass extends StatelessWidget {
-  final double heading;
+  final double? heading;
 
   const RaceCompass({
     required this.heading,
@@ -230,7 +257,7 @@ class RaceCompass extends StatelessWidget {
       width: 300,
       height: 300,
       child: CustomPaint(
-        painter: Compass(heading: heading)
+        painter: Compass(heading: heading ?? 0.0)
       )
     );
   }
@@ -239,7 +266,7 @@ class RaceCompass extends StatelessWidget {
 class RaceMarkDirectionInfo extends StatelessWidget {
   final int nextMarkNo;
   final String nextMarkName;
-  final double distanceToNextMarkMeter;
+  final double? distanceToNextMarkMeter;
 
   const RaceMarkDirectionInfo({
     required this.nextMarkNo,
@@ -250,6 +277,13 @@ class RaceMarkDirectionInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String distanceToNextMarkMeterForLabel;
+    if (distanceToNextMarkMeter != null) {
+      distanceToNextMarkMeterForLabel = getAnnounceDistanceMeter(distanceToNextMarkMeter!).toString();
+    } else {
+      distanceToNextMarkMeterForLabel = '?';
+    }
+
     return Column(
       children: [
         Padding(
@@ -258,7 +292,7 @@ class RaceMarkDirectionInfo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               RaceMarkNoIcon(markNo: nextMarkNo),
-              Heading(nextMarkName, fontSize: 24)
+              Heading('$nextMarkNameマーク', fontSize: 24)
             ]
           ),
         ),
@@ -277,7 +311,7 @@ class RaceMarkDirectionInfo extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 10, right: 10),
               child: Text(
-                '${distanceToNextMarkMeter.round()}',
+                distanceToNextMarkMeterForLabel,
                 style: const TextStyle(
                   color: primaryColor,
                   fontSize: 40,
@@ -336,7 +370,7 @@ class RaceMarkSensorInfo extends StatelessWidget {
   final double longitude;
   final double accuracyMeter;
   final double heading;
-  final double compassDegree;
+  final double? compassDegree;
   final bool showingCompass;
 
   const RaceMarkSensorInfo({
@@ -351,6 +385,13 @@ class RaceMarkSensorInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String compassDegreeForLabel;
+    if (compassDegree != null) {
+      compassDegreeForLabel = '${compassDegree!.toStringAsFixed(2)}°';
+    } else {
+      compassDegreeForLabel = '?°';
+    }
+
     return Container(
       margin: const EdgeInsets.only(top: 20, left: 30, right: 30),
       padding: const EdgeInsets.all(16),
@@ -392,9 +433,7 @@ class RaceMarkSensorInfo extends StatelessWidget {
             TableRow(
               children: [
                 const RaceMarkSensorInfoLabelCell('コンパスの角度'),
-                RaceMarkSensorInfoValueCell(
-                  '${compassDegree.toStringAsFixed(2)}°'
-                ),
+                RaceMarkSensorInfoValueCell(compassDegreeForLabel),
               ],
             )
         ]

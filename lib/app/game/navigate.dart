@@ -1,8 +1,9 @@
 import 'package:bsam/app/game/game.dart';
 import 'package:bsam/app/game/handler.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-class GameNavigate {
+class GameNavigate extends ChangeNotifier {
   int nextMarkNo = 1;
 
   final Game game;
@@ -14,17 +15,48 @@ class GameNavigate {
     return labels[nextMarkNo - 1];
   }
 
-  MarkGeolocation get nextMark {
+  MarkGeolocation? get nextMark {
+    if (game.marks.isEmpty) {
+      return null;
+    }
     return game.marks[nextMarkNo - 1];
   }
 
+  // TODO: wantMarkCounts が1のときの処理も実装する
+  Future<void> passMark(int passedMarkNo) async {
+    // マークを通過したことをサーバーに通知
+
+    // 次のマークを設定
+    nextMarkNo = passedMarkNo + 1;
+    if (nextMarkNo > game.wantMarkCounts) {
+      nextMarkNo = 1;
+    }
+  }
+
   double calcNextMarkDistanceMeter(double lat, double lng) {
-    return Geolocator.distanceBetween(lat, lng, nextMark.latitude, nextMark.longitude);
+    if (nextMark == null) {
+      return 0;
+    }
+    return Geolocator.distanceBetween(
+      lat,
+      lng,
+      nextMark!.latitude,
+      nextMark!.longitude
+    );
   }
 
   double calcNextMarkCompassDeg(double lat, double lng, double heading) {
+    if (nextMark == null) {
+      return 0;
+    }
+
     // 現在位置から次のマークまでの方位角を計算
-    double bearingDeg = Geolocator.bearingBetween(lat, lng, nextMark.latitude, nextMark.longitude);
+    double bearingDeg = Geolocator.bearingBetween(
+      lat,
+      lng,
+      nextMark!.latitude,
+      nextMark!.longitude
+    );
 
     // 現在の進行方向と目的地への方位角の差を計算
     double diff = bearingDeg - heading;
@@ -55,78 +87,78 @@ class MarkLabel {
 
 final markLabels = Map<int, List<MarkLabel>>.from({
   1: [
-    MarkLabel(1, 'マーク', 'マーク'),
+    MarkLabel(1, '', ''),
   ],
   2: [
-    MarkLabel(1, '上マーク', 'カミマーク'),
-    MarkLabel(2, '下マーク', 'シモマーク'),
+    MarkLabel(1, '上', 'カミ'),
+    MarkLabel(2, '下', 'シモ'),
   ],
   3: [
-    MarkLabel(1, '上マーク', 'カミマーク'),
-    MarkLabel(2, 'サイドマーク', 'サイドマーク'),
-    MarkLabel(3, '下マーク', 'シモマーク'),
+    MarkLabel(1, '上', 'カミ'),
+    MarkLabel(2, 'サイド', 'サイド'),
+    MarkLabel(3, '下', 'シモ'),
   ],
   4: [
-    MarkLabel(1, '1マーク', 'イチマーク'),
-    MarkLabel(2, '2マーク', 'ニマーク'),
-    MarkLabel(3, '3マーク', 'サンマーク'),
-    MarkLabel(4, '4マーク', 'ヨンマーク'),
+    MarkLabel(1, '1', 'イチ'),
+    MarkLabel(2, '2', 'ニ'),
+    MarkLabel(3, '3', 'サン'),
+    MarkLabel(4, '4', 'ヨン'),
   ],
   5: [
-    MarkLabel(1, '1マーク', 'イチマーク'),
-    MarkLabel(2, '2マーク', 'ニマーク'),
-    MarkLabel(3, '3マーク', 'サンマーク'),
-    MarkLabel(4, '4マーク', 'ヨンマーク'),
-    MarkLabel(5, '5マーク', 'ゴマーク'),
+    MarkLabel(1, '1', 'イチ'),
+    MarkLabel(2, '2', 'ニ'),
+    MarkLabel(3, '3', 'サン'),
+    MarkLabel(4, '4', 'ヨン'),
+    MarkLabel(5, '5', 'ゴ'),
   ],
   6: [
-    MarkLabel(1, '1マーク', 'イチマーク'),
-    MarkLabel(2, '2マーク', 'ニマーク'),
-    MarkLabel(3, '3マーク', 'サンマーク'),
-    MarkLabel(4, '4マーク', 'ヨンマーク'),
-    MarkLabel(5, '5マーク', 'ゴマーク'),
-    MarkLabel(6, '6マーク', 'ロクマーク'),
+    MarkLabel(1, '1', 'イチ'),
+    MarkLabel(2, '2', 'ニ'),
+    MarkLabel(3, '3', 'サン'),
+    MarkLabel(4, '4', 'ヨン'),
+    MarkLabel(5, '5', 'ゴ'),
+    MarkLabel(6, '6', 'ロク'),
   ],
   7: [
-    MarkLabel(1, '1マーク', 'イチマーク'),
-    MarkLabel(2, '2マーク', 'ニマーク'),
-    MarkLabel(3, '3マーク', 'サンマーク'),
-    MarkLabel(4, '4マーク', 'ヨンマーク'),
-    MarkLabel(5, '5マーク', 'ゴマーク'),
-    MarkLabel(6, '6マーク', 'ロクマーク'),
-    MarkLabel(7, '7マーク', 'ナナマーク'),
+    MarkLabel(1, '1', 'イチ'),
+    MarkLabel(2, '2', 'ニ'),
+    MarkLabel(3, '3', 'サン'),
+    MarkLabel(4, '4', 'ヨン'),
+    MarkLabel(5, '5', 'ゴ'),
+    MarkLabel(6, '6', 'ロク'),
+    MarkLabel(7, '7', 'ナナ'),
   ],
   8: [
-    MarkLabel(1, '1マーク', 'イチマーク'),
-    MarkLabel(2, '2マーク', 'ニマーク'),
-    MarkLabel(3, '3マーク', 'サンマーク'),
-    MarkLabel(4, '4マーク', 'ヨンマーク'),
-    MarkLabel(5, '5マーク', 'ゴマーク'),
-    MarkLabel(6, '6マーク', 'ロクマーク'),
-    MarkLabel(7, '7マーク', 'ナナマーク'),
-    MarkLabel(8, '8マーク', 'ハチマーク'),
+    MarkLabel(1, '1', 'イチ'),
+    MarkLabel(2, '2', 'ニ'),
+    MarkLabel(3, '3', 'サン'),
+    MarkLabel(4, '4', 'ヨン'),
+    MarkLabel(5, '5', 'ゴ'),
+    MarkLabel(6, '6', 'ロク'),
+    MarkLabel(7, '7', 'ナナ'),
+    MarkLabel(8, '8', 'ハチ'),
   ],
   9: [
-    MarkLabel(1, '1マーク', 'イチマーク'),
-    MarkLabel(2, '2マーク', 'ニマーク'),
-    MarkLabel(3, '3マーク', 'サンマーク'),
-    MarkLabel(4, '4マーク', 'ヨンマーク'),
-    MarkLabel(5, '5マーク', 'ゴマーク'),
-    MarkLabel(6, '6マーク', 'ロクマーク'),
-    MarkLabel(7, '7マーク', 'ナナマーク'),
-    MarkLabel(8, '8マーク', 'ハチマーク'),
-    MarkLabel(9, '9マーク', 'キュウマーク'),
+    MarkLabel(1, '1', 'イチ'),
+    MarkLabel(2, '2', 'ニ'),
+    MarkLabel(3, '3', 'サン'),
+    MarkLabel(4, '4', 'ヨン'),
+    MarkLabel(5, '5', 'ゴ'),
+    MarkLabel(6, '6', 'ロク'),
+    MarkLabel(7, '7', 'ナナ'),
+    MarkLabel(8, '8', 'ハチ'),
+    MarkLabel(9, '9', 'キュウ'),
   ],
   10: [
-    MarkLabel(1, '1マーク', 'イチマーク'),
-    MarkLabel(2, '2マーク', 'ニマーク'),
-    MarkLabel(3, '3マーク', 'サンマーク'),
-    MarkLabel(4, '4マーク', 'ヨンマーク'),
-    MarkLabel(5, '5マーク', 'ゴマーク'),
-    MarkLabel(6, '6マーク', 'ロクマーク'),
-    MarkLabel(7, '7マーク', 'ナナマーク'),
-    MarkLabel(8, '8マーク', 'ハチマーク'),
-    MarkLabel(9, '9マーク', 'キュウマーク'),
-    MarkLabel(10, '10マーク', 'ジュウマーク'),
+    MarkLabel(1, '1', 'イチ'),
+    MarkLabel(2, '2', 'ニ'),
+    MarkLabel(3, '3', 'サン'),
+    MarkLabel(4, '4', 'ヨン'),
+    MarkLabel(5, '5', 'ゴ'),
+    MarkLabel(6, '6', 'ロク'),
+    MarkLabel(7, '7', 'ナナ'),
+    MarkLabel(8, '8', 'ハチ'),
+    MarkLabel(9, '9', 'キュウ'),
+    MarkLabel(10, '10', 'ジュウ'),
   ]
 });

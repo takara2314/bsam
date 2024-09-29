@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:bsam/app/game/action.dart';
 import 'package:bsam/app/game/handler.dart';
 import 'package:bsam/app/game/navigate.dart';
@@ -5,7 +6,7 @@ import 'package:bsam/app/game/websocket.dart';
 
 const pingInterval = Duration(seconds: 1);
 
-class Game {
+class Game extends ChangeNotifier {
   late final GameWebSocket ws;
   late final GameAction action;
   late final GameNavigate navigate;
@@ -25,6 +26,24 @@ class Game {
     ws = GameWebSocket(this, handler);
     action = GameAction(ws);
     navigate = GameNavigate(this);
+
+    ws.addListener(_onChange);
+    action.addListener(_onChange);
+    navigate.addListener(_onChange);
+    handler.addListener(_onChange);
+  }
+
+  void _onChange() {
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    ws.removeListener(_onChange);
+    action.removeListener(_onChange);
+    navigate.removeListener(_onChange);
+    handler.removeListener(_onChange);
+    super.dispose();
   }
 
   void connect() => ws.connect(associationId);
