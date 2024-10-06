@@ -43,6 +43,23 @@ class GameClientState {
       marks: marks ?? this.marks,
       nextMarkNo: nextMarkNo ?? this.nextMarkNo,
       geolocation: geolocation ?? this.geolocation,
+      compassDegree: compassDegree ?? this.compassDegree,
+      distanceToNextMarkMeter: distanceToNextMarkMeter ?? this.distanceToNextMarkMeter,
+    );
+  }
+
+  // nullを許容する compassDegree と distanceToNextMarkMeter の上書き用 copyWith
+  GameClientState copyWithNullableCompassDegreeAndDistanceToNextMarkMeter({
+    double? compassDegree,
+    double? distanceToNextMarkMeter,
+  }) {
+    return GameClientState(
+      connected: connected,
+      authed: authed,
+      started: started,
+      marks: marks,
+      nextMarkNo: nextMarkNo,
+      geolocation: geolocation,
       compassDegree: compassDegree,
       distanceToNextMarkMeter: distanceToNextMarkMeter,
     );

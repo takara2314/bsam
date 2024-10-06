@@ -65,15 +65,18 @@ class GameEngine {
 
   // 位置情報変更時の処理
   void handleChangedGeolocation(GeolocationState geolocation) {
-    _client.compassDegree = _calcNextMarkCompassDeg(
-      geolocation.position!.latitude,
-      geolocation.position!.longitude,
-      geolocation.position!.heading
-    );
-
-    _client.distanceToNextMarkMeter = _calcNextMarkDistanceMeter(
-      geolocation.position!.latitude,
-      geolocation.position!.longitude
+    // コンパス角と距離を更新
+    // パフォーマンスの観点で、両方同時に更新するプラクティスを採用
+    _client.setCompassDegreeAndDistanceToNextMark(
+      _calcNextMarkCompassDeg(
+        geolocation.position!.latitude,
+        geolocation.position!.longitude,
+        geolocation.position!.heading
+      ),
+      _calcNextMarkDistanceMeter(
+        geolocation.position!.latitude,
+        geolocation.position!.longitude
+      )
     );
 
     // 最終マーク通過時間から10秒経過しないなら、マーク通過判定処理を行わない

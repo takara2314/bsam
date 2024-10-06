@@ -149,10 +149,18 @@ Future<void> Function(int) useAnnouncer(
   // クライアントの状態をローカルステートに同期
   useEffect(() {
     compassDegree.value = gameState.compassDegree;
+    return null;
+  }, [gameState.compassDegree]);
+
+  useEffect(() {
     distanceToNextMarkMeter.value = gameState.distanceToNextMarkMeter;
+    return null;
+  }, [gameState.distanceToNextMarkMeter]);
+
+  useEffect(() {
     nextMarkNo.value = gameState.nextMarkNo;
     return null;
-  }, [gameState.compassDegree, gameState.distanceToNextMarkMeter, gameState.nextMarkNo]);
+  }, [gameState.nextMarkNo]);
 
   return callbackOnPassedMark;
 }

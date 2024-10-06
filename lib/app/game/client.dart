@@ -77,12 +77,15 @@ class GameClientNotifier extends StateNotifier<GameClientState> {
   }
 
   double? get compassDegree => state.compassDegree;
-  set compassDegree(double? value) {
-    state = state.copyWith(compassDegree: value);
-  }
-
   double? get distanceToNextMarkMeter => state.distanceToNextMarkMeter;
-  set distanceToNextMarkMeter(double? value) {
-    state = state.copyWith(distanceToNextMarkMeter: value);
+
+  void setCompassDegreeAndDistanceToNextMark(
+    double? compassDegree,
+    double? distanceToNextMarkMeter
+  ) {
+    state = state.copyWithNullableCompassDegreeAndDistanceToNextMarkMeter(
+      compassDegree: compassDegree,
+      distanceToNextMarkMeter: distanceToNextMarkMeter
+    );
   }
 }
