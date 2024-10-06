@@ -24,6 +24,8 @@ UseVoice useVoice(String language, double speechRate, double volume, double pitc
   final tts = useMemoized(() => FlutterTts(), []);
   final lock = useMemoized(() => Lock(), []);
 
+  bool forcedStop = false;
+
   initTts() async {
     await tts.setLanguage(language);
     await tts.setSpeechRate(speechRate);
@@ -40,15 +42,24 @@ UseVoice useVoice(String language, double speechRate, double volume, double pitc
   }, []);
 
   String correctTextPreSpeak(String text) {
-    // 46 のみ英語の発音なので、ひらがな読みにする
+    // なぜかAndroidのみ 46 のみ英語の発音なので、ひらがな読みにする
     text = text.replaceAll('46', 'よんじゅうろく');
     return text;
   }
 
   speak(String text) async {
+    forcedStop = false;
     await lock.run(() async {
+      if (forcedStop) {
+        return;
+      }
       await tts.speak(correctTextPreSpeak(text));
     });
+  }
+
+  stop() async {
+    forcedStop = true;
+    tts.stop();
   }
 
   return UseVoice(
@@ -57,6 +68,6 @@ UseVoice useVoice(String language, double speechRate, double volume, double pitc
     volume: volume,
     pitch: pitch,
     speak: speak,
-    stop: tts.stop,
+    stop: stop,
   );
 }

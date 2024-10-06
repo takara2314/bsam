@@ -1,15 +1,14 @@
+import 'package:bsam/app/game/client.dart';
 import 'package:bsam/app/game/announcer.dart';
-import 'package:bsam/app/game/judgement.dart';
-import 'package:bsam/app/game/sender.dart';
 import 'package:bsam/app/voice/voice.dart';
 import 'package:bsam/domain/distance.dart';
+import 'package:bsam/domain/mark.dart';
 import 'package:bsam/presentation/widgets/icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:flutter_use_geolocation/flutter_use_geolocation.dart';
-import 'package:bsam/app/game/game.dart';
 import 'package:bsam/app/jwt/jwt.dart';
 import 'package:bsam/main.dart';
 import 'package:bsam/presentation/widgets/compass.dart';
@@ -31,23 +30,15 @@ class RacePage extends HookConsumerWidget {
     final tokenNotifier = ref.watch(tokenProvider.notifier);
     final jwt = Jwt.fromToken(tokenNotifier.state);
 
+    final associationIdNotifier = ref.watch(associationIdProvider.notifier);
+    final deviceIdNotifier = ref.watch(deviceIdProvider.notifier);
+    final wantMarkCountsNotifier = ref.watch(wantMarkCountsProvider.notifier);
+
+    final clientNotifier = ref.watch(gameClientProvider.notifier);
+    final gameState = ref.watch(gameClientProvider);
+
     // TODO: 仮の値のため、実際の値に変更する
     final raceName = useState('サンプルレース');
-
-    // コンパスの角度
-    final compassDegree = useState<double?>(null);
-    // 次のマークまでの距離
-    final distanceToNextMarkMeter = useState<double?>(null);
-
-    // レースサーバークライアント
-    final gameProvider = ChangeNotifierProvider((ref) => Game(
-      tokenNotifier.state,
-      jwt.associationId,
-      athleteId,
-      defaultWantMarkCounts,
-    ));
-
-    final game = ref.watch(gameProvider);
 
     // 位置情報を取得する
     final geolocation = useGeolocation(
@@ -65,62 +56,41 @@ class RacePage extends HookConsumerWidget {
     );
 
     // アナウンスを行う
-    final announcer = useAnnouncer(
+    final callbackOnPassedMark = useAnnouncer(
       context,
+      ref,
       voice,
-      game.started,
-      game.navigate.nextMarkLabel.nameKatakana,
-      compassDegree.value,
-      distanceToNextMarkMeter.value,
+      gameState,
     );
 
-    // マークの通過判定を行う
-    useJudgement(
-      distanceToNextMarkMeter.value,
-      () {
-        final passedMarkNameKatakana = game.navigate.nextMarkLabel.nameKatakana;
-        game.navigate.passMark(game.navigate.nextMarkNo);
-        announcer.announceMarkPassedRepeatedly(passedMarkNameKatakana);
-      }
-    );
-
-    // 定期的に位置情報を送信する
-    useGeolocationSender(
+    // 位置情報が更新されるたびに、ゲームクライアントに登録
+    useGeolocationRegister(
       context,
-      game,
+      clientNotifier,
       geolocation,
     );
 
     // レースサーバーに接続する
     useEffect(() {
-      game.connect();
+      // Futureを使用してビルド後にプロバイダーを更新
+      Future(() {
+        associationIdNotifier.state = jwt.associationId;
+        deviceIdNotifier.state = athleteId;
+        wantMarkCountsNotifier.state = defaultWantMarkCounts;
+
+        clientNotifier.connect();
+        clientNotifier.registerCallbackOnPassedMark(callbackOnPassedMark);
+      });
 
       return () {
-        if (game.connected) {
-          game.disconnect();
+        if (clientNotifier.connected) {
+          // 非同期的にプロバイダーを変更
+          Future.microtask(() {
+            clientNotifier.disconnect();
+          });
         }
       };
     }, []);
-
-    // 位置情報を取得したら、コンパスの角度と次のマークまでの距離を計算する
-    useEffect(() {
-      if (!geolocation.fetched) {
-        return;
-      }
-
-      compassDegree.value = game.navigate.calcNextMarkCompassDeg(
-        geolocation.position!.latitude,
-        geolocation.position!.longitude,
-        geolocation.position!.heading
-      );
-
-      distanceToNextMarkMeter.value = game.navigate.calcNextMarkDistanceMeter(
-        geolocation.position!.latitude,
-        geolocation.position!.longitude
-      );
-
-      return null;
-    }, [geolocation]);
 
     return Scaffold(
       appBar: RaceAppBar(
@@ -128,12 +98,15 @@ class RacePage extends HookConsumerWidget {
         preferredSize: const Size.fromHeight(72),
       ),
       body: Center(
-        child: game.started
+        child: gameState.started
           ? RaceStarted(
-            compassDegree: compassDegree.value,
-            nextMarkNo: game.navigate.nextMarkNo,
-            nextMarkName: game.navigate.nextMarkLabel.name,
-            distanceToNextMarkMeter: distanceToNextMarkMeter.value,
+            compassDegree: gameState.compassDegree,
+            nextMarkNo: gameState.nextMarkNo,
+            nextMarkName: getMarkLabel(
+              wantMarkCountsNotifier.state,
+              gameState.nextMarkNo
+            ).name,
+            distanceToNextMarkMeter: gameState.distanceToNextMarkMeter,
             geolocation: geolocation
           )
           : RaceWaiting(
