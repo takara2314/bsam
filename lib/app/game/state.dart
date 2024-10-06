@@ -43,8 +43,8 @@ class GameClientState {
       marks: marks ?? this.marks,
       nextMarkNo: nextMarkNo ?? this.nextMarkNo,
       geolocation: geolocation ?? this.geolocation,
-      compassDegree: compassDegree ?? this.compassDegree,
-      distanceToNextMarkMeter: distanceToNextMarkMeter ?? this.distanceToNextMarkMeter,
+      compassDegree: compassDegree,
+      distanceToNextMarkMeter: distanceToNextMarkMeter,
     );
   }
 

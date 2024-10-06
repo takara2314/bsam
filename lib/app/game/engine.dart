@@ -7,12 +7,15 @@ import 'package:bsam/app/game/websocket/sender.dart';
 import 'package:bsam/app/game/websocket/websocket.dart';
 import 'package:bsam/domain/judge.dart';
 import 'package:bsam/provider.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_use_geolocation/flutter_use_geolocation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 // 位置情報の送信間隔
 const positingGeolocationInterval = Duration(seconds: 1);
+// マーク通過のクールタイム
+const passingMarkCoolTime = Duration(seconds: 10);
 
 // ゲームの主要なロジックを管理するクラス
 class GameEngine {
@@ -23,6 +26,8 @@ class GameEngine {
 
   Future<void> Function(int)? _callbackOnPassedMark;
   Timer? _postingGeolocationTimer;
+
+  DateTime? _lastPassedMarkTime;
 
   GameEngine(this._ref, this._client) {
     ws = GameWebSocket(_ref, _client);
@@ -71,6 +76,14 @@ class GameEngine {
       geolocation.position!.longitude
     );
 
+    // 最終マーク通過時間から10秒経過しないなら、マーク通過判定処理を行わない
+    if (_lastPassedMarkTime != null) {
+      final afterPassingMarkCoolTime = _lastPassedMarkTime!.add(passingMarkCoolTime);
+      if (DateTime.now().isBefore(afterPassingMarkCoolTime)) {
+        return;
+      }
+    }
+
     // マークを通過したかどうかを判定
     if (_judgePassedMark(_client.distanceToNextMarkMeter)) {
       handlePassedMark(_client.nextMarkNo);
@@ -80,6 +93,8 @@ class GameEngine {
   // マーク通過時の処理
   // TODO: wantMarkCounts が1のときの処理も実装する
   Future<void> handlePassedMark(int passedMarkNo) async {
+    _lastPassedMarkTime = DateTime.now();
+
     // 通過したことをアナウンスする
     if (_callbackOnPassedMark != null) {
       _callbackOnPassedMark!(passedMarkNo);
@@ -216,6 +231,15 @@ class GameEngine {
   }
 
   void handleMarkGeolocations(MarkGeolocationsHandlerMessage msg) {
+    debugPrint('---');
+    for (var mark in msg.marks) {
+      debugPrint('mark: ${mark.markNo}');
+      debugPrint('- stored: ${mark.stored}');
+      debugPrint('  latitude: ${mark.latitude}');
+      debugPrint('  longitude: ${mark.longitude}');
+    }
+    debugPrint('---\n');
+
     _client.marks = msg.marks;
   }
 
