@@ -119,7 +119,7 @@ Future<void> Function(int) useAnnouncer(
 
     await announceMarkPassedRepeatedly(passedMarkNo);
 
-    if (!context.mounted) {
+    if (!context.mounted || !gameState.started) {
       return;
     }
     enabledPeriodicAnnounce.value = true;

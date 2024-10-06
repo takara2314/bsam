@@ -79,6 +79,11 @@ class GameEngine {
       )
     );
 
+    // レースが開始されていないなら、マーク通過判定処理を行わない
+    if (!_client.started) {
+      return;
+    }
+
     // 最終マーク通過時間から10秒経過しないなら、マーク通過判定処理を行わない
     if (_lastPassedMarkTime != null) {
       final afterPassingMarkCoolTime = _lastPassedMarkTime!.add(passingMarkCoolTime);
