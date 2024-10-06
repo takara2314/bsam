@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_use/flutter_use.dart';
 import 'package:flutter_use_geolocation/flutter_use_geolocation.dart';
 import 'package:bsam/app/jwt/jwt.dart';
 import 'package:bsam/main.dart';
@@ -17,6 +18,7 @@ import 'package:bsam/presentation/widgets/text.dart';
 import 'package:bsam/provider.dart';
 
 const defaultWantMarkCounts = 3;
+const compassEasingAnimationSpeed = Duration(milliseconds: 10);
 
 class RacePage extends HookConsumerWidget {
   final String athleteId;
@@ -217,7 +219,7 @@ class RaceStarted extends StatelessWidget {
   }
 }
 
-class RaceCompass extends StatelessWidget {
+class RaceCompass extends HookWidget {
   final double? heading;
 
   const RaceCompass({
@@ -227,11 +229,20 @@ class RaceCompass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final animatedHeading = useState<double>(0.0);
+
+    useInterval(() {
+      if (heading == null) {
+        return;
+      }
+      animatedHeading.value += (heading! - animatedHeading.value) * 0.1;
+    }, compassEasingAnimationSpeed);
+
     return SizedBox(
       width: 300,
       height: 300,
       child: CustomPaint(
-        painter: Compass(heading: heading ?? 0.0)
+        painter: Compass(heading: animatedHeading.value)
       )
     );
   }
