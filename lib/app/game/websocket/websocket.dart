@@ -10,6 +10,8 @@ import 'package:web_socket_channel/status.dart' as status;
 
 // WebSocketの接続を維持するためのping間隔
 const pingInterval = Duration(seconds: 1);
+// WebSocket接続をリトライする時間
+const reconnectInterval = Duration(seconds: 1);
 
 // WebSocket通信を管理するクラス
 class GameWebSocket {
@@ -20,6 +22,7 @@ class GameWebSocket {
   final GameWebSocketSender sender;
 
   late IOWebSocketChannel conn;
+  bool connWorking = false;
   bool _allowReconnect = true;
 
   GameWebSocket(this._ref, this._client)
@@ -28,6 +31,7 @@ class GameWebSocket {
 
   // WebSocket接続を確立する
   void connect() {
+    connWorking = true;
     final associationId = _ref.read(associationIdProvider);
 
     final url = Uri.parse(
@@ -48,18 +52,26 @@ class GameWebSocket {
         }
         receiver.handlePayload(payload);
       },
-      onDone: () {
+      onDone: () async {
+        connWorking = false;
         _client.connected = false;
         if (_allowReconnect) {
           debugPrint('reconnect...');
-          connect();
+          await Future.delayed(reconnectInterval);
+          if (!connWorking) {
+            connect();
+          }
         }
       },
-      onError: (error) {
+      onError: (error) async {
+        connWorking = false;
         _client.connected = false;
         if (_allowReconnect) {
           debugPrint('reconnect... (with error: $error)');
-          connect();
+          await Future.delayed(reconnectInterval);
+          if (!connWorking) {
+            connect();
+          }
         }
       }
     );
