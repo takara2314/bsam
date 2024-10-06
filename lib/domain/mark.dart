@@ -1,5 +1,37 @@
-import 'package:flutter/material.dart';
+// マークの位置情報を表すクラス
+class MarkGeolocation {
+  final int markNo;
+  final bool stored;
+  final double latitude;
+  final double longitude;
+  final double accuracyMeter;
+  final double heading;
+  final DateTime recordedAt;
 
+  MarkGeolocation({
+    required this.markNo,
+    required this.stored,
+    required this.latitude,
+    required this.longitude,
+    required this.accuracyMeter,
+    required this.heading,
+    required this.recordedAt,
+  });
+
+  factory MarkGeolocation.fromJson(Map<String, dynamic> json) {
+    return MarkGeolocation(
+      markNo: json['mark_no'] as int,
+      stored: json['stored'] as bool,
+      latitude: json['latitude'].toDouble() as double,
+      longitude: json['longitude'].toDouble() as double,
+      accuracyMeter: json['accuracy_meter'].toDouble() as double,
+      heading: json['heading'].toDouble() as double,
+      recordedAt: DateTime.parse(json['recorded_at'] as String),
+    );
+  }
+}
+
+// マークのラベルを表すクラス
 class MarkLabel {
   final int no;
   final String name;

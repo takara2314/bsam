@@ -3,15 +3,17 @@ import 'package:bsam/app/voice/voice.dart';
 import 'package:bsam/domain/direction.dart';
 import 'package:bsam/domain/distance.dart';
 import 'package:bsam/domain/mark.dart';
+import 'package:bsam/app/game/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const periodicAnnounceInterval = Duration(seconds: 3);
-const passedAnnounceNum = 3;
+const passedAnnounceTimes = 3;
 const passedAnnounceInterval = Duration(seconds: 1);
 const shortPauseInterval = Duration(milliseconds: 10);
 
+// マークの方向と距離をアナウンスするフック
 Future<void> Function(int) useAnnouncer(
   BuildContext context,
   WidgetRef ref,
@@ -29,15 +31,15 @@ Future<void> Function(int) useAnnouncer(
 
   // マークの方向と距離をアナウンスする
   Future<void> announceMarkDirectionDistance() async {
-    // コンパスの角度と次のマークまでの距離が不明の場合は、「不明」とアナウンスする
+    // コンパスの角度と次のマークまでの距離が不明の場合
     if (compassDegree.value == null || distanceToNextMarkMeter.value == null) {
+      // 3回チェックしても不明なら「次のマークがどこにあるかわかりません」とアナウンスする
       invalidMarkAnnounceCount.value++;
       if (invalidMarkAnnounceCount.value > 3) {
         await voice.speak('次のマークがどこにあるかわかりません');
       }
       return;
     }
-
     invalidMarkAnnounceCount.value = 0;
 
     if (!context.mounted) {
@@ -65,7 +67,7 @@ Future<void> Function(int) useAnnouncer(
 
   // マーク通過を複数回アナウンスする
   Future<void> announceMarkPassedRepeatedly(int passedMarkNo) async {
-    for (int i = 0; i < passedAnnounceNum; i++) {
+    for (int i = 0; i < passedAnnounceTimes; i++) {
       await announcePassedOnce(passedMarkNo);
 
       if (context.mounted) {

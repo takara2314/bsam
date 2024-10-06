@@ -1,5 +1,6 @@
 import 'package:bsam/app/game/client.dart';
 import 'package:bsam/app/game/announcer.dart';
+import 'package:bsam/app/game/geolocation_register.dart';
 import 'package:bsam/app/voice/voice.dart';
 import 'package:bsam/domain/distance.dart';
 import 'package:bsam/domain/mark.dart';
