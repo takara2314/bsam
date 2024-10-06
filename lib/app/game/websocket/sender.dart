@@ -5,6 +5,7 @@ import 'package:bsam/app/game/client.dart';
 // WebSocketアクションのタイプ定数
 const actionTypeAuth = 'auth';
 const actionTypePostGeolocation = 'post_geolocation';
+const actionTypePassedMark = 'passed_mark';
 
 // WebSocketでメッセージを送信するクラス
 class GameWebSocketSender {
@@ -19,6 +20,11 @@ class GameWebSocketSender {
 
   // 位置情報を送信する
   bool sendPostGeolocationAction(PostGeolocationActionMessage msg) {
+    return _client.engine.ws.send(msg.toJsonString());
+  }
+
+  // マーク通過アクションを送信する
+  bool sendPassedMarkAction(PassedMarkActionMessage msg) {
     return _client.engine.ws.send(msg.toJsonString());
   }
 }
@@ -79,6 +85,26 @@ class PostGeolocationActionMessage {
     'heading': heading,
     'speed_meter_per_sec': speedMeterPerSec,
     'recorded_at': recordedAt.toUtc().toIso8601String(),
+  };
+
+  String toJsonString() => jsonEncode(toJson());
+}
+
+class PassedMarkActionMessage {
+  final String type;
+  final int passedMarkNo;
+  final DateTime passedAt;
+
+  PassedMarkActionMessage({
+    this.type = actionTypePassedMark,
+    required this.passedMarkNo,
+    required this.passedAt,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'type': type,
+    'passed_mark_no': passedMarkNo,
+    'passed_at': passedAt.toUtc().toIso8601String(),
   };
 
   String toJsonString() => jsonEncode(toJson());

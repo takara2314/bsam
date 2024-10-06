@@ -6,6 +6,7 @@ import 'package:bsam/app/game/websocket/receiver.dart';
 import 'package:bsam/app/game/websocket/sender.dart';
 import 'package:bsam/app/game/websocket/websocket.dart';
 import 'package:bsam/domain/judge.dart';
+import 'package:bsam/domain/mark.dart';
 import 'package:bsam/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_use_geolocation/flutter_use_geolocation.dart';
@@ -109,14 +110,14 @@ class GameEngine {
     }
 
     // 通過したことをサーバーに通知
-
-    final wantMarkCounts = _ref.read(wantMarkCountsProvider);
+    _client.engine.ws.sender.sendPassedMarkAction(PassedMarkActionMessage(
+      passedMarkNo: passedMarkNo,
+      passedAt: DateTime.now(),
+    ));
 
     // 次のマークを設定
-    _client.nextMarkNo = passedMarkNo + 1;
-    if (_client.nextMarkNo > wantMarkCounts) {
-      _client.nextMarkNo = 1;
-    }
+    final wantMarkCounts = _ref.read(wantMarkCountsProvider);
+    _client.nextMarkNo = calcNextMarkNo(wantMarkCounts, passedMarkNo);
   }
 
   // 認証を試みる
@@ -261,5 +262,7 @@ class GameEngine {
     }
   }
 
-  void handleManageNextMark(ManageNextMarkHandlerMessage msg) {}
+  void handleManageNextMark(ManageNextMarkHandlerMessage msg) {
+    _client.nextMarkNo = msg.nextMarkNo;
+  }
 }

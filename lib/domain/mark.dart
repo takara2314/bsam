@@ -1,3 +1,7 @@
+int calcNextMarkNo(int wantMarkCounts, int passedMarkNo) {
+  return passedMarkNo + 1 > wantMarkCounts ? 1 : passedMarkNo + 1;
+}
+
 // マークの位置情報を表すクラス
 class MarkGeolocation {
   final int markNo;
