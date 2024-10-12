@@ -3,6 +3,7 @@ import 'package:bsam/app/game/announcer.dart';
 import 'package:bsam/app/game/detail/hook.dart';
 import 'package:bsam/app/game/geolocation_register.dart';
 import 'package:bsam/app/voice/voice.dart';
+import 'package:bsam/app/wakelock/wakelock.dart';
 import 'package:bsam/domain/distance.dart';
 import 'package:bsam/domain/mark.dart';
 import 'package:bsam/presentation/widgets/icon.dart';
@@ -47,7 +48,10 @@ class RacePage extends HookConsumerWidget {
       tokenNotifier.state,
     );
 
-    // 位置報を取得する
+    // スリープしないようにする
+    useWakelock();
+
+    // 位置情報を取得する
     final geolocation = useGeolocation(
       locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.best,
