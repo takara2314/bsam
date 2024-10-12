@@ -73,14 +73,14 @@ Future<RaceDetailResponse> fetchRaceDetail(String associationId, String token) a
     }).timeout(
       const Duration(seconds: timeoutSec),
       onTimeout: () {
-        throw TimeoutException('接続がタイムアウトしました。もう一度お試しください。');
+        throw TimeoutException('Connection timed out. Please try again.');
       },
     );
 
     if (response.statusCode == HttpStatus.ok) {
       return RaceDetailResponse.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('レース詳細の取得に失敗しました: ${response.statusCode}');
+      throw Exception('Failed to fetch race details: ${response.statusCode}');
     }
   } finally {
     client.close();
