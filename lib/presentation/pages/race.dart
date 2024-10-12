@@ -47,7 +47,7 @@ class RacePage extends HookConsumerWidget {
       tokenNotifier.state,
     );
 
-    // 位置情報を取得する
+    // 位置報を取得する
     final geolocation = useGeolocation(
       locationSettings: const LocationSettings(
       accuracy: LocationAccuracy.best,
@@ -99,29 +99,68 @@ class RacePage extends HookConsumerWidget {
       };
     }, []);
 
-    return Scaffold(
-      appBar: RaceAppBar(
-        raceName: raceDetail.value?.name ?? '',
-        preferredSize: const Size.fromHeight(72),
-      ),
-      body: Center(
-        child: gameState.started
-          ? RaceStarted(
-            compassDegree: gameState.compassDegree,
-            nextMarkNo: gameState.nextMarkNo,
-            nextMarkName: getMarkLabel(
-              wantMarkCountsNotifier.state,
-              gameState.nextMarkNo
-            ).name,
-            distanceToNextMarkMeter: gameState.distanceToNextMarkMeter,
-            geolocation: geolocation
-          )
-          : RaceWaiting(
-            geolocation: geolocation
-          )
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) {
+          return;
+        }
+        final shouldPop = await showExitConfirmationDialog(context, clientNotifier);
+        if (shouldPop && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: RaceAppBar(
+          raceName: raceDetail.value?.name ?? '',
+          preferredSize: const Size.fromHeight(72),
+        ),
+        body: Center(
+          child: gameState.started
+            ? RaceStarted(
+              compassDegree: gameState.compassDegree,
+              nextMarkNo: gameState.nextMarkNo,
+              nextMarkName: getMarkLabel(
+                wantMarkCountsNotifier.state,
+                gameState.nextMarkNo
+              ).name,
+              distanceToNextMarkMeter: gameState.distanceToNextMarkMeter,
+              geolocation: geolocation
+            )
+            : RaceWaiting(
+              geolocation: geolocation
+            )
+        )
       )
     );
   }
+}
+
+Future<bool> showExitConfirmationDialog(BuildContext context, GameClientNotifier clientNotifier) async {
+  return await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('レースを終了しますか？'),
+        content: const Text('レースを終了すると、サーバーとの接続が切断されます。'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('いいえ'),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+          ),
+          TextButton(
+            child: const Text('はい'),
+            onPressed: () {
+              clientNotifier.disconnect();
+              Navigator.of(context).pop(true);
+            },
+          ),
+        ],
+      );
+    },
+  ) ?? false;
 }
 
 class RaceAppBar extends StatelessWidget implements PreferredSizeWidget {
