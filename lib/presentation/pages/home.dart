@@ -1,3 +1,4 @@
+import 'package:bsam/app/game/detail/hook.dart';
 import 'package:bsam/app/jwt/jwt.dart';
 import 'package:bsam/domain/athlete.dart';
 import 'package:bsam/infrastructure/repository/token.dart';
@@ -19,10 +20,15 @@ class HomePage extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tokenNotifier = ref.watch(tokenProvider.notifier);
     final chosenAthleteId = useState<String?>(null);
+    final jwt = Jwt.fromToken(tokenNotifier.state);
+    final isActive = useState(true);
 
-    // TODO: 仮の値のため、実際の値に変更する
-    final raceName = useState('サンプルレース');
-    final joinedAthleteIds = useState(['athlete1', 'athlete2', 'athlete3']);
+    final raceDetail = useRaceDetailAlwaysFetch(
+      context,
+      jwt.associationId,
+      tokenNotifier.state,
+      isActive,
+    );
 
     void setChosenAthleteId(String? athleteId) {
       chosenAthleteId.value = athleteId;
@@ -37,17 +43,21 @@ class HomePage extends HookConsumerWidget {
       body: Center(
         child: Column(
           children: [
-            Heading(raceName.value),
+            Heading(raceDetail.value?.name ?? '読み込み中...'),
             ChoiceAthlete(
               chosenAthleteId: chosenAthleteId.value,
               setChosenAthleteId: setChosenAthleteId,
-              joinedAthleteIds: joinedAthleteIds.value,
+              joinedAthleteIds: raceDetail.value?.athleteIds ?? [],
             ),
             RaceStartButton(
               chosenAthleteId: chosenAthleteId.value,
-              joinedAthleteIds: joinedAthleteIds.value,
+              joinedAthleteIds: raceDetail.value?.athleteIds ?? [],
               onPressed: () {
-                context.push('$racePagePathBase${chosenAthleteId.value}');
+                // ボタンが押されたとき、レースページに移動する
+                isActive.value = false;
+                context.push('$racePagePathBase${chosenAthleteId.value}').then((_) {
+                  isActive.value = true;
+                });
               }
             )
           ]

@@ -1,5 +1,6 @@
 import 'package:bsam/app/game/client.dart';
 import 'package:bsam/app/game/announcer.dart';
+import 'package:bsam/app/game/detail/hook.dart';
 import 'package:bsam/app/game/geolocation_register.dart';
 import 'package:bsam/app/voice/voice.dart';
 import 'package:bsam/domain/distance.dart';
@@ -40,8 +41,11 @@ class RacePage extends HookConsumerWidget {
     final clientNotifier = ref.watch(gameClientProvider.notifier);
     final gameState = ref.watch(gameClientProvider);
 
-    // TODO: 仮の値のため、実際の値に変更する
-    final raceName = useState('サンプルレース');
+    final raceDetail = useRaceDetail(
+      context,
+      jwt.associationId,
+      tokenNotifier.state,
+    );
 
     // 位置情報を取得する
     final geolocation = useGeolocation(
@@ -97,7 +101,7 @@ class RacePage extends HookConsumerWidget {
 
     return Scaffold(
       appBar: RaceAppBar(
-        raceName: raceName.value,
+        raceName: raceDetail.value?.name ?? '',
         preferredSize: const Size.fromHeight(72),
       ),
       body: Center(
