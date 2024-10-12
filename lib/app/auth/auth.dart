@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:bsam/main.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 const timeoutSec = 30;
@@ -40,6 +41,9 @@ Future<AuthResponse> verifyPassword(String associationId, String password) async
     } else {
       throw Exception('Failed to verify password: ${response.statusCode}');
     }
+  } catch (e) {
+    debugPrint(e.toString());
+    rethrow;
   } finally {
     client.close();
   }

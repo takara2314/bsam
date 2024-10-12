@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:bsam/main.dart';
 import 'package:http/http.dart' as http;
 
 const timeoutSec = 30;
@@ -64,7 +65,7 @@ class RaceDetailResponse {
 }
 
 Future<RaceDetailResponse> fetchRaceDetail(String associationId, String token) async {
-  final url = Uri.parse('http://localhost:8080/races/$associationId');
+  final url = Uri.parse('$apiServerBaseUrl/races/$associationId');
   final client = http.Client();
   try {
     final response = await client.get(url, headers: {
