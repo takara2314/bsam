@@ -123,18 +123,18 @@ class RacePage extends HookConsumerWidget {
         body: Center(
           child: gameState.started
             ? RaceStarted(
-              compassDegree: gameState.compassDegree,
-              nextMarkNo: gameState.nextMarkNo,
-              nextMarkName: getMarkLabel(
-                wantMarkCountsNotifier.state,
-                gameState.nextMarkNo
-              ).name,
-              distanceToNextMarkMeter: gameState.distanceToNextMarkMeter,
-              geolocation: geolocation
-            )
+                compassDegree: gameState.compassDegree,
+                nextMarkNo: gameState.nextMarkNo,
+                nextMarkName: getMarkLabel(
+                  wantMarkCountsNotifier.state,
+                  gameState.nextMarkNo
+                ).name,
+                distanceToNextMarkMeter: gameState.distanceToNextMarkMeter,
+                geolocation: geolocation
+              )
             : RaceWaiting(
-              geolocation: geolocation
-            )
+                geolocation: geolocation
+              )
         )
       )
     );
