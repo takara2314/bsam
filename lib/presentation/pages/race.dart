@@ -54,9 +54,10 @@ class RacePage extends HookConsumerWidget {
     // 位置情報を取得する
     final geolocation = useGeolocation(
       locationSettings: const LocationSettings(
-      accuracy: LocationAccuracy.best,
-      distanceFilter: 0,
-    ));
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 0,
+      )
+    );
 
     // アナウンスに使用するTTS
     final voice = useVoice(
