@@ -109,7 +109,7 @@ class RacePage extends HookConsumerWidget {
         if (didPop) {
           return;
         }
-        final shouldPop = await showExitConfirmationDialog(context, clientNotifier);
+        final shouldPop = await showExitConfirmationDialog(context);
         if (shouldPop && context.mounted) {
           Navigator.of(context).pop();
         }
@@ -140,7 +140,7 @@ class RacePage extends HookConsumerWidget {
   }
 }
 
-Future<bool> showExitConfirmationDialog(BuildContext context, GameClientNotifier clientNotifier) async {
+Future<bool> showExitConfirmationDialog(BuildContext context) async {
   return await showDialog<bool>(
     context: context,
     builder: (BuildContext context) {
@@ -157,7 +157,6 @@ Future<bool> showExitConfirmationDialog(BuildContext context, GameClientNotifier
           TextButton(
             child: const Text('はい'),
             onPressed: () {
-              clientNotifier.disconnect();
               Navigator.of(context).pop(true);
             },
           ),
