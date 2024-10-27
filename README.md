@@ -25,6 +25,17 @@
 ## 🛠 前提
 - Dart 3.5.3
 - Flutter 3.24.3
+- Deno 2.0.3
+
+## 🔨 初期作業
+```sh
+deno run
+  --allow-read=.
+  --allow-write=.
+  .github/createSecret.ts \
+  --FIREBASE_ANDROID_API_KEY *** \
+  --FIREBASE_IOS_API_KEY ***
+```
 
 ## ⚖️ ライセンス
 このプロジェクトは [GPL-3.0](./LICENSE) ライセンスの下で公開しています。
