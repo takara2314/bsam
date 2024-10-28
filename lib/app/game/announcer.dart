@@ -6,6 +6,7 @@ import 'package:bsam/domain/mark.dart';
 import 'package:bsam/app/game/state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_use/flutter_use.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 const periodicAnnounceInterval = Duration(seconds: 3);
@@ -23,6 +24,7 @@ Future<void> Function(int) useAnnouncer(
   bool startedPeriodicAnnounce = false;
   final enabledPeriodicAnnounce = useState(false);
 
+  final gameStarted = useState(false);
   final compassDegree = useState<double?>(null);
   final distanceToNextMarkMeter = useState<double?>(null);
   final nextMarkNo = useState<int?>(null);
@@ -119,7 +121,7 @@ Future<void> Function(int) useAnnouncer(
 
     await announceMarkPassedRepeatedly(passedMarkNo);
 
-    if (!context.mounted || !gameState.started) {
+    if (!context.mounted || !gameStarted.value) {
       return;
     }
     enabledPeriodicAnnounce.value = true;
@@ -151,6 +153,11 @@ Future<void> Function(int) useAnnouncer(
     compassDegree.value = gameState.compassDegree;
     return null;
   }, [gameState.compassDegree]);
+
+  useEffect(() {
+    gameStarted.value = gameState.started;
+    return null;
+  }, [gameState.started]);
 
   useEffect(() {
     distanceToNextMarkMeter.value = gameState.distanceToNextMarkMeter;
