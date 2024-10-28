@@ -42,6 +42,8 @@ class GameClientNotifier extends StateNotifier<GameClientState> {
   void disconnect() => engine.ws.disconnect();
   void registerGeolocation(GeolocationState geolocation) => engine.registerGeolocation(geolocation);
   void registerCallbackOnPassedMark(Future<void> Function(int) callback) => engine.registerCallbackOnPassedMark(callback);
+  double? calcNextMarkDistanceMeter(double lat, double lng) => engine.calcNextMarkDistanceMeter(lat, lng);
+  double? calcNextMarkCompassDeg(double lat, double lng, double heading) => engine.calcNextMarkCompassDeg(lat, lng, heading);
 
   // ステートのgetterとsetter
   bool get connected => state.connected;

@@ -69,12 +69,12 @@ class GameEngine {
     // コンパス角と距離を更新
     // パフォーマンスの観点で、両方同時に更新するプラクティスを採用
     _client.setCompassDegreeAndDistanceToNextMark(
-      _calcNextMarkCompassDeg(
+      calcNextMarkCompassDeg(
         geolocation.position!.latitude,
         geolocation.position!.longitude,
         geolocation.position!.heading
       ),
-      _calcNextMarkDistanceMeter(
+      calcNextMarkDistanceMeter(
         geolocation.position!.latitude,
         geolocation.position!.longitude
       )
@@ -167,7 +167,7 @@ class GameEngine {
   }
 
   // 次のマークまでの距離を計算する
-  double? _calcNextMarkDistanceMeter(double lat, double lng) {
+  double? calcNextMarkDistanceMeter(double lat, double lng) {
     if (_client.nextMark == null) {
       return null;
     }
@@ -186,7 +186,7 @@ class GameEngine {
   }
 
   // 次のマークへの方位角を計算する
-  double? _calcNextMarkCompassDeg(double lat, double lng, double heading) {
+  double? calcNextMarkCompassDeg(double lat, double lng, double heading) {
     if (_client.nextMark == null) {
       return null;
     }
@@ -195,6 +195,10 @@ class GameEngine {
     if (!_client.nextMark!.stored) {
       return null;
     }
+
+    // debugPrint(
+    //   'NOW [$lat, $lng] -> MARK [${_client.nextMark!.latitude}, ${_client.nextMark!.longitude}]'
+    // );
 
     // 現在位置から次のマークまでの方位角を計算
     double bearingDeg = Geolocator.bearingBetween(

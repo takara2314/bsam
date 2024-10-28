@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bsam/app/game/client.dart';
 import 'package:bsam/app/game/announcer.dart';
 import 'package:bsam/app/game/detail/hook.dart';
@@ -8,6 +10,7 @@ import 'package:bsam/domain/distance.dart';
 import 'package:bsam/domain/mark.dart';
 import 'package:bsam/presentation/widgets/icon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -59,6 +62,10 @@ class RacePage extends HookConsumerWidget {
       )
     );
 
+    // コンパスの角度を取得する
+    StreamSubscription<CompassEvent>? _compass;
+    final heading = useState<double>(0.0);
+
     // アナウンスに使用するTTS
     final voice = useVoice(
       'ja-JP',
@@ -82,6 +89,15 @@ class RacePage extends HookConsumerWidget {
       geolocation,
     );
 
+    void changeHeading(CompassEvent event) {
+      double hd = event.heading ?? 0;
+      // -180 ~ 180 に標準化
+      if (hd > 180) {
+        hd -= 360;
+      }
+      heading.value = hd;
+    }
+
     // レースサーバーに接続する
     useEffect(() {
       // Futureを使用してビルド後にプロバイダーを更新
@@ -94,7 +110,10 @@ class RacePage extends HookConsumerWidget {
         clientNotifier.registerCallbackOnPassedMark(callbackOnPassedMark);
       });
 
+      _compass = FlutterCompass.events?.listen(changeHeading);
+
       return () {
+        _compass?.cancel();
         if (clientNotifier.connected) {
           // 非同期的にプロバイダーを変更
           Future.microtask(() {
@@ -123,17 +142,18 @@ class RacePage extends HookConsumerWidget {
         body: Center(
           child: gameState.started
             ? RaceStarted(
-                compassDegree: gameState.compassDegree,
                 nextMarkNo: gameState.nextMarkNo,
                 nextMarkName: getMarkLabel(
                   wantMarkCountsNotifier.state,
                   gameState.nextMarkNo
                 ).name,
                 distanceToNextMarkMeter: gameState.distanceToNextMarkMeter,
-                geolocation: geolocation
+                geolocation: geolocation,
+                heading: heading.value
               )
             : RaceWaiting(
-                geolocation: geolocation
+                geolocation: geolocation,
+                heading: heading.value
               )
         )
       )
@@ -198,9 +218,11 @@ class RaceAppBar extends StatelessWidget implements PreferredSizeWidget {
 
 class RaceWaiting extends StatelessWidget {
   final GeolocationState geolocation;
+  final double heading;
 
   const RaceWaiting({
     required this.geolocation,
+    required this.heading,
     super.key
   });
 
@@ -219,7 +241,7 @@ class RaceWaiting extends StatelessWidget {
           latitude: geolocation.position?.latitude ?? 0,
           longitude: geolocation.position?.longitude ?? 0,
           accuracyMeter: geolocation.position?.accuracy ?? 0,
-          heading: geolocation.position?.heading ?? 0,
+          heading: heading,
           compassDegree: 0,
           showingCompass: false
         )
@@ -228,24 +250,32 @@ class RaceWaiting extends StatelessWidget {
   }
 }
 
-class RaceStarted extends StatelessWidget {
-  final double? compassDegree;
+class RaceStarted extends HookConsumerWidget {
   final int nextMarkNo;
   final String nextMarkName;
   final double? distanceToNextMarkMeter;
   final GeolocationState geolocation;
+  final double heading;
 
   const RaceStarted({
-    required this.compassDegree,
     required this.nextMarkNo,
     required this.nextMarkName,
     required this.distanceToNextMarkMeter,
     required this.geolocation,
+    required this.heading,
     super.key
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final clientNotifier = ref.watch(gameClientProvider.notifier);
+
+    final compassDegree = clientNotifier.calcNextMarkCompassDeg(
+      geolocation.position?.latitude ?? 0,
+      geolocation.position?.longitude ?? 0,
+      heading
+    );
+
     return Column(
       children: [
         RaceCompass(heading: compassDegree),
@@ -258,7 +288,7 @@ class RaceStarted extends StatelessWidget {
           latitude: geolocation.position?.latitude ?? 0,
           longitude: geolocation.position?.longitude ?? 0,
           accuracyMeter: geolocation.position?.accuracy ?? 0,
-          heading: geolocation.position?.heading ?? 0,
+          heading: heading,
           compassDegree: compassDegree
         )
       ]
