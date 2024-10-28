@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:bsam/app/game/detail/hook.dart';
 import 'package:bsam/app/jwt/jwt.dart';
 import 'package:bsam/domain/athlete.dart';
 import 'package:bsam/infrastructure/repository/token.dart';
+import 'package:bsam/infrastructure/repository/ttsSpeed.dart';
 import 'package:bsam/main.dart';
 import 'package:bsam/presentation/widgets/button.dart';
 import 'package:bsam/presentation/widgets/icon.dart';
@@ -59,7 +62,8 @@ class HomePage extends HookConsumerWidget {
                   isActive.value = true;
                 });
               }
-            )
+            ),
+            TTSSpeedRange()
           ]
         )
       )
@@ -327,6 +331,62 @@ class RaceStartButton extends StatelessWidget {
         label: label,
         onPressed: disabled ? null : onPressed
       )
+    );
+  }
+}
+
+class TTSSpeedRange extends HookConsumerWidget {
+  const TTSSpeedRange({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ttsSpeedNotifier = ref.watch(ttsSpeedProvider.notifier);
+    final localSpeed = useState(ref.read(ttsSpeedProvider));
+
+    useEffect(() {
+      loadTtsSpeed(ref);
+      localSpeed.value = ttsSpeedNotifier.state;
+      return null;
+    }, [ttsSpeedNotifier.state]);
+
+    return Container(
+      margin: const EdgeInsets.only(
+        top: 50,
+      ),
+      padding: const EdgeInsets.only(
+        left: 30,
+        right: 30,
+      ),
+      child: Column(
+        children: [
+          const Heading('アナウンス速度'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              const NormalText('遅い'),
+              Slider(
+                value: localSpeed.value,
+                min: 0.0,
+                max: 1.0,
+                divisions: 10,
+                activeColor: primaryColor,
+                thumbColor: primaryColor,
+                // スライダー操作中はローカルstateのみ更新
+                onChanged: (double value) {
+                  localSpeed.value = value;
+                },
+                // スライダー操作完了時にProviderを更新して永続化
+                onChangeEnd: (double value) {
+                  ttsSpeedNotifier.state = value;
+                  saveTtsSpeed(ref, value);
+                },
+              ),
+              const NormalText('速い'),
+            ]
+          ),
+        ],
+      ),
     );
   }
 }

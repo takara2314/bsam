@@ -28,5 +28,5 @@ Future<void> deleteToken(WidgetRef ref) async {
   await prefs.remove('token');
 
   final tokenNotifier = ref.watch(tokenProvider.notifier);
-  tokenNotifier.state = '';
+  tokenNotifier.state = tokenInitValue;
 }

@@ -62,7 +62,7 @@ class RacePage extends HookConsumerWidget {
     // アナウンスに使用するTTS
     final voice = useVoice(
       'ja-JP',
-      0.6,
+      ref.read(ttsSpeedProvider),
       1.0,
       1.0,
     );
