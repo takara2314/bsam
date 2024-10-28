@@ -31,6 +31,7 @@ class PrimaryButton extends StatelessWidget {
             fontSize: 20,
             fontWeight: FontWeight.bold
           ),
+          textAlign: TextAlign.center
         ),
       ),
     );

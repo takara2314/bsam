@@ -43,28 +43,37 @@ class HomePage extends HookConsumerWidget {
         onPressedLogout: () => logoutDialogBuilder(context, ref),
         preferredSize: const Size.fromHeight(72),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Heading(raceDetail.value?.name ?? '読み込み中...'),
-            ChoiceAthlete(
-              chosenAthleteId: chosenAthleteId.value,
-              setChosenAthleteId: setChosenAthleteId,
-              joinedAthleteIds: raceDetail.value?.athleteIds ?? [],
-            ),
-            RaceStartButton(
-              chosenAthleteId: chosenAthleteId.value,
-              joinedAthleteIds: raceDetail.value?.athleteIds ?? [],
-              onPressed: () {
-                // ボタンが押されたとき、レースページに移動する
-                isActive.value = false;
-                context.push('$racePagePathBase${chosenAthleteId.value}').then((_) {
-                  isActive.value = true;
-                });
-              }
-            ),
-            TTSSpeedRange()
-          ]
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 30, right: 30),
+                child: Heading(
+                  raceDetail.value?.name ?? '読み込み中...',
+                  textAlign: TextAlign.center
+                ),
+              ),
+              ChoiceAthlete(
+                chosenAthleteId: chosenAthleteId.value,
+                setChosenAthleteId: setChosenAthleteId,
+                joinedAthleteIds: raceDetail.value?.athleteIds ?? [],
+              ),
+              RaceStartButton(
+                chosenAthleteId: chosenAthleteId.value,
+                joinedAthleteIds: raceDetail.value?.athleteIds ?? [],
+                onPressed: () {
+                  // ボタンが押されたとき、レースページに移動する
+                  isActive.value = false;
+                  context.push('$racePagePathBase${chosenAthleteId.value}').then((_) {
+                    isActive.value = true;
+                  });
+                }
+              ),
+              // TODO: なぜか const をつけると、保存された ttsSpeed がスライダーに反映されないので、原因を調査する
+              TTSSpeedRange()
+            ]
+          )
         )
       )
     );
