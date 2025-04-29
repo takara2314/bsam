@@ -8,7 +8,7 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:battery_plus/battery_plus.dart';
 import "package:async_locks/async_locks.dart";
@@ -91,7 +91,7 @@ class _Navi extends ConsumerState<Navi> {
     _initTts();
 
     // Screen lock
-    Wakelock.enable();
+    WakelockPlus.enable();
 
     // Change tts volume
     tts.setVolume(1.0);
@@ -111,7 +111,7 @@ class _Navi extends ConsumerState<Navi> {
     tts.pause();
     _compass!.cancel();
     _channel.sink.close(status.goingAway);
-    Wakelock.disable();
+    WakelockPlus.disable();
     super.dispose();
   }
 
@@ -285,7 +285,9 @@ class _Navi extends ConsumerState<Navi> {
 
   _getPosition() async {
     Position pos = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best,
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.best,
+      ),
     );
 
     if (pos.accuracy > 30.0 || !mounted) {
@@ -497,10 +499,12 @@ class _Navi extends ConsumerState<Navi> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        isPopDialog(context);
-        return false;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (!didPop) {
+          isPopDialog(context);
+        }
       },
       child: Scaffold(
         appBar: const NaviAppBar(),
