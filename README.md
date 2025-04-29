@@ -21,6 +21,30 @@
 
 [レースモニター（外部公開用）](https://github.com/takara2314/bsam-web)
 
+## 環境構築
+開発には以下が必要です。
+- Flutter 3.29.3 以上
+
+1. はじめにリポジトリをクローンし、依存関係をインストールしてください。
+
+```sh
+git clone https://github.com/takara2314/bsam.git
+
+cd bsam
+
+npm install
+```
+
+2. 次に .env.sample を .env にコピーし、環境変数の設定を行ってください。
+
+```sh
+cp .env.sample .env
+```
+
+3. Firebase Consoleから以下のファイルをダウンロードし、適切な場所に配置：
+- Android: `google-services.json` → `android/app/` に配置
+- iOS: `GoogleService-Info.plist` → `ios/Runner/` に配置
+
 ## ライセンス
 
 [GPL-3.0](./LICENSE)
