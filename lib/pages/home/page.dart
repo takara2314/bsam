@@ -14,6 +14,7 @@ import 'package:bsam/pages/home/athlete_select.dart';
 import 'package:bsam/pages/home/participate_button.dart';
 import 'package:bsam/pages/home/race_name_area.dart';
 import 'package:bsam/pages/home/settings.dart';
+import 'package:bsam/constants/app_constants.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -36,22 +37,15 @@ class _Home extends ConsumerState<Home> {
     User(displayName: '10番艇', id: 'athlete10')
   ];
 
-  static double ttsSpeedInit = 0.9;
-  static double ttsDurationInit = 1.0;
-  static int reachJudgeRadiusInit = 5;
-  static int reachNoticeNumInit = 2;
-  static double headingFixInit = 0.0;
-  static int markNameTypeInit = 0; // 0: 上/下マーク, 1: 数字マーク
-
   String? _assocId;
   String? _userId;
-  double _ttsSpeed = ttsSpeedInit;
-  double _ttsDuration = ttsDurationInit;
-  int _reachJudgeRadius = reachJudgeRadiusInit;
-  int _reachNoticeNum = reachNoticeNumInit;
-  final double _headingFix = headingFixInit;
+  double _ttsSpeed = AppConstants.ttsSpeedInit;
+  double _ttsDuration = AppConstants.ttsDurationInit;
+  int _reachJudgeRadius = AppConstants.reachJudgeRadiusInit;
+  int _reachNoticeNum = AppConstants.reachNoticeNumInit;
+  final double _headingFix = AppConstants.headingFixInit;
   final bool _isAnnounceNeighbors = false;
-  int _markNameType = markNameTypeInit;
+  int _markNameType = AppConstants.markNameTypeInit;
   String _version = '';
 
   @override
@@ -141,7 +135,7 @@ class _Home extends ConsumerState<Home> {
       });
     } catch (_) {
       setState(() {
-        _ttsSpeed = ttsSpeedInit;
+        _ttsSpeed = AppConstants.ttsSpeedInit;
       });
     }
   }
@@ -153,7 +147,7 @@ class _Home extends ConsumerState<Home> {
       });
     } catch (_) {
       setState(() {
-        _ttsDuration = ttsDurationInit;
+        _ttsDuration = AppConstants.ttsDurationInit;
       });
     }
   }
@@ -165,7 +159,7 @@ class _Home extends ConsumerState<Home> {
       });
     } catch (_) {
       setState(() {
-        _reachJudgeRadius = reachJudgeRadiusInit;
+        _reachJudgeRadius = AppConstants.reachJudgeRadiusInit;
       });
     }
   }
@@ -177,7 +171,7 @@ class _Home extends ConsumerState<Home> {
       });
     } catch (_) {
       setState(() {
-        _reachNoticeNum = reachNoticeNumInit;
+        _reachNoticeNum = AppConstants.reachNoticeNumInit;
       });
     }
   }
@@ -199,7 +193,7 @@ class _Home extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const HomeAppBar(
-        assocName: 'セーリング伊勢'
+        assocName: AppConstants.assocName
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -213,7 +207,7 @@ class _Home extends ConsumerState<Home> {
                 changeUser: _changeUser
               ),
               const RaceNameArea(
-                raceName: '全国ハンザクラスブラインドセーリング大会'
+                raceName: AppConstants.raceName
               ),
               ParticipateButton(
                 assocId: _assocId,
@@ -228,16 +222,16 @@ class _Home extends ConsumerState<Home> {
               ),
               Settings(
                 ttsSpeed: _ttsSpeed,
-                ttsSpeedInit: ttsSpeedInit,
+                ttsSpeedInit: AppConstants.ttsSpeedInit,
                 changeTtsSpeedAtTextForm: _changeTtsSpeedAtTextForm,
                 ttsDuration: _ttsDuration,
-                ttsDurationInit: ttsDurationInit,
+                ttsDurationInit: AppConstants.ttsDurationInit,
                 changeTtsDurationAtTextForm: _changeTtsDurationAtTextForm,
                 reachJudgeRadius: _reachJudgeRadius,
-                reachJudgeRadiusInit: reachJudgeRadiusInit,
+                reachJudgeRadiusInit: AppConstants.reachJudgeRadiusInit,
                 changeReachJudgeRadiusAtTextForm: _changeReachJudgeRadiusAtTextForm,
                 reachNoticeNum: _reachNoticeNum,
-                reachNoticeNumInit: reachNoticeNumInit,
+                reachNoticeNumInit: AppConstants.reachNoticeNumInit,
                 changeReachNoticeNumAtTextForm: _changeReachNoticeNumAtTextForm,
                 markNameType: _markNameType,
                 changeMarkNameType: _changeMarkNameType
