@@ -40,6 +40,8 @@ class _Home extends ConsumerState<Home> {
   String? _assocId;
   String? _userId;
   double _ttsSpeed = AppConstants.ttsSpeedInit;
+  final double _ttsVolume = AppConstants.ttsVolumeInit;
+  final double _ttsPitch = AppConstants.ttsPitchInit;
   double _ttsDuration = AppConstants.ttsDurationInit;
   int _reachJudgeRadius = AppConstants.reachJudgeRadiusInit;
   int _reachNoticeNum = AppConstants.reachNoticeNumInit;
@@ -212,7 +214,10 @@ class _Home extends ConsumerState<Home> {
               ParticipateButton(
                 assocId: _assocId,
                 userId: _userId,
+                ttsLanguage: AppConstants.ttsLanguage,
                 ttsSpeed: _ttsSpeed,
+                ttsVolume: _ttsVolume,
+                ttsPitch: _ttsPitch,
                 ttsDuration: _ttsDuration,
                 reachJudgeRadius: _reachJudgeRadius,
                 reachNoticeNum: _reachNoticeNum,

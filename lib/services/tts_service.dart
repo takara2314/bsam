@@ -1,27 +1,42 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:async_locks/async_locks.dart';
-import 'package:bsam/constants/app_constants.dart';
 
 /// 音声読み上げサービス
 class TtsService {
   final FlutterTts _tts = FlutterTts();
   final Lock _speakLock = Lock();
 
+  late String _language;
+  late double _speechRate;
+  late double _volume;
+  late double _pitch;
+
   TtsService();
 
   /// TTSの初期化
-  Future<void> initialize(double speechRate) async {
-    await _tts.setLanguage(AppConstants.ttsLanguage);
-    await _tts.setSpeechRate(speechRate);
-    await _tts.setVolume(AppConstants.ttsVolume);
-    await _tts.setPitch(AppConstants.ttsPitch);
+  Future<void> initialize(
+    String language,
+    double speechRate,
+    double volume,
+    double pitch
+  ) async {
+    _language = language;
+    _speechRate = speechRate;
+    _volume = volume;
+    _pitch = pitch;
+
+    await _tts.setLanguage(_language);
+    await _tts.setSpeechRate(_speechRate);
+    await _tts.setVolume(_volume);
+    await _tts.setPitch(_pitch);
     await _tts.awaitSpeakCompletion(true);
   }
 
   /// スピード設定
   Future<void> setSpeechRate(double rate) async {
-    await _tts.setSpeechRate(rate);
+    _speechRate = rate; // Update the field
+    await _tts.setSpeechRate(_speechRate);
   }
 
   /// 読み上げを一時停止
@@ -40,7 +55,7 @@ class TtsService {
         await _tts.speak(text);
       } catch (e) {
         debugPrint('TTS error: ${e.toString()}');
-        await initialize(AppConstants.ttsSpeedInit);
+        await initialize(_language, _speechRate, _volume, _pitch);
       }
     });
   }

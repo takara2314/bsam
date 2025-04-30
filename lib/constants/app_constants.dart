@@ -13,6 +13,8 @@ class AppConstants {
 
   // TTS初期値
   static const double ttsSpeedInit = 0.9;
+  static const double ttsVolumeInit = 1.0;
+  static const double ttsPitchInit = 1.0;
   static const double ttsDurationInit = 1.0;
 
   // 到達判定の設定

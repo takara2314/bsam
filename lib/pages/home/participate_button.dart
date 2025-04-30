@@ -7,7 +7,10 @@ class ParticipateButton extends StatelessWidget {
     super.key,
     required this.assocId,
     required this.userId,
+    required this.ttsLanguage,
     required this.ttsSpeed,
+    required this.ttsVolume,
+    required this.ttsPitch,
     required this.ttsDuration,
     required this.reachJudgeRadius,
     required this.reachNoticeNum,
@@ -18,7 +21,10 @@ class ParticipateButton extends StatelessWidget {
 
   final String? assocId;
   final String? userId;
+  final String ttsLanguage;
   final double ttsSpeed;
+  final double ttsVolume;
+  final double ttsPitch;
   final double ttsDuration;
   final int reachJudgeRadius;
   final int reachNoticeNum;
@@ -41,7 +47,10 @@ class ParticipateButton extends StatelessWidget {
                     builder: (context) => Navi(
                       assocId: assocId!,
                       userId: userId!,
+                      ttsLanguage: ttsLanguage,
                       ttsSpeed: ttsSpeed,
+                      ttsVolume: ttsVolume,
+                      ttsPitch: ttsPitch,
                       ttsDuration: ttsDuration,
                       reachJudgeRadius: reachJudgeRadius,
                       reachNoticeNum: reachNoticeNum,

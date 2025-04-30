@@ -29,7 +29,10 @@ class Navi extends ConsumerStatefulWidget {
     super.key,
     required this.assocId,
     required this.userId,
+    required this.ttsLanguage,
     required this.ttsSpeed,
+    required this.ttsVolume,
+    required this.ttsPitch,
     required this.ttsDuration,
     required this.reachJudgeRadius,
     required this.reachNoticeNum,
@@ -40,7 +43,10 @@ class Navi extends ConsumerStatefulWidget {
 
   final String assocId;
   final String userId;
+  final String ttsLanguage;
   final double ttsSpeed;
+  final double ttsVolume;
+  final double ttsPitch;
   final double ttsDuration;
   final int reachJudgeRadius;
   final int reachNoticeNum;
@@ -137,7 +143,12 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _initTts() async {
-    await ttsService.initialize(widget.ttsSpeed);
+    await ttsService.initialize(
+      widget.ttsLanguage,
+      widget.ttsSpeed,
+      widget.ttsVolume,
+      widget.ttsPitch
+    );
   }
 
   _initIsolate() async {
