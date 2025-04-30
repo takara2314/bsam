@@ -5,7 +5,7 @@ class Settings extends StatelessWidget {
     super.key,
     required this.ttsSpeed,
     required this.ttsSpeedInit,
-    required this.changeTtsSpeedAtTextForm,
+    required this.changeTtsSpeed,
     required this.ttsDuration,
     required this.ttsDurationInit,
     required this.changeTtsDurationAtTextForm,
@@ -15,11 +15,13 @@ class Settings extends StatelessWidget {
     required this.reachNoticeNum,
     required this.reachNoticeNumInit,
     required this.changeReachNoticeNumAtTextForm,
+    required this.markNameType,
+    required this.changeMarkNameType,
   });
 
   final double ttsSpeed;
   final double ttsSpeedInit;
-  final Function(String) changeTtsSpeedAtTextForm;
+  final Function(double) changeTtsSpeed;
   final double ttsDuration;
   final double ttsDurationInit;
   final Function(String) changeTtsDurationAtTextForm;
@@ -29,6 +31,8 @@ class Settings extends StatelessWidget {
   final int reachNoticeNum;
   final int reachNoticeNumInit;
   final Function(String) changeReachNoticeNumAtTextForm;
+  final int markNameType;
+  final Function(int) changeMarkNameType;
 
   @override
   Widget build(BuildContext context) {
@@ -46,19 +50,24 @@ class Settings extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: const Text('アナウンス速度')
               ),
-              TextFormField(
-                initialValue: ttsSpeedInit.toString(),
-                onChanged: changeTtsSpeedAtTextForm,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide.none,
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: ttsSpeed,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 10,
+                      label: ttsSpeed.toStringAsFixed(1),
+                      onChanged: changeTtsSpeed,
+                    ),
                   ),
-                  contentPadding: EdgeInsets.only(top: 8, bottom: 8, left: 10, right: 10),
-                ),
+                  Container(
+                    width: 40,
+                    alignment: Alignment.centerRight,
+                    child: Text(ttsSpeed.toStringAsFixed(1)),
+                  ),
+                ],
               ),
             ]
           ),
@@ -136,6 +145,50 @@ class Settings extends StatelessWidget {
                     ),
                     contentPadding: EdgeInsets.only(top: 8, bottom: 8, left: 10, right: 10),
                   ),
+                ),
+              ),
+            ]
+          ),
+          TableRow(
+            children: [
+              Container(
+                padding: const EdgeInsets.only(top: 20, bottom: 10),
+                alignment: Alignment.centerLeft,
+                child: const Text('マーク呼称')
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<int>(
+                        title: const Text('上/下'),
+                        value: 0,
+                        groupValue: markNameType,
+                        onChanged: (int? value) {
+                          if (value != null) {
+                            changeMarkNameType(value);
+                          }
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile<int>(
+                        title: const Text('数字'),
+                        value: 1,
+                        groupValue: markNameType,
+                        onChanged: (int? value) {
+                          if (value != null) {
+                            changeMarkNameType(value);
+                          }
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        dense: true,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ]

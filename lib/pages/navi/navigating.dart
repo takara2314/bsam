@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:bsam/pages/navi/compass_area.dart';
 
-class Navigating extends StatelessWidget {
+class Navigating extends StatefulWidget {
   const Navigating({
     super.key,
     required this.latitude,
@@ -14,7 +14,8 @@ class Navigating extends StatelessWidget {
     required this.routeDistance,
     required this.maxDistance,
     required this.forcePassed,
-    required this.onPassed
+    required this.onPassed,
+    required this.markNameType
   });
 
   final double latitude;
@@ -28,16 +29,24 @@ class Navigating extends StatelessWidget {
   final int maxDistance;
   final void Function(int) forcePassed;
   final void Function() onPassed;
+  final int markNameType;
 
+  @override
+  State<Navigating> createState() => _NavigatingState();
+}
+
+class _NavigatingState extends State<Navigating> {
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         CompassArea(
-          compassDeg: compassDeg
+          compassDeg: widget.compassDeg
         ),
         Text(
-          '$nextMarkNo ${markNames[nextMarkNo]![0]}マーク',
+          widget.markNameType == 0
+            ? '${widget.nextMarkNo} ${widget.markNames[widget.nextMarkNo]![0]}マーク'
+            : '${widget.markNames[widget.nextMarkNo]![0]}マーク',
           style: const TextStyle(
             fontSize: 28
           )
@@ -56,7 +65,7 @@ class Navigating extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(left: 10, right: 10),
               child: Text(
-                '${routeDistance < maxDistance ? routeDistance.toInt() : '?'}',
+                '${widget.routeDistance < widget.maxDistance ? widget.routeDistance.toInt() : '?'}',
                 style: const TextStyle(
                   color: Color.fromRGBO(79, 79, 79, 1),
                   fontSize: 36
@@ -77,38 +86,38 @@ class Navigating extends StatelessWidget {
           style: Theme.of(context).textTheme.displaySmall
         ),
         Text(
-          '${latitude.toStringAsFixed(6)} / ${longitude.toStringAsFixed(6)}'
+          '${widget.latitude.toStringAsFixed(6)} / ${widget.longitude.toStringAsFixed(6)}'
         ),
         Text(
           '位置情報の精度',
           style: Theme.of(context).textTheme.displaySmall
         ),
         Text(
-          '${accuracy.toStringAsFixed(2)} m'
+          '${widget.accuracy.toStringAsFixed(2)} m'
         ),
         Text(
           '端末の方角 / コンパスの方角',
           style: Theme.of(context).textTheme.displaySmall
         ),
         Text(
-          '${heading.toStringAsFixed(2)}° / ${compassDeg.toStringAsFixed(2)}°'
+          '${widget.heading.toStringAsFixed(2)}° / ${widget.compassDeg.toStringAsFixed(2)}°'
         ),
         Row(
           children: [
             TextButton(
-              onPressed: () {forcePassed(1);},
+              onPressed: () {widget.forcePassed(1);},
               child: const Text('上通過')
             ),
             TextButton(
-              onPressed: () {forcePassed(2);},
+              onPressed: () {widget.forcePassed(2);},
               child: const Text('サイド通過')
             ),
             TextButton(
-              onPressed: () {forcePassed(3);},
+              onPressed: () {widget.forcePassed(3);},
               child: const Text('下通過')
             ),
             TextButton(
-              onPressed: () {onPassed();},
+              onPressed: () {widget.onPassed();},
               child: const Text('マーク通過判定')
             )
           ]

@@ -7,22 +7,30 @@ class ParticipateButton extends StatelessWidget {
     super.key,
     required this.assocId,
     required this.userId,
+    required this.ttsLanguage,
     required this.ttsSpeed,
+    required this.ttsVolume,
+    required this.ttsPitch,
     required this.ttsDuration,
     required this.reachJudgeRadius,
     required this.reachNoticeNum,
     required this.headingFix,
-    required this.isAnnounceNeighbors
+    required this.isAnnounceNeighbors,
+    required this.markNameType
   });
 
   final String? assocId;
   final String? userId;
+  final String ttsLanguage;
   final double ttsSpeed;
+  final double ttsVolume;
+  final double ttsPitch;
   final double ttsDuration;
   final int reachJudgeRadius;
   final int reachNoticeNum;
   final double headingFix;
   final bool isAnnounceNeighbors;
+  final int markNameType;
 
   @override
   Widget build(BuildContext context) {
@@ -39,12 +47,16 @@ class ParticipateButton extends StatelessWidget {
                     builder: (context) => Navi(
                       assocId: assocId!,
                       userId: userId!,
+                      ttsLanguage: ttsLanguage,
                       ttsSpeed: ttsSpeed,
+                      ttsVolume: ttsVolume,
+                      ttsPitch: ttsPitch,
                       ttsDuration: ttsDuration,
                       reachJudgeRadius: reachJudgeRadius,
                       reachNoticeNum: reachNoticeNum,
                       headingFix: headingFix,
-                      isAnnounceNeighbors: isAnnounceNeighbors
+                      isAnnounceNeighbors: isAnnounceNeighbors,
+                      markNameType: markNameType
                     ),
                   )
                 );

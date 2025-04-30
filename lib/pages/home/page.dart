@@ -14,6 +14,7 @@ import 'package:bsam/pages/home/athlete_select.dart';
 import 'package:bsam/pages/home/participate_button.dart';
 import 'package:bsam/pages/home/race_name_area.dart';
 import 'package:bsam/pages/home/settings.dart';
+import 'package:bsam/constants/app_constants.dart';
 
 class Home extends ConsumerStatefulWidget {
   const Home({super.key});
@@ -36,20 +37,17 @@ class _Home extends ConsumerState<Home> {
     User(displayName: '10番艇', id: 'athlete10')
   ];
 
-  static double ttsSpeedInit = 0.9;
-  static double ttsDurationInit = 1.0;
-  static int reachJudgeRadiusInit = 15;
-  static int reachNoticeNumInit = 2;
-  static double headingFixInit = 0.0;
-
   String? _assocId;
   String? _userId;
-  double _ttsSpeed = ttsSpeedInit;
-  double _ttsDuration = ttsDurationInit;
-  int _reachJudgeRadius = reachJudgeRadiusInit;
-  int _reachNoticeNum = reachNoticeNumInit;
-  final double _headingFix = headingFixInit;
+  double _ttsSpeed = AppConstants.ttsSpeedInit;
+  final double _ttsVolume = AppConstants.ttsVolumeInit;
+  final double _ttsPitch = AppConstants.ttsPitchInit;
+  double _ttsDuration = AppConstants.ttsDurationInit;
+  int _reachJudgeRadius = AppConstants.reachJudgeRadiusInit;
+  int _reachNoticeNum = AppConstants.reachNoticeNumInit;
+  final double _headingFix = AppConstants.headingFixInit;
   final bool _isAnnounceNeighbors = false;
+  int _markNameType = AppConstants.markNameTypeInit;
   String _version = '';
 
   @override
@@ -67,6 +65,7 @@ class _Home extends ConsumerState<Home> {
       _loadWavenetToken();
       _loadAssocInfo();
       _loadUserInfo();
+      _loadSettings();
       _loadVersion();
     }();
   }
@@ -110,6 +109,18 @@ class _Home extends ConsumerState<Home> {
     }
   }
 
+  _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _ttsSpeed = prefs.getDouble('tts_speed') ?? AppConstants.ttsSpeedInit;
+      _ttsDuration = prefs.getDouble('tts_duration') ?? AppConstants.ttsDurationInit;
+      _reachJudgeRadius = prefs.getInt('reach_judge_radius') ?? AppConstants.reachJudgeRadiusInit;
+      _reachNoticeNum = prefs.getInt('reach_notice_num') ?? AppConstants.reachNoticeNumInit;
+      _markNameType = prefs.getInt('mark_name_type') ?? AppConstants.markNameTypeInit;
+    });
+  }
+
   _setUserId(String id) {
     final userId = ref.read(userIdProvider.notifier);
 
@@ -132,52 +143,91 @@ class _Home extends ConsumerState<Home> {
     _storeUserId(id);
   }
 
-  _changeTtsSpeedAtTextForm(String value) {
-    try {
-      setState(() {
-        _ttsSpeed = double.parse(value);
-      });
-    } catch (_) {
-      setState(() {
-        _ttsSpeed = ttsSpeedInit;
-      });
-    }
+  _changeTtsSpeed(double value) {
+    setState(() {
+      _ttsSpeed = value;
+    });
+    _storeTtsSpeed(value);
+  }
+
+  _storeTtsSpeed(double value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('tts_speed', value);
   }
 
   _changeTtsDurationAtTextForm(String value) {
+    double duration;
     try {
+      duration = double.parse(value);
       setState(() {
-        _ttsDuration = double.parse(value);
+        _ttsDuration = duration;
       });
+      _storeTtsDuration(duration);
     } catch (_) {
       setState(() {
-        _ttsDuration = ttsDurationInit;
+        _ttsDuration = AppConstants.ttsDurationInit;
       });
+      _storeTtsDuration(AppConstants.ttsDurationInit);
     }
+  }
+
+  _storeTtsDuration(double value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('tts_duration', value);
   }
 
   _changeReachJudgeRadiusAtTextForm(String value) {
+    int radius;
     try {
+      radius = int.parse(value);
       setState(() {
-        _reachJudgeRadius = int.parse(value);
+        _reachJudgeRadius = radius;
       });
+      _storeReachJudgeRadius(radius);
     } catch (_) {
       setState(() {
-        _reachJudgeRadius = reachJudgeRadiusInit;
+        _reachJudgeRadius = AppConstants.reachJudgeRadiusInit;
       });
+      _storeReachJudgeRadius(AppConstants.reachJudgeRadiusInit);
     }
   }
 
+  _storeReachJudgeRadius(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('reach_judge_radius', value);
+  }
+
   _changeReachNoticeNumAtTextForm(String value) {
+    int num;
     try {
+      num = int.parse(value);
       setState(() {
-        _reachNoticeNum = int.parse(value);
+        _reachNoticeNum = num;
       });
+      _storeReachNoticeNum(num);
     } catch (_) {
       setState(() {
-        _reachNoticeNum = reachNoticeNumInit;
+        _reachNoticeNum = AppConstants.reachNoticeNumInit;
       });
+      _storeReachNoticeNum(AppConstants.reachNoticeNumInit);
     }
+  }
+
+  _storeReachNoticeNum(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('reach_notice_num', value);
+  }
+
+  _changeMarkNameType(int value) {
+    setState(() {
+      _markNameType = value;
+    });
+    _storeMarkNameType(value);
+  }
+
+  _storeMarkNameType(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('mark_name_type', value);
   }
 
   _loadVersion() async {
@@ -191,7 +241,7 @@ class _Home extends ConsumerState<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const HomeAppBar(
-        assocName: 'セーリング伊勢'
+        assocName: AppConstants.assocName
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -205,31 +255,37 @@ class _Home extends ConsumerState<Home> {
                 changeUser: _changeUser
               ),
               const RaceNameArea(
-                raceName: '全国ハンザクラスブラインドセーリング大会'
+                raceName: AppConstants.raceName
               ),
               ParticipateButton(
                 assocId: _assocId,
                 userId: _userId,
+                ttsLanguage: AppConstants.ttsLanguage,
                 ttsSpeed: _ttsSpeed,
+                ttsVolume: _ttsVolume,
+                ttsPitch: _ttsPitch,
                 ttsDuration: _ttsDuration,
                 reachJudgeRadius: _reachJudgeRadius,
                 reachNoticeNum: _reachNoticeNum,
                 headingFix: _headingFix,
-                isAnnounceNeighbors: _isAnnounceNeighbors
+                isAnnounceNeighbors: _isAnnounceNeighbors,
+                markNameType: _markNameType
               ),
               Settings(
                 ttsSpeed: _ttsSpeed,
-                ttsSpeedInit: ttsSpeedInit,
-                changeTtsSpeedAtTextForm: _changeTtsSpeedAtTextForm,
+                ttsSpeedInit: AppConstants.ttsSpeedInit,
+                changeTtsSpeed: _changeTtsSpeed,
                 ttsDuration: _ttsDuration,
-                ttsDurationInit: ttsDurationInit,
+                ttsDurationInit: AppConstants.ttsDurationInit,
                 changeTtsDurationAtTextForm: _changeTtsDurationAtTextForm,
                 reachJudgeRadius: _reachJudgeRadius,
-                reachJudgeRadiusInit: reachJudgeRadiusInit,
+                reachJudgeRadiusInit: AppConstants.reachJudgeRadiusInit,
                 changeReachJudgeRadiusAtTextForm: _changeReachJudgeRadiusAtTextForm,
                 reachNoticeNum: _reachNoticeNum,
-                reachNoticeNumInit: reachNoticeNumInit,
-                changeReachNoticeNumAtTextForm: _changeReachNoticeNumAtTextForm
+                reachNoticeNumInit: AppConstants.reachNoticeNumInit,
+                changeReachNoticeNumAtTextForm: _changeReachNoticeNumAtTextForm,
+                markNameType: _markNameType,
+                changeMarkNameType: _changeMarkNameType
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 50),
