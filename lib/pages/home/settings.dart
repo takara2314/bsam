@@ -5,7 +5,7 @@ class Settings extends StatelessWidget {
     super.key,
     required this.ttsSpeed,
     required this.ttsSpeedInit,
-    required this.changeTtsSpeedAtTextForm,
+    required this.changeTtsSpeed,
     required this.ttsDuration,
     required this.ttsDurationInit,
     required this.changeTtsDurationAtTextForm,
@@ -21,7 +21,7 @@ class Settings extends StatelessWidget {
 
   final double ttsSpeed;
   final double ttsSpeedInit;
-  final Function(String) changeTtsSpeedAtTextForm;
+  final Function(double) changeTtsSpeed;
   final double ttsDuration;
   final double ttsDurationInit;
   final Function(String) changeTtsDurationAtTextForm;
@@ -50,19 +50,24 @@ class Settings extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: const Text('アナウンス速度')
               ),
-              TextFormField(
-                initialValue: ttsSpeedInit.toString(),
-                onChanged: changeTtsSpeedAtTextForm,
-                textAlign: TextAlign.center,
-                decoration: const InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide.none,
+              Row(
+                children: [
+                  Expanded(
+                    child: Slider(
+                      value: ttsSpeed,
+                      min: 0.0,
+                      max: 1.0,
+                      divisions: 10,
+                      label: ttsSpeed.toStringAsFixed(1),
+                      onChanged: changeTtsSpeed,
+                    ),
                   ),
-                  contentPadding: EdgeInsets.only(top: 8, bottom: 8, left: 10, right: 10),
-                ),
+                  Container(
+                    width: 40,
+                    alignment: Alignment.centerRight,
+                    child: Text(ttsSpeed.toStringAsFixed(1)),
+                  ),
+                ],
               ),
             ]
           ),

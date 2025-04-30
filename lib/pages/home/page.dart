@@ -130,16 +130,10 @@ class _Home extends ConsumerState<Home> {
     _storeUserId(id);
   }
 
-  _changeTtsSpeedAtTextForm(String value) {
-    try {
-      setState(() {
-        _ttsSpeed = double.parse(value);
-      });
-    } catch (_) {
-      setState(() {
-        _ttsSpeed = AppConstants.ttsSpeedInit;
-      });
-    }
+  _changeTtsSpeed(double value) {
+    setState(() {
+      _ttsSpeed = value;
+    });
   }
 
   _changeTtsDurationAtTextForm(String value) {
@@ -228,7 +222,7 @@ class _Home extends ConsumerState<Home> {
               Settings(
                 ttsSpeed: _ttsSpeed,
                 ttsSpeedInit: AppConstants.ttsSpeedInit,
-                changeTtsSpeedAtTextForm: _changeTtsSpeedAtTextForm,
+                changeTtsSpeed: _changeTtsSpeed,
                 ttsDuration: _ttsDuration,
                 ttsDurationInit: AppConstants.ttsDurationInit,
                 changeTtsDurationAtTextForm: _changeTtsDurationAtTextForm,
