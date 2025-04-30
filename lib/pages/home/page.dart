@@ -65,6 +65,7 @@ class _Home extends ConsumerState<Home> {
       _loadWavenetToken();
       _loadAssocInfo();
       _loadUserInfo();
+      _loadSettings();
       _loadVersion();
     }();
   }
@@ -108,6 +109,18 @@ class _Home extends ConsumerState<Home> {
     }
   }
 
+  _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      _ttsSpeed = prefs.getDouble('tts_speed') ?? AppConstants.ttsSpeedInit;
+      _ttsDuration = prefs.getDouble('tts_duration') ?? AppConstants.ttsDurationInit;
+      _reachJudgeRadius = prefs.getInt('reach_judge_radius') ?? AppConstants.reachJudgeRadiusInit;
+      _reachNoticeNum = prefs.getInt('reach_notice_num') ?? AppConstants.reachNoticeNumInit;
+      _markNameType = prefs.getInt('mark_name_type') ?? AppConstants.markNameTypeInit;
+    });
+  }
+
   _setUserId(String id) {
     final userId = ref.read(userIdProvider.notifier);
 
@@ -134,48 +147,87 @@ class _Home extends ConsumerState<Home> {
     setState(() {
       _ttsSpeed = value;
     });
+    _storeTtsSpeed(value);
+  }
+
+  _storeTtsSpeed(double value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('tts_speed', value);
   }
 
   _changeTtsDurationAtTextForm(String value) {
+    double duration;
     try {
+      duration = double.parse(value);
       setState(() {
-        _ttsDuration = double.parse(value);
+        _ttsDuration = duration;
       });
+      _storeTtsDuration(duration);
     } catch (_) {
       setState(() {
         _ttsDuration = AppConstants.ttsDurationInit;
       });
+      _storeTtsDuration(AppConstants.ttsDurationInit);
     }
   }
 
+  _storeTtsDuration(double value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setDouble('tts_duration', value);
+  }
+
   _changeReachJudgeRadiusAtTextForm(String value) {
+    int radius;
     try {
+      radius = int.parse(value);
       setState(() {
-        _reachJudgeRadius = int.parse(value);
+        _reachJudgeRadius = radius;
       });
+      _storeReachJudgeRadius(radius);
     } catch (_) {
       setState(() {
         _reachJudgeRadius = AppConstants.reachJudgeRadiusInit;
       });
+      _storeReachJudgeRadius(AppConstants.reachJudgeRadiusInit);
     }
   }
 
+  _storeReachJudgeRadius(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('reach_judge_radius', value);
+  }
+
   _changeReachNoticeNumAtTextForm(String value) {
+    int num;
     try {
+      num = int.parse(value);
       setState(() {
-        _reachNoticeNum = int.parse(value);
+        _reachNoticeNum = num;
       });
+      _storeReachNoticeNum(num);
     } catch (_) {
       setState(() {
         _reachNoticeNum = AppConstants.reachNoticeNumInit;
       });
+      _storeReachNoticeNum(AppConstants.reachNoticeNumInit);
     }
+  }
+
+  _storeReachNoticeNum(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('reach_notice_num', value);
   }
 
   _changeMarkNameType(int value) {
     setState(() {
       _markNameType = value;
     });
+    _storeMarkNameType(value);
+  }
+
+  _storeMarkNameType(int value) async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('mark_name_type', value);
   }
 
   _loadVersion() async {
