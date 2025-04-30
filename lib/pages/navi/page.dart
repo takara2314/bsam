@@ -60,6 +60,7 @@ class _Navi extends ConsumerState<Navi> {
 
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
+  bool _disposed = false;
 
   bool _started = false;
   bool _enabledPeriodicAnnounce = true;
@@ -108,9 +109,29 @@ class _Navi extends ConsumerState<Navi> {
 
   @override
   void dispose() {
+    _disposed = true;
+    // 各種リソースの解放
     ttsService.pause();
-    _compass!.cancel();
-    _channel.sink.close(status.goingAway);
+    if (_compass != null) {
+      _compass!.cancel();
+      _compass = null;
+    }
+
+    // WebSocketメッセージサービスを閉じる
+    try {
+      messageService.close();
+    } catch (e) {
+      // messageServiceがまだ初期化されていない可能性がある
+      debugPrint('Error closing message service: $e');
+    }
+
+    // WebSocketの接続を適切に閉じる
+    try {
+      _channel.sink.close(status.normalClosure);
+    } catch (e) {
+      debugPrint('Error closing WebSocket: $e');
+    }
+
     WakelockPlus.disable();
     super.dispose();
   }
@@ -127,7 +148,7 @@ class _Navi extends ConsumerState<Navi> {
 
   _announceIsolate(int interval) async {
     while (true) {
-      if (!mounted) {
+      if (_disposed) {
         return;
       }
       await _announce();
@@ -137,7 +158,7 @@ class _Navi extends ConsumerState<Navi> {
 
   _sendLocationIsolate(int interval) async {
     while (true) {
-      if (!mounted) {
+      if (_disposed) {
         return;
       }
       await _sendLocation();
@@ -147,7 +168,7 @@ class _Navi extends ConsumerState<Navi> {
 
   _sendBatteryIsolate(int interval) async {
     while (true) {
-      if (!mounted) {
+      if (_disposed) {
         return;
       }
       await messageService.sendBattery();
@@ -156,7 +177,7 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _connectWs() {
-    if (!mounted) {
+    if (_disposed) {
       return;
     }
 
@@ -171,16 +192,30 @@ class _Navi extends ConsumerState<Navi> {
     // WebSocketメッセージサービスの初期化
     messageService = WsMessageService(_channel);
 
-    _channel.stream.listen(_readWsMsg,
+    _channel.stream.listen(
+      _readWsMsg,
       onDone: () {
-        if (mounted) {
-          debugPrint('reconnect');
-          setState(() {
-            _reconnected = true;
-          });
-          _connectWs();
+        debugPrint('WebSocket connection closed');
+        // disposeされていない場合のみ再接続を試みる
+        if (!_disposed) {
+          debugPrint('Attempting to reconnect...');
+          // setState()を使用する前に、ウィジェットがまだマウントされているか確認
+          if (mounted) {
+            setState(() {
+              _reconnected = true;
+            });
+            _connectWs();
+          }
         }
-      }
+      },
+      onError: (error) {
+        debugPrint('WebSocket error: $error');
+        // エラー発生時も同様に、disposeされていない場合のみ再接続
+        if (!_disposed && mounted) {
+          Future.delayed(const Duration(seconds: 3), _connectWs);
+        }
+      },
+      cancelOnError: false
     );
 
     final jwt = ref.read(jwtProvider);
@@ -192,6 +227,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _readWsMsg(dynamic msg) {
+    if (_disposed) return;
+
     final body = json.decode(msg);
 
     switch (body['type']) {
@@ -218,6 +255,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _receiveAuth(dynamic msg) {
+    if (_disposed || !mounted) return;
+
     if (msg['link_type'] != 'restore') {
       return;
     }
@@ -237,6 +276,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _receiveMarkPos(MarkPositionMsg msg) {
+    if (_disposed || !mounted) return;
+
     if (!_started) {
       setState(() {
         _marks = msg.marks!;
@@ -257,6 +298,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _receiveNearSail(dynamic msg) {
+    if (_disposed || !mounted) return;
+
     if (!_started || !widget.isAnnounceNeighbors) {
       return;
     }
@@ -267,6 +310,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _receiveStartRace(dynamic msg) {
+    if (_disposed || !mounted) return;
+
     // race status
     setState(() {
       _started = msg['started'];
@@ -274,12 +319,16 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _receiveSetMarkNo(dynamic msg) {
+    if (_disposed || !mounted) return;
+
     setState(() {
       _nextMarkNo = msg['next_mark_no'];
     });
   }
 
   _sendLocation() async {
+    if (_disposed) return;
+
     await _getPosition();
     if (_started) {
       _checkPassed();
@@ -289,6 +338,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _getPosition() async {
+    if (_disposed) return;
+
     geo.Position? pos = await locationService.getCurrentPosition();
 
     if (pos == null || !mounted) {
@@ -303,7 +354,7 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _checkPassed() {
-    if (_lat == 0.0 && _lng == 0.0 || _marks.isEmpty || _nextMarkNo > _marks.length) {
+    if (_disposed || _lat == 0.0 && _lng == 0.0 || _marks.isEmpty || _nextMarkNo > _marks.length) {
       return;
     }
 
@@ -313,6 +364,8 @@ class _Navi extends ConsumerState<Navi> {
       _marks[_nextMarkNo - 1].position!.lat!,
       _marks[_nextMarkNo - 1].position!.lng!,
     );
+
+    if (!mounted) return;
 
     setState(() {
       _routeDistance = diff;
@@ -327,6 +380,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _onPassed() {
+    if (_disposed || !mounted) return;
+
     int oldMarkNo = _nextMarkNo;
     int nextMarkNo = oldMarkNo % AppConstants.markNum + 1;
 
@@ -340,6 +395,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _changeHeading(CompassEvent evt) {
+    if (_disposed || !mounted) return;
+
     double heading = evt.heading ?? 0.0;
 
     // Correct magnetic declination
@@ -353,7 +410,7 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _changeCompassDeg(double heading) {
-    if (!_started) {
+    if (_disposed || !mounted || !_started) {
       return;
     }
 
@@ -377,6 +434,8 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _announce() async {
+    if (_disposed) return;
+
     // If not started, skip tts
     if (!_started) {
       return;
@@ -387,19 +446,22 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
-    String text = '${markNames[_nextMarkNo]![1]}、${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
-    // If route distance is over max distance, announce 'unknown'
-    if (_routeDistance >= AppConstants.maxDistance) {
+    String text;
+    if (!_isDistanceValid(_routeDistance)) {
       text = '向き、距離、不明';
+    } else {
+      text = '${markNames[_nextMarkNo]![1]}、${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
     }
 
     await ttsService.speak(text);
   }
 
+  _isDistanceValid(double distance) {
+    return !distance.isInfinite && !distance.isNaN && distance < AppConstants.maxDistance;
+  }
+
   _passedAnnounce(int markNo) async {
-    if (!mounted) {
-      return;
-    }
+    if (_disposed || !mounted) return;
 
     setState(() {
       _enabledPeriodicAnnounce = false;
@@ -407,12 +469,16 @@ class _Navi extends ConsumerState<Navi> {
 
     await ttsService.speakMultiple('${markNames[markNo]![1]}に到達', widget.reachNoticeNum);
 
+    if (!mounted) return;
+
     setState(() {
       _enabledPeriodicAnnounce = true;
     });
   }
 
   _forcePassed(int markNo) {
+    if (_disposed || !mounted) return;
+
     int oldMarkNo = _nextMarkNo;
     int nextMarkNo = markNo % AppConstants.markNum + 1;
 

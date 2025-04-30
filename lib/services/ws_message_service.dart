@@ -7,8 +7,17 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 class WsMessageService {
   final WebSocketChannel channel;
   final Battery _battery = Battery();
+  bool _isClosed = false;
 
   WsMessageService(this.channel);
+
+  /// WebSocketの状態を確認
+  bool get isClosed => _isClosed;
+
+  /// WebSocketを閉じる
+  void close() {
+    _isClosed = true;
+  }
 
   /// 認証メッセージを送信
   void sendAuth(String jwt, String userId) {
@@ -52,10 +61,17 @@ class WsMessageService {
 
   /// メッセージ送信の共通処理
   void _sendMessage(Map<String, dynamic> data) {
+    if (_isClosed) {
+      debugPrint('Attempted to send message on closed WebSocket: ${data['type']}');
+      return;
+    }
+
     try {
       channel.sink.add(json.encode(data));
     } catch (e) {
       debugPrint('WS message error: ${e.toString()}');
+      // エラーが発生した場合はWebSocketが閉じられたと見なす
+      _isClosed = true;
     }
   }
 

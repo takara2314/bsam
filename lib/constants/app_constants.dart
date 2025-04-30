@@ -8,7 +8,7 @@ class AppConstants {
   // マーク数
   static const int markNum = 3;
 
-  // 最大距離
+  // 案内できる最大距離 (これ以上は不正値として処理)
   static const int maxDistance = 10000;
 
   // TTS初期値
