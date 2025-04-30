@@ -33,7 +33,8 @@ class Navi extends ConsumerStatefulWidget {
     required this.reachJudgeRadius,
     required this.reachNoticeNum,
     required this.headingFix,
-    required this.isAnnounceNeighbors
+    required this.isAnnounceNeighbors,
+    required this.markNameType
   });
 
   final String assocId;
@@ -44,6 +45,7 @@ class Navi extends ConsumerStatefulWidget {
   final int reachNoticeNum;
   final double headingFix;
   final bool isAnnounceNeighbors;
+  final int markNameType;
 
   @override
   ConsumerState<Navi> createState() => _Navi();
@@ -53,12 +55,19 @@ class _Navi extends ConsumerState<Navi> {
   static const markNum = 3;
   static const maxDistance = 10000;
 
-  static const markNames = {
+  static const standardMarkNames = {
     1: ['上', 'かみ'],
     2: ['サイド', 'さいど'],
     3: ['下', 'しも']
   };
 
+  static const numericMarkNames = {
+    1: ['1', 'いち'],
+    2: ['2', 'に'],
+    3: ['3', 'さん']
+  };
+
+  late Map<int, List<String>> markNames;
   final FlutterTts tts = FlutterTts();
   final Battery battery = Battery();
 
@@ -86,6 +95,9 @@ class _Navi extends ConsumerState<Navi> {
   @override
   void initState() {
     super.initState();
+
+    // Mark names initialization based on type
+    markNames = widget.markNameType == 0 ? standardMarkNames : numericMarkNames;
 
     // Init text to speech
     _initTts();
@@ -524,7 +536,8 @@ class _Navi extends ConsumerState<Navi> {
                   routeDistance: _routeDistance,
                   maxDistance: maxDistance,
                   forcePassed: _forcePassed,
-                  onPassed: _onPassed
+                  onPassed: _onPassed,
+                  markNameType: widget.markNameType
                 )
               : Waiting(
                   latitude: _lat,

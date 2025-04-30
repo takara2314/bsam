@@ -38,9 +38,10 @@ class _Home extends ConsumerState<Home> {
 
   static double ttsSpeedInit = 0.9;
   static double ttsDurationInit = 1.0;
-  static int reachJudgeRadiusInit = 15;
+  static int reachJudgeRadiusInit = 5;
   static int reachNoticeNumInit = 2;
   static double headingFixInit = 0.0;
+  static int markNameTypeInit = 0; // 0: 上/下マーク, 1: 数字マーク
 
   String? _assocId;
   String? _userId;
@@ -50,6 +51,7 @@ class _Home extends ConsumerState<Home> {
   int _reachNoticeNum = reachNoticeNumInit;
   final double _headingFix = headingFixInit;
   final bool _isAnnounceNeighbors = false;
+  int _markNameType = markNameTypeInit;
   String _version = '';
 
   @override
@@ -180,6 +182,12 @@ class _Home extends ConsumerState<Home> {
     }
   }
 
+  _changeMarkNameType(int value) {
+    setState(() {
+      _markNameType = value;
+    });
+  }
+
   _loadVersion() async {
     final packageInfo = await PackageInfo.fromPlatform();
     setState(() {
@@ -215,7 +223,8 @@ class _Home extends ConsumerState<Home> {
                 reachJudgeRadius: _reachJudgeRadius,
                 reachNoticeNum: _reachNoticeNum,
                 headingFix: _headingFix,
-                isAnnounceNeighbors: _isAnnounceNeighbors
+                isAnnounceNeighbors: _isAnnounceNeighbors,
+                markNameType: _markNameType
               ),
               Settings(
                 ttsSpeed: _ttsSpeed,
@@ -229,7 +238,9 @@ class _Home extends ConsumerState<Home> {
                 changeReachJudgeRadiusAtTextForm: _changeReachJudgeRadiusAtTextForm,
                 reachNoticeNum: _reachNoticeNum,
                 reachNoticeNumInit: reachNoticeNumInit,
-                changeReachNoticeNumAtTextForm: _changeReachNoticeNumAtTextForm
+                changeReachNoticeNumAtTextForm: _changeReachNoticeNumAtTextForm,
+                markNameType: _markNameType,
+                changeMarkNameType: _changeMarkNameType
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 10, bottom: 50),

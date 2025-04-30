@@ -12,7 +12,8 @@ class ParticipateButton extends StatelessWidget {
     required this.reachJudgeRadius,
     required this.reachNoticeNum,
     required this.headingFix,
-    required this.isAnnounceNeighbors
+    required this.isAnnounceNeighbors,
+    required this.markNameType
   });
 
   final String? assocId;
@@ -23,6 +24,7 @@ class ParticipateButton extends StatelessWidget {
   final int reachNoticeNum;
   final double headingFix;
   final bool isAnnounceNeighbors;
+  final int markNameType;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +46,8 @@ class ParticipateButton extends StatelessWidget {
                       reachJudgeRadius: reachJudgeRadius,
                       reachNoticeNum: reachNoticeNum,
                       headingFix: headingFix,
-                      isAnnounceNeighbors: isAnnounceNeighbors
+                      isAnnounceNeighbors: isAnnounceNeighbors,
+                      markNameType: markNameType
                     ),
                   )
                 );
