@@ -1,69 +1,57 @@
+import 'package:bsam/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bsam/pages/navi/page.dart';
+import 'package:bsam/constants/app_constants.dart';
 
-class ParticipateButton extends StatelessWidget {
+class ParticipateButton extends ConsumerWidget {
   const ParticipateButton({
     super.key,
     required this.assocId,
     required this.userId,
     required this.ttsLanguage,
-    required this.ttsSpeed,
-    required this.ttsVolume,
-    required this.ttsPitch,
-    required this.ttsDuration,
-    required this.reachJudgeRadius,
-    required this.reachNoticeNum,
-    required this.headingFix,
-    required this.isAnnounceNeighbors,
-    required this.markNameType
   });
 
   final String? assocId;
   final String? userId;
   final String ttsLanguage;
-  final double ttsSpeed;
-  final double ttsVolume;
-  final double ttsPitch;
-  final double ttsDuration;
-  final int reachJudgeRadius;
-  final int reachNoticeNum;
-  final double headingFix;
-  final bool isAnnounceNeighbors;
-  final int markNameType;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final bool isEnabled = assocId != null && userId != null;
+
+    // 固定値の設定
+    const ttsVolume = AppConstants.ttsVolumeInit;
+    const ttsPitch = AppConstants.ttsPitchInit;
+    const headingFix = AppConstants.headingFixInit;
+    const isAnnounceNeighbors = false;
+
     final width = MediaQuery.of(context).size.width;
 
     return SizedBox(
       width: width * 0.9,
       child: ElevatedButton(
-        onPressed:
-          userId != null && assocId != null
-            ? () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => Navi(
-                      assocId: assocId!,
-                      userId: userId!,
-                      ttsLanguage: ttsLanguage,
-                      ttsSpeed: ttsSpeed,
-                      ttsVolume: ttsVolume,
-                      ttsPitch: ttsPitch,
-                      ttsDuration: ttsDuration,
-                      reachJudgeRadius: reachJudgeRadius,
-                      reachNoticeNum: reachNoticeNum,
-                      headingFix: headingFix,
-                      isAnnounceNeighbors: isAnnounceNeighbors,
-                      markNameType: markNameType
-                    ),
-                  )
-                );
-              }
-            : null,
+        onPressed: isEnabled
+          ? () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Navi(
+                    assocId: assocId!,
+                    userId: userId!,
+                    ttsLanguage: ttsLanguage,
+                    ttsVolume: ttsVolume,
+                    ttsPitch: ttsPitch,
+                    headingFix: headingFix,
+                    isAnnounceNeighbors: isAnnounceNeighbors,
+                  ),
+                ),
+              );
+            }
+          : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.cyan,
+          backgroundColor: primaryColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20)
           ),

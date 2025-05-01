@@ -52,4 +52,8 @@ class AppConstants {
   static const String ttsLanguage = 'ja-JP';
   static const double ttsVolume = 1.0;
   static const double ttsPitch = 1.0;
+
+  // インターネットに接続されていない場合のダイアログ表示
+  static const String noConnectionDialogTitle = 'インターネットに接続されていません';
+  static const String noConnectionDialogContent = 'B-SAMを利用するにはインターネットの接続が必要です。SIMカードの有効期限が切れていないか確認してください。';
 }

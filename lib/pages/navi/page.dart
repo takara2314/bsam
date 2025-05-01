@@ -30,29 +30,19 @@ class Navi extends ConsumerStatefulWidget {
     required this.assocId,
     required this.userId,
     required this.ttsLanguage,
-    required this.ttsSpeed,
     required this.ttsVolume,
     required this.ttsPitch,
-    required this.ttsDuration,
-    required this.reachJudgeRadius,
-    required this.reachNoticeNum,
     required this.headingFix,
     required this.isAnnounceNeighbors,
-    required this.markNameType
   });
 
   final String assocId;
   final String userId;
   final String ttsLanguage;
-  final double ttsSpeed;
   final double ttsVolume;
   final double ttsPitch;
-  final double ttsDuration;
-  final int reachJudgeRadius;
-  final int reachNoticeNum;
   final double headingFix;
   final bool isAnnounceNeighbors;
-  final int markNameType;
 
   @override
   ConsumerState<Navi> createState() => _Navi();
@@ -82,23 +72,21 @@ class _Navi extends ConsumerState<Navi> {
   double _routeDistance = 0.0;
   bool _reconnected = false;
 
-  // DateTime? _lastPassedTime;
+  // 設定値をproviderから取得するためのgetter
+  double get ttsSpeed => ref.watch(ttsSpeedProvider);
+  double get ttsDuration => ref.watch(ttsDurationProvider);
+  int get reachJudgeRadius => ref.watch(reachJudgeRadiusProvider);
+  int get reachNoticeNum => ref.watch(reachNoticeNumProvider);
+  int get markNameType => ref.watch(markNameTypeProvider);
 
   @override
   void initState() {
     super.initState();
-
-    // Mark names initialization based on type
-    markNames = widget.markNameType == 0
-        ? AppConstants.standardMarkNames
-        : AppConstants.numericMarkNames;
+    markNames = {};
 
     // サービスの初期化
     ttsService = TtsService();
     locationService = LocationService();
-
-    // Init text to speech
-    _initTts();
 
     // Screen lock
     WakelockPlus.enable();
@@ -109,8 +97,13 @@ class _Navi extends ConsumerState<Navi> {
     // WebSocket接続
     _connectWs();
 
-    // 定期処理の開始
-    _initIsolate();
+    // initState完了後に実行
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initTts();
+        _initIsolate();
+      }
+    });
   }
 
   @override
@@ -142,19 +135,50 @@ class _Navi extends ConsumerState<Navi> {
     super.dispose();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // 設定が変更されたかチェック
+    final currentMarkNameType = ref.read(markNameTypeProvider);
+    final needsUpdate = markNames.isEmpty || // 初回初期化
+                        (currentMarkNameType == 0 && markNames != AppConstants.standardMarkNames) ||
+                        (currentMarkNameType == 1 && markNames != AppConstants.numericMarkNames);
+
+    // マーク名称タイプが変更された場合、または初回初期化の場合は再設定
+    if (needsUpdate) {
+      setState(() {
+        markNames = currentMarkNameType == 0
+            ? AppConstants.standardMarkNames
+            : AppConstants.numericMarkNames;
+      });
+    }
+  }
+
   _initTts() async {
+    // ttsSpeedをここで読み込む
+    final speed = ref.read(ttsSpeedProvider);
     await ttsService.initialize(
       widget.ttsLanguage,
-      widget.ttsSpeed,
+      speed, // 読み込んだ値を使用
       widget.ttsVolume,
       widget.ttsPitch
     );
   }
 
   _initIsolate() async {
-    _announceIsolate((widget.ttsDuration * 1000).toInt());
+    // ttsDuration が変更されたときに再初期化するために、前のタイマーを覚えておく
+    // _startAnnounceIsolateを呼ぶ前にttsDurationを取得する
+    final duration = ref.read(ttsDurationProvider);
+    await _startAnnounceIsolate(duration);
     _sendLocationIsolate(AppConstants.locationUpdateInterval);
     _sendBatteryIsolate(AppConstants.batteryUpdateInterval);
+  }
+
+  // ttsDurationの変更を監視して、アナウンスの間隔を調整するメソッド
+  Future<void> _startAnnounceIsolate(double duration) async {
+    // 引数で受け取ったdurationを使用
+    _announceIsolate((duration * 1000).toInt());
   }
 
   _announceIsolate(int interval) async {
@@ -382,7 +406,7 @@ class _Navi extends ConsumerState<Navi> {
       _routeDistance = diff;
     });
 
-    if (diff > widget.reachJudgeRadius) {
+    if (diff > reachJudgeRadius) {
       return;
     }
 
@@ -478,7 +502,7 @@ class _Navi extends ConsumerState<Navi> {
       _enabledPeriodicAnnounce = false;
     });
 
-    await ttsService.speakMultiple('${markNames[markNo]![1]}に到達', widget.reachNoticeNum);
+    await ttsService.speakMultiple('${markNames[markNo]![1]}に到達', reachNoticeNum);
 
     if (!mounted) return;
 
@@ -528,7 +552,7 @@ class _Navi extends ConsumerState<Navi> {
                   maxDistance: AppConstants.maxDistance,
                   forcePassed: _forcePassed,
                   onPassed: _onPassed,
-                  markNameType: widget.markNameType
+                  markNameType: markNameType
                 )
               : Waiting(
                   latitude: _lat,
