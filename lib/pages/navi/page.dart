@@ -82,21 +82,11 @@ class _Navi extends ConsumerState<Navi> {
   @override
   void initState() {
     super.initState();
-
-    // 設定値がproviderから正しく取得できているか確認
-    debugPrint('Navi設定値(provider): ttsSpeed=${ttsSpeed}, ttsDuration=${ttsDuration}, reachJudgeRadius=${reachJudgeRadius}, reachNoticeNum=${reachNoticeNum}, markNameType=${markNameType}');
-
-    // Mark names initialization based on type
-    markNames = markNameType == 0
-        ? AppConstants.standardMarkNames
-        : AppConstants.numericMarkNames;
+    markNames = {};
 
     // サービスの初期化
     ttsService = TtsService();
     locationService = LocationService();
-
-    // Init text to speech
-    _initTts();
 
     // Screen lock
     WakelockPlus.enable();
@@ -107,8 +97,13 @@ class _Navi extends ConsumerState<Navi> {
     // WebSocket接続
     _connectWs();
 
-    // 定期処理の開始
-    _initIsolate();
+    // initState完了後に実行
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _initTts();
+        _initIsolate();
+      }
+    });
   }
 
   @override
@@ -146,23 +141,26 @@ class _Navi extends ConsumerState<Navi> {
 
     // 設定が変更されたかチェック
     final currentMarkNameType = ref.read(markNameTypeProvider);
+    final needsUpdate = markNames.isEmpty || // 初回初期化
+                        (currentMarkNameType == 0 && markNames != AppConstants.standardMarkNames) ||
+                        (currentMarkNameType == 1 && markNames != AppConstants.numericMarkNames);
 
-    // マーク名称タイプが変更された場合は再設定
-    if (markNames.isEmpty || (currentMarkNameType == 0 && markNames != AppConstants.standardMarkNames) ||
-        (currentMarkNameType == 1 && markNames != AppConstants.numericMarkNames)) {
+    // マーク名称タイプが変更された場合、または初回初期化の場合は再設定
+    if (needsUpdate) {
       setState(() {
         markNames = currentMarkNameType == 0
             ? AppConstants.standardMarkNames
             : AppConstants.numericMarkNames;
       });
-      debugPrint('マーク名称が変更されました: タイプ=$currentMarkNameType');
     }
   }
 
   _initTts() async {
+    // ttsSpeedをここで読み込む
+    final speed = ref.read(ttsSpeedProvider);
     await ttsService.initialize(
       widget.ttsLanguage,
-      ttsSpeed,
+      speed, // 読み込んだ値を使用
       widget.ttsVolume,
       widget.ttsPitch
     );
@@ -170,14 +168,17 @@ class _Navi extends ConsumerState<Navi> {
 
   _initIsolate() async {
     // ttsDuration が変更されたときに再初期化するために、前のタイマーを覚えておく
-    await _startAnnounceIsolate();
+    // _startAnnounceIsolateを呼ぶ前にttsDurationを取得する
+    final duration = ref.read(ttsDurationProvider);
+    await _startAnnounceIsolate(duration);
     _sendLocationIsolate(AppConstants.locationUpdateInterval);
     _sendBatteryIsolate(AppConstants.batteryUpdateInterval);
   }
 
   // ttsDurationの変更を監視して、アナウンスの間隔を調整するメソッド
-  Future<void> _startAnnounceIsolate() async {
-    _announceIsolate((ttsDuration * 1000).toInt());
+  Future<void> _startAnnounceIsolate(double duration) async {
+    // 引数で受け取ったdurationを使用
+    _announceIsolate((duration * 1000).toInt());
   }
 
   _announceIsolate(int interval) async {
