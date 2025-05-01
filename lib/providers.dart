@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'package:bsam/constants/app_constants.dart';
 
@@ -10,6 +11,9 @@ final wavenetTokenProvider = StateProvider<String?>((ref) => null);
 final assocIdProvider = StateProvider<String?>((ref) => null);
 final jwtProvider = StateProvider<String?>((ref) => null);
 final userIdProvider = StateProvider<String?>((ref) => null);
+
+// --- ネットワーク接続状態Provider ---
+final connectivityProvider = StateProvider<ConnectivityResult>((ref) => ConnectivityResult.none);
 
 // --- 設定管理関連 ---
 // 設定が読み込まれたかどうかを追跡するProvider

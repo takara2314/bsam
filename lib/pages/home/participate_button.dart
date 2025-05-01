@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:bsam/pages/navi/page.dart';
-import 'package:bsam/providers.dart';
 import 'package:bsam/constants/app_constants.dart';
 
 class ParticipateButton extends ConsumerWidget {
