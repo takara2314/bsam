@@ -6,7 +6,9 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'dart:async';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:bsam/pages/home/page.dart';
+import 'package:bsam/providers.dart';
 
 void main() async {
   // クラッシュハンドラ
@@ -19,6 +21,9 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // ロケールデータの初期化を追加
+    await initializeDateFormatting('ja_JP');
 
     // クラッシュハンドラ (Flutterフレームワーク内でスローされたすべてのエラー)
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -37,8 +42,19 @@ void main() async {
   );
 }
 
-class App extends StatelessWidget {
+class App extends ConsumerStatefulWidget {
   const App({super.key});
+
+  @override
+  ConsumerState<App> createState() => _AppState();
+}
+
+class _AppState extends ConsumerState<App> {
+  @override
+  void initState() {
+    super.initState();
+    loadSettingsFromPrefs(ref);
+  }
 
   @override
   Widget build(BuildContext context) {
