@@ -12,6 +12,8 @@ import 'package:bsam/providers.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:bsam/constants/app_constants.dart';
 
+const primaryColor = Color.fromRGBO(0, 42, 149, 1);
+
 void main() async {
   // クラッシュハンドラ
   runZonedGuarded<Future<void>>(() async {
@@ -157,7 +159,7 @@ class _AppState extends ConsumerState<App> {
       navigatorKey: _navigatorKey,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.cyan,
+        colorSchemeSeed: primaryColor,
         scaffoldBackgroundColor: const Color(0xFFF2F2F2),
         appBarTheme: const AppBarTheme(
           systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent),

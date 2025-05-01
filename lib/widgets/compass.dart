@@ -1,3 +1,4 @@
+import 'package:bsam/main.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -57,7 +58,7 @@ class Compass extends CustomPainter {
 
     path.close();
 
-    paint.color = const Color.fromRGBO(0, 94, 115, 1);
+    paint.color = primaryColor;
     canvas.drawPath(path, paint);
   }
 
