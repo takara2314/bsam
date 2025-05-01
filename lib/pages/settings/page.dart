@@ -87,10 +87,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             TextButton(
               child: const Text('リセット'),
               onPressed: () async {
+                // await の前に Navigator と ScaffoldMessenger を取得
+                final navigator = Navigator.of(context);
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                // mounted の状態も await 前に確認
+                final isMounted = mounted;
+
                 await _resetSettings();
-                if (mounted) { // 非同期処理後にウィジェットが存在するか確認
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
+
+                // await の後に mounted の状態を確認し、取得済みの変数を使用
+                if (isMounted) {
+                  navigator.pop();
+                  scaffoldMessenger.showSnackBar(
                     const SnackBar(content: Text('設定をリセットしました。')),
                   );
                 }
