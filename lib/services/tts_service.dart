@@ -19,7 +19,7 @@ class TtsService {
     String language,
     double speechRate,
     double volume,
-    double pitch
+    double pitch,
   ) async {
     _language = language;
     _speechRate = speechRate;
@@ -61,7 +61,11 @@ class TtsService {
   }
 
   /// 複数回読み上げる
-  Future<void> speakMultiple(String text, int count, {int delaySeconds = 1}) async {
+  Future<void> speakMultiple(
+    String text,
+    int count, {
+    int delaySeconds = 1,
+  }) async {
     for (int i = 0; i < count; i++) {
       await speak(text);
       if (i < count - 1) {

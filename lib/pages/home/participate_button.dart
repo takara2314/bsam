@@ -32,39 +32,41 @@ class ParticipateButton extends ConsumerWidget {
     return SizedBox(
       width: width * 0.9,
       child: ElevatedButton(
-        onPressed: isEnabled
-          ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Navi(
-                    assocId: assocId!,
-                    userId: userId!,
-                    ttsLanguage: ttsLanguage,
-                    ttsVolume: ttsVolume,
-                    ttsPitch: ttsPitch,
-                    headingFix: headingFix,
-                    isAnnounceNeighbors: isAnnounceNeighbors,
-                  ),
-                ),
-              );
-            }
-          : null,
+        onPressed:
+            isEnabled
+                ? () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => Navi(
+                            assocId: assocId!,
+                            userId: userId!,
+                            ttsLanguage: ttsLanguage,
+                            ttsVolume: ttsVolume,
+                            ttsPitch: ttsPitch,
+                            headingFix: headingFix,
+                            isAnnounceNeighbors: isAnnounceNeighbors,
+                          ),
+                    ),
+                  );
+                }
+                : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)
+            borderRadius: BorderRadius.circular(20),
           ),
-          padding: const EdgeInsets.only(top: 20, bottom: 20)
+          padding: const EdgeInsets.only(top: 20, bottom: 20),
         ),
         child: const Text(
           'レースに参加する',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 20
-          )
-        )
+            fontSize: 20,
+          ),
+        ),
       ),
     );
   }

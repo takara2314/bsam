@@ -11,38 +11,50 @@ import 'package:bsam/pages/home/page.dart';
 import 'package:bsam/providers.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:bsam/constants/app_constants.dart';
+import 'package:bsam/utils/error_classifier.dart';
 
 const primaryColor = Color.fromRGBO(0, 42, 149, 1);
 
 void main() async {
   // クラッシュハンドラ
-  runZonedGuarded<Future<void>>(() async {
-    // 環境変数ファイルの読み込み
-    await dotenv.load(fileName: '.env');
+  runZonedGuarded<Future<void>>(
+    () async {
+      // 環境変数ファイルの読み込み
+      await dotenv.load(fileName: '.env');
 
-    // Firebaseの初期化
-    WidgetsFlutterBinding.ensureInitialized();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+      // Firebaseの初期化
+      WidgetsFlutterBinding.ensureInitialized();
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
 
-    // ロケールデータの初期化を追加
-    await initializeDateFormatting('ja_JP');
+      // ロケールデータの初期化を追加
+      await initializeDateFormatting('ja_JP');
 
-    // クラッシュハンドラ (Flutterフレームワーク内でスローされたすべてのエラー)
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      // クラッシュハンドラ (Flutterフレームワーク内でスローされたすべてのエラー)
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-    WidgetsFlutterBinding.ensureInitialized();
-    // 画面の向きを縦に固定
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-    ]);
+      WidgetsFlutterBinding.ensureInitialized();
+      // 画面の向きを縦に固定
+      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
-    runApp(const ProviderScope(child: App()));
-  },
+      runApp(const ProviderScope(child: App()));
+    },
     // クラッシュハンドラ (Flutterフレームワーク内でキャッチされないエラー)
-    (error, stack) =>
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true)
+    //
+    // ネットワーク関連のエラーは非致命的として記録することで、
+    // 一時的なネットワーク障害でアプリがクラッシュすることを防ぐ。
+    // これにより、視覚障がい者のレース中に音声案内が突然停止するリスクを軽減する。
+    (error, stack) {
+      final isFatal = ErrorClassifier.isFatalError(error);
+      FirebaseCrashlytics.instance.recordError(
+        error,
+        stack,
+        fatal: isFatal,
+        reason: 'Uncaught error in runZonedGuarded',
+      );
+    },
   );
 }
 
@@ -54,7 +66,8 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   bool _showingNoConnectionDialog = false;
@@ -94,10 +107,12 @@ class _AppState extends ConsumerState<App> {
     // ★★★ リスナー設定直後に現在の接続状態を確認してダイアログ表示を判断 ★★★
     final initialConnectivity = ref.read(connectivityProvider);
     if (initialConnectivity == ConnectivityResult.none) {
-       _showNoConnectionDialog();
+      _showNoConnectionDialog();
     }
 
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      List<ConnectivityResult> results,
+    ) {
       ConnectivityResult currentResult;
       // Providerの状態を更新（リストの最初の接続タイプを使用）
       if (results.isNotEmpty) {
@@ -114,7 +129,10 @@ class _AppState extends ConsumerState<App> {
       } else {
         // 接続が復活した場合、表示中のダイアログを閉じる
         if (_showingNoConnectionDialog && _navigatorKey.currentState != null) {
-          Navigator.of(_navigatorKey.currentContext!, rootNavigator: true).pop();
+          Navigator.of(
+            _navigatorKey.currentContext!,
+            rootNavigator: true,
+          ).pop();
           _showingNoConnectionDialog = false;
         }
       }
@@ -131,21 +149,26 @@ class _AppState extends ConsumerState<App> {
         showDialog(
           context: _navigatorKey.currentContext!,
           barrierDismissible: false, // ダイアログ外をタップしても閉じない
-          builder: (context) => AlertDialog(
-            title: const Text(AppConstants.noConnectionDialogTitle),
-            content: const Text(AppConstants.noConnectionDialogContent),
-            backgroundColor: Colors.white,
-            icon: const Icon(Icons.signal_wifi_off, color: Colors.red, size: 36),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  _showingNoConnectionDialog = false;
-                  Navigator.pop(context);
-                },
-                child: const Text('OK'),
+          builder:
+              (context) => AlertDialog(
+                title: const Text(AppConstants.noConnectionDialogTitle),
+                content: const Text(AppConstants.noConnectionDialogContent),
+                backgroundColor: Colors.white,
+                icon: const Icon(
+                  Icons.signal_wifi_off,
+                  color: Colors.red,
+                  size: 36,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      _showingNoConnectionDialog = false;
+                      Navigator.pop(context);
+                    },
+                    child: const Text('OK'),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
       }
     });
@@ -162,14 +185,16 @@ class _AppState extends ConsumerState<App> {
         colorSchemeSeed: primaryColor,
         scaffoldBackgroundColor: const Color(0xFFF2F2F2),
         appBarTheme: const AppBarTheme(
-          systemOverlayStyle: SystemUiOverlayStyle(statusBarColor: Colors.transparent),
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+          ),
           backgroundColor: Colors.transparent,
         ),
         textTheme: TextTheme(
           displayLarge: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary
+            color: Theme.of(context).colorScheme.primary,
           ),
           displayMedium: TextStyle(
             fontSize: 20,
@@ -183,34 +208,24 @@ class _AppState extends ConsumerState<App> {
           ),
           headlineMedium: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold,
           ),
           headlineSmall: const TextStyle(
             fontSize: 14,
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold,
           ),
           titleLarge: const TextStyle(
             fontSize: 12,
-            fontWeight: FontWeight.bold
+            fontWeight: FontWeight.bold,
           ),
-          bodyLarge: const TextStyle(
-            fontSize: 18
-          ),
-          bodyMedium: const TextStyle(
-            fontSize: 16
-          ),
-          labelLarge: const TextStyle(
-            fontSize: 14
-          ),
-          bodySmall: const TextStyle(
-            fontSize: 12
-          ),
-          labelSmall: const TextStyle(
-            fontSize: 10
-          )
-        )
+          bodyLarge: const TextStyle(fontSize: 18),
+          bodyMedium: const TextStyle(fontSize: 16),
+          labelLarge: const TextStyle(fontSize: 14),
+          bodySmall: const TextStyle(fontSize: 12),
+          labelSmall: const TextStyle(fontSize: 10),
+        ),
       ),
-      home: const Home()
+      home: const Home(),
     );
   }
 }

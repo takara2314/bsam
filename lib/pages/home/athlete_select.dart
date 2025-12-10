@@ -7,7 +7,7 @@ class AthleteSelect extends StatelessWidget {
     super.key,
     required this.users,
     required this.userId,
-    required this.changeUser
+    required this.changeUser,
   });
 
   final List<User> users;
@@ -24,7 +24,7 @@ class AthleteSelect extends StatelessWidget {
       padding: const EdgeInsets.only(top: 20, bottom: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10)
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         children: [
@@ -38,9 +38,9 @@ class AthleteSelect extends StatelessWidget {
                     value: user.id!,
                     groupValue: userId,
                     onChanged: changeUser,
-                  )
-              ]
-            )
+                  ),
+              ],
+            ),
           ),
           SizedBox(
             width: width * 0.4,
@@ -52,12 +52,12 @@ class AthleteSelect extends StatelessWidget {
                     value: user.id!,
                     groupValue: userId,
                     onChanged: changeUser,
-                  )
-              ]
-            )
+                  ),
+              ],
+            ),
           ),
-        ]
-      )
+        ],
+      ),
     );
   }
 }

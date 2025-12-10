@@ -13,7 +13,9 @@ final jwtProvider = StateProvider<String?>((ref) => null);
 final userIdProvider = StateProvider<String?>((ref) => null);
 
 // --- ネットワーク接続状態Provider ---
-final connectivityProvider = StateProvider<ConnectivityResult>((ref) => ConnectivityResult.none);
+final connectivityProvider = StateProvider<ConnectivityResult>(
+  (ref) => ConnectivityResult.none,
+);
 
 // --- 設定管理関連 ---
 // 設定が読み込まれたかどうかを追跡するProvider
@@ -44,7 +46,11 @@ final markNameTypeProvider = StateProvider<int>((ref) {
 // --- 設定管理のヘルパー関数 ---
 
 /// 指定した設定値を更新し、SharedPreferencesに保存する
-Future<void> updateSetting<T>(StateController<T> controller, String key, T value) async {
+Future<void> updateSetting<T>(
+  StateController<T> controller,
+  String key,
+  T value,
+) async {
   final prefs = await SharedPreferences.getInstance();
   controller.state = value;
   if (value is double) {
@@ -63,7 +69,7 @@ Future<void> updateSettingValue<T>({
   required WidgetRef ref,
   required StateProvider<T> provider,
   required String key,
-  required T value
+  required T value,
 }) async {
   ref.read(provider.notifier).state = value;
   final prefs = await SharedPreferences.getInstance();
@@ -84,13 +90,13 @@ Future<void> updateSliderSetting({
   required WidgetRef ref,
   required StateProvider<double> provider,
   required String key,
-  required double value
+  required double value,
 }) async {
   return updateSettingValue(
     ref: ref,
     provider: provider,
     key: key,
-    value: value
+    value: value,
   );
 }
 
@@ -101,7 +107,7 @@ Future<void> updateTextFormSetting<T extends num>({
   required String key,
   required String newValue,
   required T defaultValue,
-  bool isDouble = false
+  bool isDouble = false,
 }) async {
   T parsedValue;
   try {
@@ -114,7 +120,7 @@ Future<void> updateTextFormSetting<T extends num>({
       ref: ref,
       provider: provider,
       key: key,
-      value: parsedValue
+      value: parsedValue,
     );
   } catch (_) {
     // パース失敗時はデフォルト値を使用
@@ -122,7 +128,7 @@ Future<void> updateTextFormSetting<T extends num>({
       ref: ref,
       provider: provider,
       key: key,
-      value: defaultValue
+      value: defaultValue,
     );
   }
 }
@@ -132,13 +138,13 @@ Future<void> updateRadioSetting<T>({
   required WidgetRef ref,
   required StateProvider<T> provider,
   required String key,
-  required T value
+  required T value,
 }) async {
   return updateSettingValue(
     ref: ref,
     provider: provider,
     key: key,
-    value: value
+    value: value,
   );
 }
 
@@ -151,16 +157,20 @@ Future<void> loadSettingsFromPrefs(WidgetRef ref) async {
     final ttsSpeed = prefs.getDouble('tts_speed') ?? AppConstants.ttsSpeedInit;
     ref.read(ttsSpeedProvider.notifier).state = ttsSpeed;
 
-    final ttsDuration = prefs.getDouble('tts_duration') ?? AppConstants.ttsDurationInit;
+    final ttsDuration =
+        prefs.getDouble('tts_duration') ?? AppConstants.ttsDurationInit;
     ref.read(ttsDurationProvider.notifier).state = ttsDuration;
 
-    final reachJudgeRadius = prefs.getInt('reach_judge_radius') ?? AppConstants.reachJudgeRadiusInit;
+    final reachJudgeRadius =
+        prefs.getInt('reach_judge_radius') ?? AppConstants.reachJudgeRadiusInit;
     ref.read(reachJudgeRadiusProvider.notifier).state = reachJudgeRadius;
 
-    final reachNoticeNum = prefs.getInt('reach_notice_num') ?? AppConstants.reachNoticeNumInit;
+    final reachNoticeNum =
+        prefs.getInt('reach_notice_num') ?? AppConstants.reachNoticeNumInit;
     ref.read(reachNoticeNumProvider.notifier).state = reachNoticeNum;
 
-    final markNameType = prefs.getInt('mark_name_type') ?? AppConstants.markNameTypeInit;
+    final markNameType =
+        prefs.getInt('mark_name_type') ?? AppConstants.markNameTypeInit;
     ref.read(markNameTypeProvider.notifier).state = markNameType;
 
     // 設定読み込み完了をマーク
@@ -185,9 +195,12 @@ Future<void> resetAllSettings(WidgetRef ref) async {
     // Providerの値も更新
     ref.read(ttsSpeedProvider.notifier).state = AppConstants.ttsSpeedInit;
     ref.read(ttsDurationProvider.notifier).state = AppConstants.ttsDurationInit;
-    ref.read(reachJudgeRadiusProvider.notifier).state = AppConstants.reachJudgeRadiusInit;
-    ref.read(reachNoticeNumProvider.notifier).state = AppConstants.reachNoticeNumInit;
-    ref.read(markNameTypeProvider.notifier).state = AppConstants.markNameTypeInit;
+    ref.read(reachJudgeRadiusProvider.notifier).state =
+        AppConstants.reachJudgeRadiusInit;
+    ref.read(reachNoticeNumProvider.notifier).state =
+        AppConstants.reachNoticeNumInit;
+    ref.read(markNameTypeProvider.notifier).state =
+        AppConstants.markNameTypeInit;
   } catch (e) {
     debugPrint('設定のリセット中にエラーが発生しました: $e');
   }

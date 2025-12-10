@@ -7,7 +7,7 @@ class Waiting extends StatelessWidget {
     required this.longitude,
     required this.accuracy,
     required this.heading,
-    required this.compassDeg
+    required this.compassDeg,
   });
 
   final double latitude;
@@ -23,36 +23,23 @@ class Waiting extends StatelessWidget {
       padding: const EdgeInsets.only(right: 15, left: 15),
       child: Column(
         children: [
+          Text('レースは始まっていません', style: Theme.of(context).textTheme.displayLarge),
+          const Text('スタートボタンが押されるまでお待ちください。'),
+          Text('緯度 / 経度', style: Theme.of(context).textTheme.displaySmall),
           Text(
-            'レースは始まっていません',
-            style: Theme.of(context).textTheme.displayLarge
+            '${latitude.toStringAsFixed(6)} / ${longitude.toStringAsFixed(6)}',
           ),
-          const Text(
-            'スタートボタンが押されるまでお待ちください。'
-          ),
-          Text(
-            '緯度 / 経度',
-            style: Theme.of(context).textTheme.displaySmall
-          ),
-          Text(
-            '${latitude.toStringAsFixed(6)} / ${longitude.toStringAsFixed(6)}'
-          ),
-          Text(
-            '位置情報の精度',
-            style: Theme.of(context).textTheme.displaySmall
-          ),
-          Text(
-            '$accuracy m'
-          ),
+          Text('位置情報の精度', style: Theme.of(context).textTheme.displaySmall),
+          Text('$accuracy m'),
           Text(
             '端末の方角 / コンパスの方角',
-            style: Theme.of(context).textTheme.displaySmall
+            style: Theme.of(context).textTheme.displaySmall,
           ),
           Text(
-            '${heading.toStringAsFixed(2)}° / ${compassDeg.toStringAsFixed(2)}°'
-          )
-        ]
-      )
+            '${heading.toStringAsFixed(2)}° / ${compassDeg.toStringAsFixed(2)}°',
+          ),
+        ],
+      ),
     );
   }
 }

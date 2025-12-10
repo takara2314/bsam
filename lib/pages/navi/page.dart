@@ -9,6 +9,8 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import 'package:bsam/providers.dart';
 import 'package:bsam/models/mark.dart';
@@ -23,6 +25,8 @@ import 'package:bsam/pages/navi/navigating.dart';
 import 'package:bsam/pages/navi/waiting.dart';
 import 'package:bsam/pages/navi/app_bar.dart';
 import 'package:bsam/pages/navi/pop_dialog.dart';
+import 'package:bsam/utils/websocket_url_validator.dart';
+import 'package:bsam/utils/reconnection_strategy.dart';
 
 class Navi extends ConsumerStatefulWidget {
   const Navi({
@@ -57,6 +61,9 @@ class _Navi extends ConsumerState<Navi> {
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
   bool _disposed = false;
+  int _reconnectAttempts = 0;
+  Timer? _reconnectTimer;
+  bool _isConnecting = false;
 
   bool _started = false;
   bool _enabledPeriodicAnnounce = true;
@@ -109,6 +116,7 @@ class _Navi extends ConsumerState<Navi> {
   @override
   void dispose() {
     _disposed = true;
+    _reconnectTimer?.cancel();
     // 各種リソースの解放
     ttsService.pause();
     if (_compass != null) {
@@ -141,16 +149,20 @@ class _Navi extends ConsumerState<Navi> {
 
     // 設定が変更されたかチェック
     final currentMarkNameType = ref.read(markNameTypeProvider);
-    final needsUpdate = markNames.isEmpty || // 初回初期化
-                        (currentMarkNameType == 0 && markNames != AppConstants.standardMarkNames) ||
-                        (currentMarkNameType == 1 && markNames != AppConstants.numericMarkNames);
+    final needsUpdate =
+        markNames.isEmpty || // 初回初期化
+        (currentMarkNameType == 0 &&
+            markNames != AppConstants.standardMarkNames) ||
+        (currentMarkNameType == 1 &&
+            markNames != AppConstants.numericMarkNames);
 
     // マーク名称タイプが変更された場合、または初回初期化の場合は再設定
     if (needsUpdate) {
       setState(() {
-        markNames = currentMarkNameType == 0
-            ? AppConstants.standardMarkNames
-            : AppConstants.numericMarkNames;
+        markNames =
+            currentMarkNameType == 0
+                ? AppConstants.standardMarkNames
+                : AppConstants.numericMarkNames;
       });
     }
   }
@@ -162,7 +174,7 @@ class _Navi extends ConsumerState<Navi> {
       widget.ttsLanguage,
       speed, // 読み込んだ値を使用
       widget.ttsVolume,
-      widget.ttsPitch
+      widget.ttsPitch,
     );
   }
 
@@ -212,53 +224,151 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _connectWs() {
-    if (_disposed) {
+    // 接続可能状態のチェック
+    // disposed: ウィジェットが破棄済み
+    // _isConnecting: 既に接続処理中
+    // !mounted: ウィジェットがマウントされていない
+    if (_disposed || _isConnecting || !mounted) {
       return;
     }
 
-    // Get server url
+    // ネットワーク接続状態を確認
+    // オフライン状態での接続試行を避け、再接続をスケジュールする
+    final connectivity = ref.read(connectivityProvider);
+    if (connectivity == ConnectivityResult.none) {
+      debugPrint('No network connection, skipping WebSocket connection');
+      _scheduleReconnect();
+      return;
+    }
+
+    // サーバーURLの取得
     final serverUrl = ref.read(serverUrlProvider);
 
-    _channel = IOWebSocketChannel.connect(
-      Uri.parse('$serverUrl/racing/${widget.assocId}'),
-      pingInterval: const Duration(seconds: 1)
+    // WebSocket URLの検証
+    // 検証項目: URL存在、URI構文、ポート番号、スキーム
+    final validationResult = WebSocketUrlValidator.validate(
+      serverUrl,
+      'racing/${widget.assocId}',
     );
 
-    // WebSocketメッセージサービスの初期化
-    messageService = WsMessageService(_channel);
+    if (!validationResult.isValid) {
+      debugPrint(
+        'WebSocket URL validation failed: ${validationResult.errorMessage}',
+      );
+      FirebaseCrashlytics.instance.recordError(
+        Exception(validationResult.errorMessage),
+        StackTrace.current,
+        fatal: false,
+        reason: 'WebSocket connection validation failed',
+      );
+      // URL検証失敗時は再接続をスケジュール
+      // （一時的な設定エラーの可能性を考慮）
+      _scheduleReconnect();
+      return;
+    }
 
-    _channel.stream.listen(
-      _readWsMsg,
-      onDone: () {
-        debugPrint('WebSocket connection closed');
-        // disposeされていない場合のみ再接続を試みる
-        if (!_disposed) {
-          debugPrint('Attempting to reconnect...');
-          // setState()を使用する前に、ウィジェットがまだマウントされているか確認
-          if (mounted) {
+    final uri = validationResult.uri!;
+
+    _isConnecting = true;
+
+    try {
+      _channel = IOWebSocketChannel.connect(
+        uri,
+        pingInterval: const Duration(seconds: 1),
+      );
+
+      // WebSocketメッセージサービスの初期化
+      messageService = WsMessageService(_channel);
+
+      _channel.stream.listen(
+        _readWsMsg,
+        onDone: () {
+          debugPrint('WebSocket connection closed');
+          _isConnecting = false;
+          // ウィジェットがアクティブな状態でのみ再接続を試みる
+          // これにより、画面遷移後の不要な再接続を防ぐ
+          if (!_disposed && mounted) {
+            debugPrint('Attempting to reconnect...');
             setState(() {
               _reconnected = true;
             });
-            _connectWs();
+            _scheduleReconnect();
           }
-        }
-      },
-      onError: (error) {
-        debugPrint('WebSocket error: $error');
-        // エラー発生時も同様に、disposeされていない場合のみ再接続
-        if (!_disposed && mounted) {
-          Future.delayed(const Duration(seconds: 3), _connectWs);
-        }
-      },
-      cancelOnError: false
+        },
+        onError: (error) {
+          debugPrint('WebSocket error: $error');
+          _isConnecting = false;
+          // エラーを非致命的に記録
+          // ネットワークエラーでアプリがクラッシュすることを防ぐ
+          FirebaseCrashlytics.instance.recordError(
+            error,
+            StackTrace.current,
+            fatal: false,
+            reason: 'WebSocket connection error',
+          );
+          // エラー発生時も適切に再接続をスケジュール
+          if (!_disposed && mounted) {
+            _scheduleReconnect();
+          }
+        },
+        cancelOnError: false,
+      );
+
+      // 接続成功時はリトライカウンターをリセット
+      // これにより、次回の切断時には再び短い遅延（1秒）から再接続を開始する
+      _reconnectAttempts = 0;
+
+      final jwt = ref.read(jwtProvider);
+      if (jwt != null) {
+        messageService.sendAuth(jwt, widget.userId);
+      } else {
+        debugPrint('JWT token is null');
+      }
+    } catch (e) {
+      _isConnecting = false;
+      debugPrint('WebSocket connection exception: $e');
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        StackTrace.current,
+        fatal: false,
+        reason: 'WebSocket connection exception',
+      );
+      if (!_disposed && mounted) {
+        _scheduleReconnect();
+      }
+    }
+  }
+
+  void _scheduleReconnect() {
+    // 再接続スケジュール可能状態のチェック
+    if (_disposed || !mounted || _isConnecting) {
+      return;
+    }
+
+    // 既存のタイマーをキャンセル（重複防止）
+    _reconnectTimer?.cancel();
+
+    // 指数バックオフによる遅延時間の計算
+    // 1回目: 1秒、2回目: 2秒、3回目: 4秒、4回目以降: 10秒
+    // これにより、一時的な障害では素早く再接続し、
+    // 長期的な障害ではサーバー負荷を抑えることができる
+    final delaySeconds = ReconnectionStrategy.calculateDelaySeconds(
+      _reconnectAttempts,
     );
 
-    final jwt = ref.read(jwtProvider);
-    if (jwt != null) {
-      messageService.sendAuth(jwt, widget.userId);
-    } else {
-      debugPrint('JWT token is null');
-    }
+    _reconnectAttempts++;
+
+    debugPrint(
+      'Scheduling WebSocket reconnect in $delaySeconds seconds '
+      '(attempt $_reconnectAttempts)',
+    );
+
+    _reconnectTimer = Timer(Duration(seconds: delaySeconds), () {
+      // タイマー実行時にも再度状態確認
+      if (!_disposed && mounted) {
+        _connectWs();
+      }
+    });
   }
 
   _readWsMsg(dynamic msg) {
@@ -267,25 +377,25 @@ class _Navi extends ConsumerState<Navi> {
     final body = json.decode(msg);
 
     switch (body['type']) {
-    case 'auth_result':
-      _receiveAuth(body);
-      break;
+      case 'auth_result':
+        _receiveAuth(body);
+        break;
 
-    case 'mark_position':
-      _receiveMarkPos(MarkPositionMsg.fromJson(body));
-      break;
+      case 'mark_position':
+        _receiveMarkPos(MarkPositionMsg.fromJson(body));
+        break;
 
-    case 'near_sail':
-      _receiveNearSail(body);
-      break;
+      case 'near_sail':
+        _receiveNearSail(body);
+        break;
 
-    case 'start_race':
-      _receiveStartRace(body);
-      break;
+      case 'start_race':
+        _receiveStartRace(body);
+        break;
 
-    case 'set_next_mark_no':
-      _receiveSetMarkNo(body);
-      break;
+      case 'set_next_mark_no':
+        _receiveSetMarkNo(body);
+        break;
     }
   }
 
@@ -302,7 +412,6 @@ class _Navi extends ConsumerState<Navi> {
         oldMarkNo = AppConstants.markNum;
       }
       messageService.sendPassed(oldMarkNo, _nextMarkNo);
-
     } else {
       setState(() {
         _nextMarkNo = msg['next_mark_no'];
@@ -369,7 +478,13 @@ class _Navi extends ConsumerState<Navi> {
       _checkPassed();
     }
 
-    messageService.sendLocation(_lat, _lng, _accuracy, _heading, widget.headingFix);
+    messageService.sendLocation(
+      _lat,
+      _lng,
+      _accuracy,
+      _heading,
+      widget.headingFix,
+    );
   }
 
   _getPosition() async {
@@ -389,7 +504,10 @@ class _Navi extends ConsumerState<Navi> {
   }
 
   _checkPassed() {
-    if (_disposed || _lat == 0.0 && _lng == 0.0 || _marks.isEmpty || _nextMarkNo > _marks.length) {
+    if (_disposed ||
+        _lat == 0.0 && _lng == 0.0 ||
+        _marks.isEmpty ||
+        _nextMarkNo > _marks.length) {
       return;
     }
 
@@ -464,7 +582,7 @@ class _Navi extends ConsumerState<Navi> {
       _lat,
       _lng,
       _marks[_nextMarkNo - 1].position!.lat!,
-      _marks[_nextMarkNo - 1].position!.lng!
+      _marks[_nextMarkNo - 1].position!.lng!,
     );
   }
 
@@ -485,14 +603,17 @@ class _Navi extends ConsumerState<Navi> {
     if (!_isDistanceValid(_routeDistance)) {
       text = '向き、距離、不明';
     } else {
-      text = '${markNames[_nextMarkNo]![1]}、${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
+      text =
+          '${markNames[_nextMarkNo]![1]}、${getDegName(_compassDeg)}、${_routeDistance.toInt()}';
     }
 
     await ttsService.speak(text);
   }
 
   _isDistanceValid(double distance) {
-    return !distance.isInfinite && !distance.isNaN && distance < AppConstants.maxDistance;
+    return !distance.isInfinite &&
+        !distance.isNaN &&
+        distance < AppConstants.maxDistance;
   }
 
   _passedAnnounce(int markNo) async {
@@ -502,7 +623,10 @@ class _Navi extends ConsumerState<Navi> {
       _enabledPeriodicAnnounce = false;
     });
 
-    await ttsService.speakMultiple('${markNames[markNo]![1]}に到達', reachNoticeNum);
+    await ttsService.speakMultiple(
+      '${markNames[markNo]![1]}に到達',
+      reachNoticeNum,
+    );
 
     if (!mounted) return;
 
@@ -540,7 +664,7 @@ class _Navi extends ConsumerState<Navi> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             (_started
-              ? Navigating(
+                ? Navigating(
                   latitude: _lat,
                   longitude: _lng,
                   accuracy: _accuracy,
@@ -552,19 +676,18 @@ class _Navi extends ConsumerState<Navi> {
                   maxDistance: AppConstants.maxDistance,
                   forcePassed: _forcePassed,
                   onPassed: _onPassed,
-                  markNameType: markNameType
+                  markNameType: markNameType,
                 )
-              : Waiting(
+                : Waiting(
                   latitude: _lat,
                   longitude: _lng,
                   accuracy: _accuracy,
                   heading: _heading,
-                  compassDeg: _compassDeg
-              )
-            )
-          ]
-        )
-      )
+                  compassDeg: _compassDeg,
+                )),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -31,14 +31,14 @@ class AppConstants {
   static const Map<int, List<String>> standardMarkNames = {
     1: ['上', 'かみ'],
     2: ['サイド', 'さいど'],
-    3: ['下', 'しも']
+    3: ['下', 'しも'],
   };
 
   // 数字マーク名
   static const Map<int, List<String>> numericMarkNames = {
     1: ['1', 'いち'],
     2: ['2', 'に'],
-    3: ['3', 'さん']
+    3: ['3', 'さん'],
   };
 
   // アップデート間隔（ミリ秒）
@@ -55,5 +55,6 @@ class AppConstants {
 
   // インターネットに接続されていない場合のダイアログ表示
   static const String noConnectionDialogTitle = 'インターネットに接続されていません';
-  static const String noConnectionDialogContent = 'B-SAMを利用するにはインターネットの接続が必要です。SIMカードの有効期限が切れていないか確認してください。';
+  static const String noConnectionDialogContent =
+      'B-SAMを利用するにはインターネットの接続が必要です。SIMカードの有効期限が切れていないか確認してください。';
 }

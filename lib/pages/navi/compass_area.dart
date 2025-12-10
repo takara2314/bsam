@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:bsam/widgets/compass.dart';
 
 class CompassArea extends StatefulWidget {
-  const CompassArea({
-    super.key,
-    required this.compassDeg
-  });
+  const CompassArea({super.key, required this.compassDeg});
 
   final double compassDeg;
 
@@ -21,10 +18,7 @@ class CompassAreaState extends State<CompassArea> {
   void initState() {
     super.initState();
 
-    Timer.periodic(
-      const Duration(milliseconds: 10),
-      _calcCompassDeg
-    );
+    Timer.periodic(const Duration(milliseconds: 10), _calcCompassDeg);
   }
 
   _calcCompassDeg(Timer timer) {
@@ -43,10 +37,8 @@ class CompassAreaState extends State<CompassArea> {
       child: SizedBox(
         width: 250,
         height: 250,
-        child: CustomPaint(
-          painter: Compass(heading: _compassDegShowing)
-        )
-      )
+        child: CustomPaint(painter: Compass(heading: _compassDegShowing)),
+      ),
     );
   }
 }
