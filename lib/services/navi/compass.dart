@@ -31,8 +31,13 @@ String getDegName(double deg) {
 }
 
 /// 方位角の計算
-double calculateCompassDegree(double heading, double currentLat, double currentLng, 
-    double targetLat, double targetLng) {
+double calculateCompassDegree(
+  double heading,
+  double currentLat,
+  double currentLng,
+  double targetLat,
+  double targetLng,
+) {
   if (currentLat == 0.0 && currentLng == 0.0) {
     return 0;
   }

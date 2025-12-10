@@ -19,22 +19,22 @@ class Compass extends CustomPainter {
     canvas.drawCircle(
       Offset(size.width / 2, size.height / 2),
       size.width / 2,
-      paint
+      paint,
     );
 
     paint.color = const Color.fromRGBO(181, 181, 181, 1);
 
-    for (var theta = 0; theta < 360; theta+=30) {
+    for (var theta = 0; theta < 360; theta += 30) {
       canvas.drawLine(
         Offset(
           startRadius * cos(pi * theta / 180) + (size.width / 2),
-          - startRadius * sin(pi * theta / 180) + (size.width / 2)
+          -startRadius * sin(pi * theta / 180) + (size.width / 2),
         ),
         Offset(
           endRadius * cos(pi * theta / 180) + (size.width / 2),
-          - endRadius * sin(pi * theta / 180) + (size.width / 2)
+          -endRadius * sin(pi * theta / 180) + (size.width / 2),
         ),
-        paint
+        paint,
       );
     }
 
@@ -43,17 +43,17 @@ class Compass extends CustomPainter {
     final path = Path();
     path.moveTo(
       startRadius * cos(pi * angle / 180) + (size.width / 2),
-      - startRadius * sin(pi * angle / 180) + (size.width / 2)
+      -startRadius * sin(pi * angle / 180) + (size.width / 2),
     );
 
     path.lineTo(
       startRadius * cos(pi * (angle + 160) / 180) + (size.width / 2),
-      - startRadius * sin(pi * (angle + 160) / 180) + (size.width / 2)
+      -startRadius * sin(pi * (angle + 160) / 180) + (size.width / 2),
     );
 
     path.lineTo(
       startRadius * cos(pi * (angle + 200) / 180) + (size.width / 2),
-      - startRadius * sin(pi * (angle + 200) / 180) + (size.width / 2)
+      -startRadius * sin(pi * (angle + 200) / 180) + (size.width / 2),
     );
 
     path.close();

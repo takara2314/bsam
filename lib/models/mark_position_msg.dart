@@ -4,10 +4,7 @@ class MarkPositionMsg {
   int? markNum;
   List<Mark>? marks;
 
-  MarkPositionMsg({
-    this.markNum,
-    this.marks
-  });
+  MarkPositionMsg({this.markNum, this.marks});
 
   MarkPositionMsg.fromJson(Map<String, dynamic> json) {
     markNum = json['mark_num'];

@@ -15,7 +15,7 @@ class Navigating extends StatefulWidget {
     required this.maxDistance,
     required this.forcePassed,
     required this.onPassed,
-    required this.markNameType
+    required this.markNameType,
   });
 
   final double latitude;
@@ -40,16 +40,12 @@ class _NavigatingState extends State<Navigating> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        CompassArea(
-          compassDeg: widget.compassDeg
-        ),
+        CompassArea(compassDeg: widget.compassDeg),
         Text(
           widget.markNameType == 0
-            ? '${widget.nextMarkNo} ${widget.markNames[widget.nextMarkNo]![0]}マーク'
-            : '${widget.markNames[widget.nextMarkNo]![0]}マーク',
-          style: const TextStyle(
-            fontSize: 28
-          )
+              ? '${widget.nextMarkNo} ${widget.markNames[widget.nextMarkNo]![0]}マーク'
+              : '${widget.markNames[widget.nextMarkNo]![0]}マーク',
+          style: const TextStyle(fontSize: 28),
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -59,8 +55,8 @@ class _NavigatingState extends State<Navigating> {
               '残り 約',
               style: TextStyle(
                 color: Color.fromRGBO(79, 79, 79, 1),
-                fontSize: 28
-              )
+                fontSize: 28,
+              ),
             ),
             Container(
               margin: const EdgeInsets.only(left: 10, right: 10),
@@ -68,61 +64,61 @@ class _NavigatingState extends State<Navigating> {
                 '${widget.routeDistance < widget.maxDistance ? widget.routeDistance.toInt() : '?'}',
                 style: const TextStyle(
                   color: Color.fromRGBO(79, 79, 79, 1),
-                  fontSize: 36
-                )
-              )
+                  fontSize: 36,
+                ),
+              ),
             ),
             const Text(
               'm',
               style: TextStyle(
                 color: Color.fromRGBO(79, 79, 79, 1),
-                fontSize: 28
-              )
-            )
+                fontSize: 28,
+              ),
+            ),
           ],
         ),
+        Text('緯度 / 経度', style: Theme.of(context).textTheme.displaySmall),
         Text(
-          '緯度 / 経度',
-          style: Theme.of(context).textTheme.displaySmall
+          '${widget.latitude.toStringAsFixed(6)} / ${widget.longitude.toStringAsFixed(6)}',
         ),
-        Text(
-          '${widget.latitude.toStringAsFixed(6)} / ${widget.longitude.toStringAsFixed(6)}'
-        ),
-        Text(
-          '位置情報の精度',
-          style: Theme.of(context).textTheme.displaySmall
-        ),
-        Text(
-          '${widget.accuracy.toStringAsFixed(2)} m'
-        ),
+        Text('位置情報の精度', style: Theme.of(context).textTheme.displaySmall),
+        Text('${widget.accuracy.toStringAsFixed(2)} m'),
         Text(
           '端末の方角 / コンパスの方角',
-          style: Theme.of(context).textTheme.displaySmall
+          style: Theme.of(context).textTheme.displaySmall,
         ),
         Text(
-          '${widget.heading.toStringAsFixed(2)}° / ${widget.compassDeg.toStringAsFixed(2)}°'
+          '${widget.heading.toStringAsFixed(2)}° / ${widget.compassDeg.toStringAsFixed(2)}°',
         ),
         Row(
           children: [
             TextButton(
-              onPressed: () {widget.forcePassed(1);},
-              child: const Text('上通過')
+              onPressed: () {
+                widget.forcePassed(1);
+              },
+              child: const Text('上通過'),
             ),
             TextButton(
-              onPressed: () {widget.forcePassed(2);},
-              child: const Text('サイド通過')
+              onPressed: () {
+                widget.forcePassed(2);
+              },
+              child: const Text('サイド通過'),
             ),
             TextButton(
-              onPressed: () {widget.forcePassed(3);},
-              child: const Text('下通過')
+              onPressed: () {
+                widget.forcePassed(3);
+              },
+              child: const Text('下通過'),
             ),
             TextButton(
-              onPressed: () {widget.onPassed();},
-              child: const Text('マーク通過判定')
-            )
-          ]
-        )
-      ]
+              onPressed: () {
+                widget.onPassed();
+              },
+              child: const Text('マーク通過判定'),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

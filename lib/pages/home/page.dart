@@ -32,7 +32,7 @@ class _Home extends ConsumerState<Home> {
     User(displayName: '7番艇', id: 'athlete7'),
     User(displayName: '8番艇', id: 'athlete8'),
     User(displayName: '9番艇', id: 'athlete9'),
-    User(displayName: '10番艇', id: 'athlete10')
+    User(displayName: '10番艇', id: 'athlete10'),
   ];
 
   String? _assocId;
@@ -120,9 +120,7 @@ class _Home extends ConsumerState<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HomeAppBar(
-        assocName: AppConstants.assocName
-      ),
+      appBar: const HomeAppBar(assocName: AppConstants.assocName),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
@@ -132,20 +130,18 @@ class _Home extends ConsumerState<Home> {
               AthleteSelect(
                 users: users,
                 userId: _userId,
-                changeUser: _changeUser
+                changeUser: _changeUser,
               ),
-              const RaceNameArea(
-                raceName: AppConstants.raceName
-              ),
+              const RaceNameArea(raceName: AppConstants.raceName),
               ParticipateButton(
                 assocId: _assocId,
                 userId: _userId,
                 ttsLanguage: AppConstants.ttsLanguage,
               ),
-            ]
-          )
-        )
-      )
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

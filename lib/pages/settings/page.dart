@@ -50,11 +50,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         }
       } catch (e) {
         _isLicenseActive = false;
-         setState(() {});
+        setState(() {});
       }
     } else {
-       _isLicenseActive = false;
-       setState(() {});
+      _isLicenseActive = false;
+      setState(() {});
     }
   }
 
@@ -112,14 +112,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final formattedExpiryDate = _jwtExpiryDate != null
-        ? DateFormat('yyyy年M月d日', 'ja_JP').format(_jwtExpiryDate!)
-        : '不明';
+    final formattedExpiryDate =
+        _jwtExpiryDate != null
+            ? DateFormat('yyyy年M月d日', 'ja_JP').format(_jwtExpiryDate!)
+            : '不明';
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('設定', style: TextStyle(fontSize: 16)),
-      ),
+      appBar: AppBar(title: const Text('設定', style: TextStyle(fontSize: 16))),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
@@ -164,14 +163,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   const Text(
-                     'ライセンス情報',
-                     style: TextStyle(
-                       fontSize: 16,
-                       fontWeight: FontWeight.bold,
-                     ),
-                   ),
-                   const SizedBox(height: 10),
+                  const Text(
+                    'ライセンス情報',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Icon(
@@ -188,23 +184,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       ),
                     ],
                   ),
-                   if (_jwtExpiryDate != null) ...[
-                     const SizedBox(height: 5),
-                     Row(
-                       children: [
-                         Text('有効期限: $formattedExpiryDate'),
-                         if (!_isLicenseActive)
-                           const Text(
-                             '（有効期限切れ）',
-                             style: TextStyle(color: Colors.red),
-                           ),
-                       ],
-                     ),
-                  ] else if (!_isLicenseActive) ... [
-                     const SizedBox(height: 5),
-                     const Text('有効なライセンスが設定されていません。'),
-                  ]
-
+                  if (_jwtExpiryDate != null) ...[
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Text('有効期限: $formattedExpiryDate'),
+                        if (!_isLicenseActive)
+                          const Text(
+                            '（有効期限切れ）',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                      ],
+                    ),
+                  ] else if (!_isLicenseActive) ...[
+                    const SizedBox(height: 5),
+                    const Text('有効なライセンスが設定されていません。'),
+                  ],
                 ],
               ),
             ),
@@ -218,13 +213,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                   child: Text(
                     'アナウンス設定',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 _buildSliderSetting(
@@ -245,13 +240,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 const SizedBox(height: 30),
 
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                    vertical: 8.0,
+                  ),
                   child: Text(
                     'ナビゲーション設定',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 _buildTextFormSetting(
@@ -260,7 +255,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                   prefsKey: 'reach_judge_radius',
                   defaultValue: AppConstants.reachJudgeRadiusInit,
                 ),
-                 _buildTextFormSetting(
+                _buildTextFormSetting(
                   label: '到着通知回数',
                   provider: reachNoticeNumProvider,
                   prefsKey: 'reach_notice_num',
@@ -277,12 +272,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
 
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
+            ),
             child: ElevatedButton(
               onPressed: _showResetConfirmationDialog,
-              child: const Text(
-                '設定をリセット',
-              ),
+              child: const Text('設定をリセット'),
             ),
           ),
         ],
@@ -318,16 +314,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ref: ref,
             provider: provider,
             key: prefsKey,
-            value: newValue
+            value: newValue,
           );
         },
       ),
       trailing: Text(
         value.toStringAsFixed(1),
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
   }
@@ -340,16 +333,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     bool isDouble = false,
   }) {
     // TextEditingController を使用して状態を管理
-    final controller = TextEditingController(text: ref.watch(provider).toString());
+    final controller = TextEditingController(
+      text: ref.watch(provider).toString(),
+    );
 
     return ListTile(
       title: Text(label),
       subtitle: TextFormField(
         controller: controller,
         keyboardType: TextInputType.numberWithOptions(decimal: isDouble),
-        decoration: InputDecoration(
-          hintText: defaultValue.toString(),
-        ),
+        decoration: InputDecoration(hintText: defaultValue.toString()),
         onFieldSubmitted: (newValue) async {
           // 共通関数を使用して設定を保存
           await updateTextFormSetting(
@@ -358,7 +351,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             key: prefsKey,
             newValue: newValue,
             defaultValue: defaultValue,
-            isDouble: isDouble
+            isDouble: isDouble,
           );
           // 更新後の値をコントローラーに反映（パースエラー時も正しく表示される）
           controller.text = ref.read(provider).toString();
@@ -378,25 +371,26 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       title: Text(label),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: options.entries.map((entry) {
-          return RadioListTile<T>(
-            title: Text(entry.value),
-            value: entry.key,
-            groupValue: selectedValue,
-            onChanged: (T? newValue) async {
-              if (newValue != null) {
-                // 共通関数を使用して設定を保存
-                await updateRadioSetting(
-                  ref: ref,
-                  provider: provider,
-                  key: prefsKey,
-                  value: newValue
-                );
-              }
-            },
-            contentPadding: EdgeInsets.zero,
-          );
-        }).toList(),
+        children:
+            options.entries.map((entry) {
+              return RadioListTile<T>(
+                title: Text(entry.value),
+                value: entry.key,
+                groupValue: selectedValue,
+                onChanged: (T? newValue) async {
+                  if (newValue != null) {
+                    // 共通関数を使用して設定を保存
+                    await updateRadioSetting(
+                      ref: ref,
+                      provider: provider,
+                      key: prefsKey,
+                      value: newValue,
+                    );
+                  }
+                },
+                contentPadding: EdgeInsets.zero,
+              );
+            }).toList(),
       ),
     );
   }

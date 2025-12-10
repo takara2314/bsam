@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:bsam/utils/websocket_channel_state.dart';
 
 /// WebSocketメッセージサービス
 class WsMessageService {
@@ -25,29 +26,32 @@ class WsMessageService {
       'type': 'auth',
       'token': jwt,
       'user_id': userId,
-      'role': 'athlete'
+      'role': 'athlete',
     });
   }
 
   /// 位置情報を送信
-  void sendLocation(double lat, double lng, double accuracy, double heading, double headingFix) {
+  void sendLocation(
+    double lat,
+    double lng,
+    double accuracy,
+    double heading,
+    double headingFix,
+  ) {
     _sendMessage({
       'type': 'location',
       'latitude': lat,
       'longitude': lng,
       'accuracy': accuracy,
       'heading': heading,
-      'heading_fixing': headingFix
+      'heading_fixing': headingFix,
     });
   }
 
   /// バッテリー情報を送信
   Future<void> sendBattery() async {
     final level = await _getBatteryLevel();
-    _sendMessage({
-      'type': 'battery',
-      'level': level
-    });
+    _sendMessage({'type': 'battery', 'level': level});
   }
 
   /// マークを通過したことを送信
@@ -55,14 +59,25 @@ class WsMessageService {
     _sendMessage({
       'type': 'passed',
       'passed_mark_no': passedMarkNo,
-      'next_mark_no': nextMarkNo
+      'next_mark_no': nextMarkNo,
     });
   }
 
   /// メッセージ送信の共通処理
+  ///
+  /// WebSocketチャネルの状態を確認し、送信可能な場合のみメッセージを送信する。
+  /// これにより、クローズ済みのチャネルへの送信による例外を防ぐ。
   void _sendMessage(Map<String, dynamic> data) {
-    if (_isClosed) {
-      debugPrint('Attempted to send message on closed WebSocket: ${data['type']}');
+    // WebSocketチャネルの状態を取得
+    final state = WebSocketChannelState.fromChannel(channel, _isClosed);
+
+    // 送信可能状態の確認
+    if (!state.canSend) {
+      debugPrint(
+        'Cannot send message on closed WebSocket: ${data['type']}'
+        '${state.closeReason != null ? ' (${state.closeReason})' : ''}',
+      );
+      _isClosed = true;
       return;
     }
 
