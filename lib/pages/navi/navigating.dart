@@ -38,6 +38,11 @@ class Navigating extends StatefulWidget {
 class _NavigatingState extends State<Navigating> {
   @override
   Widget build(BuildContext context) {
+    final accuracyText =
+        widget.accuracy > 0.0
+            ? '${widget.accuracy.toStringAsFixed(2)} m'
+            : '位置未取得';
+
     return Column(
       children: [
         CompassArea(compassDeg: widget.compassDeg),
@@ -82,7 +87,7 @@ class _NavigatingState extends State<Navigating> {
           '${widget.latitude.toStringAsFixed(6)} / ${widget.longitude.toStringAsFixed(6)}',
         ),
         Text('位置情報の精度', style: Theme.of(context).textTheme.displaySmall),
-        Text('${widget.accuracy.toStringAsFixed(2)} m'),
+        Text(accuracyText),
         Text(
           '端末の方角 / コンパスの方角',
           style: Theme.of(context).textTheme.displaySmall,

@@ -61,6 +61,7 @@ class _Navi extends ConsumerState<Navi> {
   StreamSubscription<CompassEvent>? _compass;
   late WebSocketChannel _channel;
   bool _disposed = false;
+  bool _isConnected = false;
   int _reconnectAttempts = 0;
   Timer? _reconnectTimer;
   bool _isConnecting = false;
@@ -133,11 +134,7 @@ class _Navi extends ConsumerState<Navi> {
     }
 
     // WebSocketの接続を適切に閉じる
-    try {
-      _channel.sink.close(status.normalClosure);
-    } catch (e) {
-      debugPrint('Error closing WebSocket: $e');
-    }
+    _closeWsConnection();
 
     WakelockPlus.disable();
     super.dispose();
@@ -241,6 +238,8 @@ class _Navi extends ConsumerState<Navi> {
       return;
     }
 
+    _closeWsConnection();
+
     // サーバーURLの取得
     final serverUrl = ref.read(serverUrlProvider);
 
@@ -276,6 +275,7 @@ class _Navi extends ConsumerState<Navi> {
         uri,
         pingInterval: const Duration(seconds: 1),
       );
+      _isConnected = true;
 
       // WebSocketメッセージサービスの初期化
       messageService = WsMessageService(_channel);
@@ -284,6 +284,7 @@ class _Navi extends ConsumerState<Navi> {
         _readWsMsg,
         onDone: () {
           debugPrint('WebSocket connection closed');
+          _isConnected = false;
           _isConnecting = false;
           // ウィジェットがアクティブな状態でのみ再接続を試みる
           // これにより、画面遷移後の不要な再接続を防ぐ
@@ -297,6 +298,7 @@ class _Navi extends ConsumerState<Navi> {
         },
         onError: (error) {
           debugPrint('WebSocket error: $error');
+          _isConnected = false;
           _isConnecting = false;
           // エラーを非致命的に記録
           // ネットワークエラーでアプリがクラッシュすることを防ぐ
@@ -326,6 +328,7 @@ class _Navi extends ConsumerState<Navi> {
       }
     } catch (e) {
       _isConnecting = false;
+      _isConnected = false;
       debugPrint('WebSocket connection exception: $e');
       FirebaseCrashlytics.instance.recordError(
         e,
@@ -369,6 +372,17 @@ class _Navi extends ConsumerState<Navi> {
         _connectWs();
       }
     });
+  }
+
+  void _closeWsConnection() {
+    try {
+      if (_isConnected) {
+        _channel.sink.close(status.normalClosure);
+        _isConnected = false;
+      }
+    } catch (e) {
+      debugPrint('Error closing WebSocket: $e');
+    }
   }
 
   _readWsMsg(dynamic msg) {
