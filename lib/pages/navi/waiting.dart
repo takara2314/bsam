@@ -18,6 +18,8 @@ class Waiting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accuracyText = accuracy > 0.0 ? '$accuracy m' : '位置未取得';
+
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.only(right: 15, left: 15),
@@ -30,7 +32,7 @@ class Waiting extends StatelessWidget {
             '${latitude.toStringAsFixed(6)} / ${longitude.toStringAsFixed(6)}',
           ),
           Text('位置情報の精度', style: Theme.of(context).textTheme.displaySmall),
-          Text('$accuracy m'),
+          Text(accuracyText),
           Text(
             '端末の方角 / コンパスの方角',
             style: Theme.of(context).textTheme.displaySmall,
